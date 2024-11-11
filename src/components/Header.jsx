@@ -1,6 +1,9 @@
+import { Bell, Menu, User } from "lucide-react";
+import ToggleTheme from "./ui/ToggleTheme";
+
 function Header({ onToggleSidebar }) {
     return (
-      <header className="fixed top-0 right-0 left-0 bg-white shadow-sm z-30">
+      <header className="fixed top-0 right-0 left-0 bg-base-200 shadow-sm z-30">
         <div className="flex items-center justify-between h-16 px-4">
           <div className="flex items-center">
             <button 
@@ -12,6 +15,7 @@ function Header({ onToggleSidebar }) {
             <h1 className="text-xl font-semibold">SCF Admin</h1>
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
+            <ToggleTheme/>
             <button className="p-2 hover:bg-gray-100 rounded-lg">
               <Bell className="w-5 h-5 md:w-6 md:h-6" />
             </button>
@@ -23,3 +27,5 @@ function Header({ onToggleSidebar }) {
       </header>
     );
   }
+
+  export default Header

@@ -13,7 +13,7 @@ function Overview() {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
+          <div key={index} className="bg-base-200 rounded-lg shadow p-6">
             <div className="flex justify-between">
               <div>
                 <h3 className="text-gray-500 text-sm">{stat.label}</h3>
@@ -32,36 +32,36 @@ function Overview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+        <div className="bg-base-200 rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4 text-neutral-content">Recent Activity</h3>
           {/* Activity list */}
           <div className="space-y-4">
             {[1, 2, 3].map((item) => (
               <div key={item} className="flex items-center py-2 border-b">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
+                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 "></div>
                 <div>
-                  <p className="text-sm font-medium">User completed action {item}</p>
-                  <p className="text-xs text-gray-500">2 hours ago</p>
+                  <p className="text-sm font-medium text-neutral-content">User completed action {item}</p>
+                  <p className="text-xs text-neutral-content">2 hours ago</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Quick Stats</h3>
+        <div className="bg-base-200 rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4 text-neutral-content">Quick Stats</h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Weekly Sales</span>
-              <span className="text-sm font-medium">$4,320</span>
+              <span className="text-sm text-neutral-content">Weekly Sales</span>
+              <span className="text-sm font-medium text-neutral-content">$4,320</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">New Users</span>
-              <span className="text-sm font-medium">245</span>
+              <span className="text-sm text-neutral-content">New Users</span>
+              <span className="text-sm font-medium text-neutral-content">245</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Pending Orders</span>
-              <span className="text-sm font-medium">12</span>
+              <span className="text-sm text-neutral-content">Pending Orders</span>
+              <span className="text-sm font-medium text-neutral-content">12</span>
             </div>
           </div>
         </div>
