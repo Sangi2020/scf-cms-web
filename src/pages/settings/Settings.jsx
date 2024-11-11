@@ -16,7 +16,7 @@ import {
 
 const Settings = () => {
   return (
-    <div className="p-6 max-w-6xl mx-auto w-full">
+    <div className=" ">
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Settings</h1>
         <p className="text-gray-600">Manage your application preferences and configurations</p>
