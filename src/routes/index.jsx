@@ -7,6 +7,7 @@ import UserList from '../pages/users/UserList';
 import UserProfile from '../pages/users/UserProfile';
 import Settings from '../pages/settings/Settings';
 import HomeLayout from '../layout/HomeLayout';
+import LoginPage from '../pages/auth/Login';
 
 
 export const router = createBrowserRouter([
@@ -35,10 +36,10 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // {
-  //   path: '/login',
-  //   element: <Login />,
-  // },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
   // {
   //   path: '/forgot-password',
   //   element: <ForgotPassword />,
