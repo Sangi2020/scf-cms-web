@@ -14,9 +14,9 @@ export default {
       {
         "light": {
           "primary": "#7b57e0", //violet
-          "base-100": "#DCE3EB",
+          "base-300": "#DCE3EB",
           "base-200": "#FFFFFF",
-          "base-300": "#F1F3F4",
+          "base-100": "#F1F3F4",
           "stroke": "#DCDCDD",
           "secondary": "#5DAAEE",
           "accent": "#5395cf",

@@ -11,29 +11,16 @@ import LoginPage from '../pages/auth/Login';
 
 
 export const router = createBrowserRouter([
-  {
+   {
     path: '/',
     element: <HomeLayout />,
     children: [
-      {
-        path: 'dashboard',
-        children: [
-          { index: true, element: <Overview /> },
-          { path: 'analytics', element: <Analytics /> },
-          { path: 'reports', element: <Reports /> },
-        ],
-      },
-      {
-        path: 'users',
-        children: [
-          { index: true, element: <UserList /> },
-          { path: ':id', element: <UserProfile /> },
-        ],
-      },
-      {
-        path: 'settings',
-        element: <Settings />,
-      },
+      { path: 'dashboard', element: <Overview /> },
+      { path: 'analytics', element: <Analytics /> },
+      { path: 'reports', element: <Reports /> },
+      { path: 'users', element: <UserList /> },
+      { path: 'users/:id', element: <UserProfile /> },
+      { path: 'settings', element: <Settings /> },
     ],
   },
   {

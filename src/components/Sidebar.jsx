@@ -29,8 +29,8 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
     const navigation = [
         // Dashboard Section
         { name: 'Overview', path: '/dashboard', icon: Home },
-        { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart2 },
-        { name: 'Reports', path: '/dashboard/reports', icon: FileText },
+        { name: 'Analytics', path: '/analytics', icon: BarChart2 },
+        { name: 'Reports', path: '/reports', icon: FileText },
 
         // Content Management
         { name: 'Pages', path: '/pages', icon: Layout },
@@ -49,15 +49,15 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         { name: 'Testimonials', path: '/testimonials', icon: MessageSquare },
         { name: 'Social Media', path: '/social', icon: Globe },
         
-        // E-commerce (if needed)
-        { name: 'Products', path: '/products', icon: ShoppingCart },
-        { name: 'Orders', path: '/orders', icon: ShoppingCart },
-        { name: 'Categories', path: '/categories', icon: Tag },
+        // // E-commerce (if needed)
+        // { name: 'Products', path: '/products', icon: ShoppingCart },
+        // { name: 'Orders', path: '/orders', icon: ShoppingCart },
+        // { name: 'Categories', path: '/categories', icon: Tag },
         
         // Resources
-        { name: 'Events', path: '/events', icon: Calendar },
-        { name: 'Forms', path: '/forms', icon: FileText },
-        { name: 'Gallery', path: '/gallery', icon: FileImage },
+        // { name: 'Events', path: '/events', icon: Calendar },
+        // { name: 'Forms', path: '/forms', icon: FileText },
+        // { name: 'Gallery', path: '/gallery', icon: FileImage },
         
         // System
         { name: 'Notifications', path: '/notifications', icon: Bell },
@@ -79,11 +79,11 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 bg-base-200 
-                transition-all duration-300 ease-in-out shadow-sm
+                transition-all duration-300 ease-in-out shadow-sm h-full 
                 ${isCollapsed ? 'w-16' : 'w-64'} 
                 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
             >
-                <div className="flex items-center justify-between h-16 px-4">
+                <div className="flex items-center justify-between h-16 px-4 ">
                     {!isCollapsed && (
                         <h1 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             SCF Admin
@@ -104,14 +104,14 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     </button>
                 </div>
 
-                <nav className="mt-8 px-2 h-[calc(100vh-4rem)] overflow-y-auto">
+                <nav className="mt-8 px-2 h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hidden pb-24 ">
                     {navigation.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
                             onClick={() => window.innerWidth < 1024 && onClose()}
                             className={({ isActive }) =>
-                                `flex items-center px-3 py-2 mt-2 rounded-lg transition-all duration-200 group
+                                `flex items-center px-3 py-2 mt-2 rounded-lg transition-all duration-200 group 
                                 ${isCollapsed ? 'justify-center' : ''} 
                                 ${isActive
                                     ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600'
@@ -121,10 +121,10 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                         >
                             <item.icon className={`w-5 h-5 text-primary ${!isCollapsed && 'mr-3'}`} />
                             {!isCollapsed && (
-                                <span className="font-medium">{item.name}</span>
+                                <span className="font-medium overflow-hidden">{item.name}</span>
                             )}
                             {isCollapsed && (
-                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md 
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900   text-white text-sm rounded-md 
                                     opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity">
                                     {item.name}
                                 </div>

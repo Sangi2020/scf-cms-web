@@ -1,71 +1,98 @@
-import { Users, ShoppingBag, DollarSign, ArrowUp, ArrowDown } from 'lucide-react';
+import React from 'react';
+import StatCard from '../../components/stats/StatCard'; // Import the StatCard component
+import { Users, FileText, MessageSquare, Eye, BarChart, Mail, Clipboard } from 'lucide-react'; // Import relevant icons
 
 function Overview() {
+  // Define the CMS-related stats data in an array
   const stats = [
-    { label: 'Total Users', value: '1,234', icon: Users, change: '+12.5%', up: true },
-    { label: 'Total Sales', value: '$12,345', icon: ShoppingBag, change: '+8.2%', up: true },
-    { label: 'Revenue', value: '$54,321', icon: DollarSign, change: '-2.4%', up: false },
+    {
+      title: 'Total Pages',
+      value: 50, // Example number of pages
+      description: 'Published',
+      icon: FileText,
+      iconColor: 'text-blue-500',
+      trend: 'up',
+      trendValue: 5.0, // Example percentage growth
+    },
+    {
+      title: 'Blog Posts',
+      value: 120, // Example number of blog posts
+      description: 'Published',
+      icon: FileText,
+      iconColor: 'text-green-500',
+      trend: 'up',
+      trendValue: 8.2, // Example percentage increase in posts
+    },
+    {
+      title: 'Comments',
+      value: 320, // Example number of comments
+      description: 'Total Comments',
+      icon: MessageSquare,
+      iconColor: 'text-purple-500',
+      trend: 'down',
+      trendValue: 2.1, // Example percentage decrease in comments
+    },
+    {
+      title: 'Visitors',
+      value: 5000, // Example number of visitors
+      description: 'this month',
+      icon: Users,
+      iconColor: 'text-orange-500',
+      trend: 'up',
+      trendValue: 15.8, // Example percentage increase in visitors
+    },
+    {
+      title: 'Content Views',
+      value: 15000, // Example number of views
+      description: 'this month',
+      icon: Eye,
+      iconColor: 'text-teal-500',
+      trend: 'up',
+      trendValue: 10.3, // Example percentage increase in content views
+    },
+    {
+      title: 'Active Users',
+      value: 10, // Example number of active users or admins
+      description: 'Managing content',
+      icon: Users,
+      iconColor: 'text-red-500',
+      trend: 'up',
+      trendValue: 20.5, // Example percentage increase in active users
+    },
+    {
+      title: 'Total Newsletters',
+      value: 500, // Example number of newsletters
+      description: 'Sent',
+      icon: Mail,
+      iconColor: 'text-yellow-500',
+      trend: 'up',
+      trendValue: 7.8, // Example percentage increase in newsletters sent
+    },
+    {
+      title: 'Total Enquiries',
+      value: 120, // Example number of enquiries
+      description: 'Received',
+      icon: Clipboard,
+      iconColor: 'text-indigo-500',
+      trend: 'down',
+      trendValue: 3.1, // Example percentage decrease in enquiries
+    },
   ];
 
   return (
-    <div className='w-full'>
-      <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-base-200 rounded-lg shadow p-6">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="text-gray-500 text-sm">{stat.label}</h3>
-                <p className="text-3xl font-bold mt-1">{stat.value}</p>
-              </div>
-              <stat.icon className="w-8 h-8 text-gray-400" />
-            </div>
-            <div className={`flex items-center mt-4 text-sm ${
-              stat.up ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {stat.up ? <ArrowUp className="w-4 h-4 mr-1" /> : <ArrowDown className="w-4 h-4 mr-1" />}
-              {stat.change} from last month
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-base-200 rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4 text-neutral-content">Recent Activity</h3>
-          {/* Activity list */}
-          <div className="space-y-4">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="flex items-center py-2 border-b">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 "></div>
-                <div>
-                  <p className="text-sm font-medium text-neutral-content">User completed action {item}</p>
-                  <p className="text-xs text-neutral-content">2 hours ago</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-base-200 rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4 text-neutral-content">Quick Stats</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-neutral-content">Weekly Sales</span>
-              <span className="text-sm font-medium text-neutral-content">$4,320</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-neutral-content">New Users</span>
-              <span className="text-sm font-medium text-neutral-content">245</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-neutral-content">Pending Orders</span>
-              <span className="text-sm font-medium text-neutral-content">12</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {stats.map((stat, index) => (
+        <StatCard
+          key={index}  // Using index as a unique key (consider using a unique ID in production)
+          title={stat.title}
+          value={stat.value}
+          description={stat.description}
+          icon={stat.icon}
+          iconColor={stat.iconColor}
+          trend={stat.trend}
+          trendValue={stat.trendValue}
+        />
+      ))}
     </div>
   );
 }
