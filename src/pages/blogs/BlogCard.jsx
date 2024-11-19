@@ -26,22 +26,22 @@ function BlogCard({ blog }) {
 
       {/* Content Section */}
       <div className="card-body p-4">
-        <p className="text-sm text-gray-400">{blog.date}</p>
-        <h2 className="card-title text-white text-lg font-bold">
+        <p className="text-sm text-neutral-content">{blog.date}</p>
+        <h2 className="card-title text-neutral-content text-lg font-bold">
           {blog.title}
         </h2>
 
         {/* Stats Section */}
         <div className="flex items-center gap-4 mt-4">
-          <div className="flex items-center gap-1 text-gray-400">
+          <div className="flex items-center gap-1 text-neutral-content">
             <MessageSquare className="w-4 h-4" />
             <span className="text-sm">{blog.stats.comments}</span>
           </div>
-          <div className="flex items-center gap-1 text-gray-400">
+          <div className="flex items-center gap-1 text-neutral-content">
             <Eye className="w-4 h-4" />
             <span className="text-sm">{blog.stats.views}</span>
           </div>
-          <div className="flex items-center gap-1 text-gray-400">
+          <div className="flex items-center gap-1 text-neutral-content">
             <Share2 className="w-4 h-4" />
             <span className="text-sm">{blog.stats.shares}</span>
           </div>

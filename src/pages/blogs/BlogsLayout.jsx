@@ -61,7 +61,7 @@ function BlogsLayout() {
         <div className="drawer-content">
           {/* Header Section */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-white">Blog</h1>
+            <h1 className="text-3xl font-bold text-neutral-content">Blog</h1>
             <label htmlFor="new-post-drawer" className="btn btn-primary gap-2">
               + New post
             </label>
@@ -74,10 +74,10 @@ function BlogsLayout() {
               <input
                 type="text"
                 placeholder="Search post..."
-                className="input input-bordered w-full focus:outline-none pl-10 bg-base-300 text-white"
+                className="input input-bordered w-full focus:outline-none pl-10 bg-base-100 text-neutral-content"
               />
             </div>
-            <select className="select select-bordered focus:outline-none bg-base-300 text-white">
+            <select className="select select-bordered focus:outline-none bg-base-100 text-neutral-content">
               <option>Latest</option>
               <option>Most Viewed</option>
               <option>Most Shared</option>
@@ -97,7 +97,7 @@ function BlogsLayout() {
         <div className="drawer-side  ">
           <label htmlFor="new-post-drawer" className="drawer-overlay"> helo</label>
           <div
-            className="p-4 md:w-1/4 w-full sm:w-1/2 overflow-y-scroll bg-base-100  h-[70vh]  text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg"
+            className="p-4 md:w-[40%] w-full sm:w-1/2 overflow-y-scroll bg-base-100  h-[85vh]  text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg"
           >
             <h2 className="text-lg font-bold mb-4">Add New Post</h2>
             <BlogPostForm/>

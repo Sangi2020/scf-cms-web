@@ -47,7 +47,7 @@ function BlogPostForm() {
         <input
           type="text"
           placeholder="Post title"
-          className="input input-bordered"
+          className="input input-bordered border-accent "
         />
       </div>
 
@@ -57,7 +57,7 @@ function BlogPostForm() {
           <span className="label-text">Image</span>
         </label>
         <div
-          className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-200"
+          className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
@@ -72,7 +72,7 @@ function BlogPostForm() {
               >
                 <path d="M4 3a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v3.586l-1.293-1.293a1 1 0 00-1.414 0L10 12l-2.293-2.293a1 1 0 00-1.414 0L4 12V5zm0 10v-1.586l2.293-2.293a1 1 0 011.414 0L10 13l3.293-3.293a1 1 0 011.414 0L16 12.414V15H4z" />
               </svg>
-              <p className="text-gray-500">Drag and drop or click to upload</p>
+              <p className="text-neutral-content">Drag and drop or click to upload</p>
             </>
           ) : (
             <div className="relative">

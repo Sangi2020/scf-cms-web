@@ -9,6 +9,7 @@ import Settings from '../pages/settings/Settings';
 import HomeLayout from '../layout/HomeLayout';
 import LoginPage from '../pages/auth/Login';
 import BlogsLayout from '../pages/blogs/BlogsLayout';
+import TestimonialLayout from '../pages/testimonials/TestimonialLayout';
 
 
 export const router = createBrowserRouter([
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: 'users/:id', element: <UserProfile /> },
       { path: 'settings', element: <Settings /> },
       { path: '/posts', element: <BlogsLayout /> },
+      { path: '/testimonials', element: <TestimonialLayout /> },
     ],
   },
   {
