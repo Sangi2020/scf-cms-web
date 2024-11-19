@@ -1,6 +1,6 @@
 import { Bell, Menu, Moon, Sun, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import logo from '../assets/images/logo.png'
+
 function Header({ onToggleSidebar , isCollapsed}) {
   const [theme, setTheme] = useState(localStorage.getItem('theme') ? localStorage.getItem('theme') : 'dark');
 
@@ -27,9 +27,9 @@ function Header({ onToggleSidebar , isCollapsed}) {
 
           {/* Title with conditional margin based on isCollapsed */}
           <h1 className={`text-base md:text-xl font-semibold text-neutral-content 
-              ${isCollapsed ? 'pl-8' : 'transition-all duration-300 ease-in-out'}
+              ${isCollapsed ? 'pl-16' : 'transition-all duration-300 ease-in-out'}
               ${isCollapsed ? 'opacity-100' : 'opacity-0'}`}>
-            <img src={logo} alt="" className="h-10 w-auto" />
+            SCF Admin
           </h1>
         </div>
 
