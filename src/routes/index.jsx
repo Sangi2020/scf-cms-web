@@ -8,6 +8,7 @@ import UserProfile from '../pages/users/UserProfile';
 import Settings from '../pages/settings/Settings';
 import HomeLayout from '../layout/HomeLayout';
 import LoginPage from '../pages/auth/Login';
+import BlogsLayout from '../pages/blogs/BlogsLayout';
 
 
 export const router = createBrowserRouter([
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { path: 'users', element: <UserList /> },
       { path: 'users/:id', element: <UserProfile /> },
       { path: 'settings', element: <Settings /> },
+      { path: '/posts', element: <BlogsLayout /> },
     ],
   },
   {
