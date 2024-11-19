@@ -5,15 +5,7 @@ import { Users, FileText, MessageSquare, Eye, BarChart, Mail, Clipboard } from '
 function Overview() {
   // Define the CMS-related stats data in an array
   const stats = [
-    {
-      title: 'Total Pages',
-      value: 50, // Example number of pages
-      description: 'Published',
-      icon: FileText,
-      iconColor: 'text-blue-500',
-      trend: 'up',
-      trendValue: 5.0, // Example percentage growth
-    },
+  
     {
       title: 'Blog Posts',
       value: 120, // Example number of blog posts
@@ -60,7 +52,7 @@ function Overview() {
       trendValue: 20.5, // Example percentage increase in active users
     },
     {
-      title: 'Total Newsletters',
+      title: 'Total Subscribers',
       value: 500, // Example number of newsletters
       description: 'Sent',
       icon: Mail,
@@ -80,7 +72,7 @@ function Overview() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2  xl:grid-cols-3 gap-6">
       {stats.map((stat, index) => (
         <StatCard
           key={index}  // Using index as a unique key (consider using a unique ID in production)

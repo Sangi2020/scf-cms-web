@@ -12,7 +12,7 @@ function StatCard({
   isLoading = false
 }) {
   return (
-    <div className="relative overflow-hidden bg-base-100 rounded-xl shadow-sm border hover:shadow-lg transition-shadow duration-200">
+    <div className="relative overflow-hidden bg-base-100 rounded-xl shadow-sm  hover:shadow-lg transition-shadow duration-200">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">

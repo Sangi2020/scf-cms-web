@@ -29,44 +29,73 @@ import 'tippy.js/dist/tippy.css';
 
 function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
     const navigation = [
-        // Dashboard Section
-        { name: 'Dashboard', path: '/dashboard', icon: Home },
-        { name: 'Analytics', path: '/analytics', icon: BarChart2 },
-        { name: 'Reports', path: '/reports', icon: FileText },
-        // Content Management
-        { name: 'Pages', path: '/pages', icon: Layout },
-        { name: 'Blog Posts', path: '/posts', icon: PenTool },
-        { name: 'Media Library', path: '/media', icon: Image },
-        { name: 'Documents', path: '/documents', icon: FileText },
-        // User Management
-        { name: 'Users', path: '/users', icon: Users },
-        { name: 'Team Members', path: '/team', icon: Users },
-        { name: 'Roles & Permissions', path: '/roles', icon: Lock },
-        // Marketing
-        { name: 'Newsletters', path: '/newsletters', icon: Mail },
-        { name: 'Comments', path: '/comments', icon: MessageSquare },
-        { name: 'Testimonials', path: '/testimonials', icon: MessageSquare },
-        { name: 'Social Media', path: '/social', icon: Globe },
-        // System
-        { name: 'Notifications', path: '/notifications', icon: Bell },
-        { name: 'SEO', path: '/seo', icon: Globe },
-        { name: 'Settings', path: '/settings', icon: Settings },
-        { name: 'Help & Docs', path: '/help', icon: HelpCircle }
+        {
+            section: "Dashboard",
+            items: [
+                { name: 'Dashboard', path: '/', icon: Home },
+                { name: 'Analytics', path: '/analytics', icon: BarChart2 },
+                { name: 'Reports', path: '/reports', icon: FileText },
+            ]
+        },
+        {
+            section: "Content Management",
+            items: [
+                { name: 'Pages', path: '/pages', icon: Layout },
+                { name: 'Blog Posts', path: '/posts', icon: PenTool },
+                { name: 'Media Library', path: '/media', icon: Image },
+                { name: 'Documents', path: '/documents', icon: FileText },
+            ]
+        },
+        {
+            section: "User Management",
+            items: [
+                { name: 'Users', path: '/users', icon: Users },
+                { name: 'Team Members', path: '/team', icon: Users },
+                { name: 'Roles & Permissions', path: '/roles', icon: Lock },
+            ]
+        },
+        {
+            section: "Marketing",
+            items: [
+                { name: 'Newsletters', path: '/newsletters', icon: Mail },
+                { name: 'Comments', path: '/comments', icon: MessageSquare },
+                { name: 'Testimonials', path: '/testimonials', icon: MessageSquare },
+                { name: 'Social Media', path: '/social', icon: Globe },
+            ]
+        },
+        {
+            section: "System",
+            items: [
+                { name: 'Notifications', path: '/notifications', icon: Bell },
+                { name: 'SEO', path: '/seo', icon: Globe },
+                { name: 'Settings', path: '/settings', icon: Settings },
+                { name: 'Help & Docs', path: '/help', icon: HelpCircle }
+            ]
+        }
     ];
 
     const NavItem = ({ item, isActive }) => {
         const content = (
-            <>
-                <item.icon
-                    className={`w-7 h-7 flex-shrink-0 text-primary group-hover:text-white ${isActive ? 'text-white group-hover:text-white' : ''}`}
-                />
+            <div className="flex items-center w-full">
+                <div className="flex-shrink-0">
+                    <item.icon
+                        className={`w-7 h-7 text-primary group-hover:text-white ${
+                            isActive ? 'text-white' : ''
+                        }`}
+                    />
+                </div>
                 <span
-                    className={`ml-3 font-medium whitespace-nowrap 
-                        ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'} ${isActive ? 'text-white group-hover:text-white' : ''} `}
+                    className={`ml-3 font-medium transition-all duration-300 ease-in-out ${
+                        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                    } ${isActive ? 'text-white' : ''}`}
+                    style={{
+                        transform: isCollapsed ? 'translateX(-20px)' : 'translateX(0)',
+                        display: isCollapsed ? 'none' : 'block'
+                    }}
                 >
                     {item.name}
                 </span>
-            </>
+            </div>
         );
 
         return isCollapsed ? (
@@ -76,7 +105,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 arrow={true}
                 className="tippy-box"
             >
-                <div className="flex items-center">{content}</div>
+                {content}
             </Tippy>
         ) : (
             content
@@ -87,8 +116,9 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         <>
             {/* Overlay for mobile */}
             <div
-                className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity lg:hidden ${isOpen ? 'opacity-100 z-40' : 'opacity-0 pointer-events-none'
-                    }`}
+                className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity lg:hidden ${
+                    isOpen ? 'opacity-100 z-40' : 'opacity-0 pointer-events-none'
+                }`}
                 onClick={onClose}
             />
 
@@ -100,20 +130,17 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
             >
                 <div className="flex items-center justify-between h-16 px-3">
-                    {!isCollapsed ? (
-                        <h1 className="text-xl whitespace-nowrap font-semibold w-auto opacity-100 overflow-hidden bg-gradient-to-r transition-all duration-300 ease-in-out from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                        isCollapsed ? 'w-0' : 'w-40'
+                    }`}>
+                        <h1 className="text-xl whitespace-nowrap font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             SCF Admin
                         </h1>
-                    )
-                        : (
-                            <h1 className="text-xl  whitespace-nowrap  font-semibold bg-gradient-to-r w-0 opacity-0 overflow-hidden from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            </h1>
-                        )
-                    }
+                    </div>
 
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="p-2  bg-gradient-to-r from-blue-500 to-purple-500 focus:outline-none text-white hover:from-blue-600 hover:to-purple-600  rounded-full shadow-md transition-all duration-300 ease-in-out lg:flex hidden"
+                        className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 focus:outline-none text-white hover:from-blue-600 hover:to-purple-600 rounded-full shadow-md transition-all duration-300 ease-in-out lg:flex hidden"
                     >
                         {isCollapsed ? (
                             <ChevronRight className="w-5 h-5 text-white" />
@@ -126,24 +153,35 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     </button>
                 </div>
 
-                <nav className=" px-2 h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hidden pb-24">
-                    {navigation.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            onClick={() => window.innerWidth < 1024 && onClose()}
-                            className={({ isActive }) =>
-                                `flex items-center px-3 py-2 mt-2 rounded-lg  duration-300 ease-in-out group relative
-                                ${isActive
-                                    ? 'bg-primary text-white'
-                                    : 'text-neutral-content hover:bg-primary/90 hover:text-white'}
-                                }`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <NavItem item={item} isActive={isActive} />
-                            )}
-                        </NavLink>
+                <nav className="px-2 h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hidden pb-24">
+                    {navigation.map((section, index) => (
+                        <div key={section.section} className={`${index > 0 ? 'mt-6' : 'mt-2'}`}>
+                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                                isCollapsed ? 'h-0 opacity-0' : 'h-6 opacity-100'
+                            }`}>
+                                <h2 className="text-xs font-semibold text-neutral-content/70 uppercase tracking-wider px-2 mb-2">
+                                    {section.section}
+                                </h2>
+                            </div>
+                            {section.items.map((item) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => window.innerWidth < 1024 && onClose()}
+                                    className={({ isActive }) =>
+                                        `flex mx-auto px-2 py-2 mt-2 rounded-lg duration-300 ease-in-out group relative
+                                        ${isActive
+                                            ? 'bg-primary text-white'
+                                            : 'text-neutral-content hover:bg-primary/90 hover:text-white'
+                                        }`
+                                    }
+                                >
+                                    {({ isActive }) => (
+                                        <NavItem item={item} isActive={isActive} />
+                                    )}
+                                </NavLink>
+                            ))}
+                        </div>
                     ))}
                 </nav>
             </aside>
@@ -161,4 +199,4 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
     );
 }
 
-export default Sidebar
+export default Sidebar;
