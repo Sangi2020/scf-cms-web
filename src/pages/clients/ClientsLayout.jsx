@@ -1,37 +1,25 @@
 import { Search, Plus } from 'lucide-react';
 import ClientCard from './ClientCard';
 import ClientForm from './ClientForm';
-import { useState } from 'react';
-import dummy1 from "./dummy/dummy1.jpeg";
-import dummy2 from "./dummy/2.png";
+import { useState, useEffect } from 'react';
+import axiosInstance from '../../config/axios';
 
 function ClientsLayout() {
-  const [clients, setClients] = useState([
-    {
-      id: '1',
-      name: "Client A",
-      logo: dummy1,
-      website: "https://client-a.com",
-      description: "Description for Client A",
-      isActive: true,
-      order: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '2',
-      name: "Client B",
-      logo: dummy2,
-      website: "https://client-b.com",
-      description: "Description for Client B",
-      isActive: true,
-      order: 2,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ]);
-
+  const [clients, setClients] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axiosInstance.get('client/get-all-clients');
+        setClients(response.data.data);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   return (
     <div className="min-h-screen relative">
