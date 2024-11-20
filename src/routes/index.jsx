@@ -10,6 +10,7 @@ import HomeLayout from '../layout/HomeLayout';
 import LoginPage from '../pages/auth/Login';
 import BlogsLayout from '../pages/blogs/BlogsLayout';
 import TestimonialLayout from '../pages/testimonials/TestimonialLayout';
+import ClientsLayout from '../pages/clients/ClientsLayout';
 
 
 export const router = createBrowserRouter([
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <Settings /> },
       { path: '/posts', element: <BlogsLayout /> },
       { path: '/testimonials', element: <TestimonialLayout /> },
+      { path: '/clients', element: <ClientsLayout /> },
     ],
   },
   {
