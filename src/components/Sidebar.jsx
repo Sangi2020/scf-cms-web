@@ -6,6 +6,7 @@ import {
     Home,
     Settings,
     Users,
+    Briefcase,
     X,
     Layout,
     Image,
@@ -42,7 +43,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             items: [
                 { name: 'Pages', path: '/pages', icon: Layout },
                 { name: 'Blog Posts', path: '/posts', icon: PenTool },
-                { name: 'Media Library', path: '/media', icon: Image },
+                { name: 'Clients', path: '/clients', icon: Briefcase },
                 { name: 'Documents', path: '/documents', icon: FileText },
             ]
         },
