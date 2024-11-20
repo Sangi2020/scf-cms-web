@@ -1,30 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 
-function ClientForm({ onClose }) {
-  const [name, setName] = useState('');
-  const [logo, setLogo] = useState(null); // State for the uploaded logo file
-  const [logoPreview, setLogoPreview] = useState(null); // State for logo preview
-  const [website, setWebsite] = useState('');
-  const [description, setDescription] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  const [order, setOrder] = useState(1);
+function ClientForm() {
+  const [imageFile, setImageFile] = useState(null); // State for the uploaded image file
+  const [imagePreview, setImagePreview] = useState(null); // State for image preview
   const inputRef = useRef(null); // Ref for file input
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Logic to add the client goes here
-    onClose(); // Close the form after submission
-  };
-
-  // Handle logo selection via input
-  const handleLogoChange = (event) => {
+  // Handle image selection via input
+  const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setLogo(file);
-      setLogoPreview(URL.createObjectURL(file));
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
     } else {
-      setLogo(null);
-      setLogoPreview(null);
+      setImageFile(null);
+      setImagePreview(null);
     }
   };
 
@@ -34,40 +23,38 @@ function ClientForm({ onClose }) {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
     if (file) {
-      setLogo(file);
-      setLogoPreview(URL.createObjectURL(file));
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  // Remove selected logo
-  const handleRemoveLogo = () => {
-    setLogo(null);
-    setLogoPreview(null);
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
     if (inputRef.current) {
       inputRef.current.value = "";
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form>
+      {/* Title Input */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Client Name</span>
+          <span className="label-text">Title</span>
         </label>
         <input
           type="text"
-          placeholder="Client Name"
-          className="input input-bordered border-accent"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          placeholder="Post title"
+          className="input input-bordered border-accent "
         />
       </div>
 
-      {/* Logo Upload with Drag-and-Drop and Preview */}
+      {/* Image Upload with Drag-and-Drop and Preview */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Logo</span>
+          <span className="label-text">Image</span>
         </label>
         <div
           className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
@@ -75,7 +62,7 @@ function ClientForm({ onClose }) {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
-          {!logoPreview ? (
+          {!imagePreview ? (
             <>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -90,14 +77,14 @@ function ClientForm({ onClose }) {
           ) : (
             <div className="relative">
               <img
-                src={logoPreview}
-                alt="Logo Preview"
+                src={imagePreview}
+                alt="Preview"
                 className="w-full h-auto rounded-lg shadow-lg"
               />
               <button
                 type="button"
                 className="absolute top-2 right-2 btn btn-xs btn-error"
-                onClick={handleRemoveLogo}
+                onClick={handleRemoveImage}
               >
                 Remove
               </button>
@@ -108,69 +95,30 @@ function ClientForm({ onClose }) {
             accept="image/*"
             className="hidden"
             ref={inputRef}
-            onChange={handleLogoChange}
+            onChange={handleImageChange}
           />
         </div>
       </div>
 
+      {/* Content Input */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Website</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Website URL"
-          className="input input-bordered border-accent"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
-      </div>
-
-      <div className="form-control mb-4">
-        <label className="label">
-          <span className="label-text">Description</span>
+          <span className="label-text">Content</span>
         </label>
         <textarea
-          className="textarea textarea-bordered border-accent"
-          placeholder="Client Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          className="textarea textarea-bordered"
+          placeholder="Write your post content..."
         ></textarea>
       </div>
 
-      <div className="form-control mb-4">
-        <label className="label">
-          <span className="label-text">Order</span>
-        </label>
-        <input
-          type="number"
-          className="input input-bordered border-accent"
-          value={order}
-          onChange={(e) => setOrder(Number(e.target.value))}
-        />
-      </div>
-
-      <div className="form-control mb-4">
-        <label className="label">
-          <span className="label-text">Active</span>
-        </label>
-        <input
-          type="checkbox"
-          checked={isActive}
-          onChange={() => setIsActive(!isActive)}
-        />
-      </div>
-
+      {/* Publish Button */}
       <div className="form-control">
         <button type="submit" className="btn btn-primary">
-          Add Client
-        </button>
-        <button type="button" className="btn" onClick={onClose}>
-          Cancel
+          Publish
         </button>
       </div>
     </form>
   );
 }
 
-export default ClientForm; 
+export default ClientForm;
