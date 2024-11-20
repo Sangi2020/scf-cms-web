@@ -1,57 +1,34 @@
-
-import { Search, Eye, Share2, MessageSquare } from 'lucide-react';
-import BlogPostForm from './CreateForm';
-import BlogCard from './BlogCard';
+import { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import BlogPostForm from "./CreateForm";
+import BlogCard from "./BlogCard";
+import axiosInstance from "../../config/axios";
 
 function BlogsLayout() {
-  // Sample blog data
-  const blogs = [
-    {
-      id: 1,
-      title: "Whiteboard Templates By Industry Leaders",
-      date: "08 Nov 2023",
-      image: "https://img.freepik.com/free-photo/front-view-goals-written-note-with-pen-white-background_179666-19381.jpg?ga=GA1.1.188398426.1729686763&semt=ais_hybrid",
-      author: {
-        name: "John Doe",
-        avatar: "https://img.freepik.com/free-vector/geometric-professional-consultant-discord-profile-picture_742173-13190.jpg?ga=GA1.1.188398426.1729686763&semt=ais_hybrid"
-      },
-      stats: {
-        comments: "7.98k",
-        views: "8.83k",
-        shares: "8.56k"
+  // State for blogs, loading, and error
+const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch blogs from API
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("https://scf-cms-be-hz4e.onrender.com/api/v1/web/blog/get-all-blogs");
+        console.log(response.data)
+        // Access the 'data' array within the response
+        setBlogs(response.data.data)
+      } catch (err) {
+        setError("Failed to load blogs");
+        console.error("Error fetching blogs:", err);
+      } finally {
+        setLoading(false);
       }
-    },
-    {
-      id: 2,
-      title: "Tesla Cybertruck-inspired camper trailer for Tesla fans",
-      date: "09 Apr 2024",
-      image: "https://img.freepik.com/free-photo/front-view-goals-written-note-with-pen-white-background_179666-19381.jpg?ga=GA1.1.188398426.1729686763&semt=ais_hybrid",
-      author: {
-        name: "Jane Smith",
-        avatar: "https://img.freepik.com/free-vector/geometric-professional-consultant-discord-profile-picture_742173-13190.jpg?ga=GA1.1.188398426.1729686763&semt=ais_hybrid"
-      },
-      stats: {
-        comments: "7.98k",
-        views: "8.83k",
-        shares: "8.56k"
-      }
-    },
-    {
-      id: 3,
-      title: "Designify Agency Landing Page Design",
-      date: "12 Sep 2023",
-      image: "https://img.freepik.com/free-photo/front-view-goals-written-note-with-pen-white-background_179666-19381.jpg?ga=GA1.1.188398426.1729686763&semt=ais_hybrid",
-      author: {
-        name: "Mike Johnson",
-        avatar: "https://img.freepik.com/free-vector/geometric-professional-consultant-discord-profile-picture_742173-13190.jpg?ga=GA1.1.188398426.1729686763&semt=ais_hybrid"
-      },
-      stats: {
-        comments: "7.98k",
-        views: "8.83k",
-        shares: "8.56k"
-      }
-    },
-  ];
+    };
+  
+    fetchBlogs();
+  }, []);
 
   return (
     <div className="min-h-screen relative">
@@ -61,12 +38,12 @@ function BlogsLayout() {
         <div className="drawer-content">
           {/* Header Section */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-content">Blog</h1>
+            <h1 className="text-3xl font-bold text-neutral-content">Blogs</h1>
             <label htmlFor="new-post-drawer" className="btn btn-primary gap-2">
               + New post
             </label>
           </div>
-  
+
           {/* Search and Filter Section */}
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <div className="relative flex-grow">
@@ -83,30 +60,56 @@ function BlogsLayout() {
               <option>Most Shared</option>
             </select>
           </div>
-  
-          {/* Blog Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {blogs.map((blog) => (
-    <BlogCard key={blog.id} blog={blog} /> 
-  ))}
-</div>
 
+          {/* Blog Grid */}
+          {loading ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[...Array(6)].map((_, index) => (
+      <div 
+        key={index} 
+        className="card bg-base-100 animate-pulse transition-all duration-300 ease-in-out transform hover:scale-105"
+      >
+        {/* Image Skeleton */}
+        <div className="h-48 bg-base-100 rounded-3xl transition-colors duration-300"></div>
+        
+        {/* Content Skeleton */}
+        <div className="card-body p-4 space-y-3">
+          <div className="h-4 bg-base-200 w-1/2 transition-colors duration-300"></div>
+          <div className="h-6 bg-base-200 w-3/4 transition-colors duration-300"></div>
+          <div className="h-4 bg-base-200 w-full transition-colors duration-300"></div>
+          
+          {/* Stats Skeleton */}
+          <div className="flex gap-4 mt-4">
+            <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
+            <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
+            <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
+          </div>
         </div>
-  
+      </div>
+    ))}
+  </div>
+) : error ? (
+  <div className="text-center text-red-500">{error}</div>
+) : (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {blogs.map((blog) => (
+      <BlogCard key={blog.id} blog={blog} />
+    ))}
+  </div>
+)}
+        </div>
+
         {/* Drawer Sidebar */}
-        <div className="drawer-side  ">
-          <label htmlFor="new-post-drawer" className="drawer-overlay"> helo</label>
-          <div
-            className="p-4 md:w-[40%] w-full sm:w-1/2 overflow-y-scroll bg-base-100  h-[85vh]  text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg"
-          >
+        <div className="drawer-side">
+          <label htmlFor="new-post-drawer" className="drawer-overlay"></label>
+          <div className="p-4 md:w-[40%] w-full sm:w-1/2 overflow-y-scroll bg-base-100 h-[85vh] text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg">
             <h2 className="text-lg font-bold mb-4">Add New Post</h2>
-            <BlogPostForm/>
+            <BlogPostForm />
           </div>
         </div>
       </div>
     </div>
   );
-  
 }
 
 export default BlogsLayout;
