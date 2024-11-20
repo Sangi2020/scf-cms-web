@@ -8,7 +8,7 @@ export default function CountryAnalytics() {
   const { theme } = useTheme(); // Access the theme from context
 
   useEffect(() => {
-    const fetchData = async () => {
+const fetchData = async () => {
       try {
         // Simulated API response
         const result = [

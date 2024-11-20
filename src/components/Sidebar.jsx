@@ -85,7 +85,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     />
                 </div>
                 <span
-                    className={`ml-3 font-medium transition-all duration-300 ease-in-out ${
+                    className={`ml-3 font-medium  ease-in-out ${
                         isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
                     } ${isActive ? 'text-white' : ''}`}
                     style={{
@@ -100,10 +100,10 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
 
         return isCollapsed ? (
             <Tippy
-                content={<div className="font-medium">{item.name}</div>}
+                content={<div className="font-medium  " >{item.name}</div>}
                 placement="right"
                 arrow={true}
-                className="tippy-box"
+                className="tippy-box ml-2 "
             >
                 {content}
             </Tippy>
