@@ -1,113 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from "react";
 
-function ClientForm({ onClose }) {
-  const [name, setName] = useState('');
-  const [logo, setLogo] = useState('');
-  const [website, setWebsite] = useState('');
-  const [description, setDescription] = useState('');
-  const [isActive, setIsActive] = useState(true);
-  const [order, setOrder] = useState(1);
+function ClientForm() {
+  const [imageFile, setImageFile] = useState(null); // State for the uploaded image file
+  const [imagePreview, setImagePreview] = useState(null); // State for image preview
+  const inputRef = useRef(null); // Ref for file input
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Logic to add the client goes here
-    onClose(); // Close the form after submission
+  // Handle image selection via input
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+    }
+  };
+
+  // Handle drag-and-drop upload
+  const handleDragOver = (event) => event.preventDefault();
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form>
+      {/* Title Input */}
       <div className="form-control mb-4">
-        <label className="label" htmlFor="client-name">
-          <span className="label-text">Client Name</span>
+        <label className="label">
+          <span className="label-text">Title</span>
         </label>
         <input
-          id="client-name"
           type="text"
-          placeholder="Client Name"
-          className="input input-bordered"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          placeholder="Post title"
+          className="input input-bordered border-accent "
         />
       </div>
 
+      {/* Image Upload with Drag-and-Drop and Preview */}
       <div className="form-control mb-4">
-        <label className="label" htmlFor="logo-url">
-          <span className="label-text">Logo URL</span>
+        <label className="label">
+          <span className="label-text">Image</span>
         </label>
-        <input
-          id="logo-url"
-          type="text"
-          placeholder="Logo URL"
-          className="input input-bordered"
-          value={logo}
-          onChange={(e) => setLogo(e.target.value)}
-          required
-        />
+        <div
+          className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          {!imagePreview ? (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-10 w-10 text-primary mb-2"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M4 3a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v3.586l-1.293-1.293a1 1 0 00-1.414 0L10 12l-2.293-2.293a1 1 0 00-1.414 0L4 12V5zm0 10v-1.586l2.293-2.293a1 1 0 011.414 0L10 13l3.293-3.293a1 1 0 011.414 0L16 12.414V15H4z" />
+              </svg>
+              <p className="text-neutral-content">Drag and drop or click to upload</p>
+            </>
+          ) : (
+            <div className="relative">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+              <button
+                type="button"
+                className="absolute top-2 right-2 btn btn-xs btn-error"
+                onClick={handleRemoveImage}
+              >
+                Remove
+              </button>
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={inputRef}
+            onChange={handleImageChange}
+          />
+        </div>
       </div>
 
+      {/* Content Input */}
       <div className="form-control mb-4">
-        <label className="label" htmlFor="website-url">
-          <span className="label-text">Website</span>
-        </label>
-        <input
-          id="website-url"
-          type="text"
-          placeholder="Website URL"
-          className="input input-bordered"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
-      </div>
-
-      <div className="form-control mb-4">
-        <label className="label" htmlFor="client-description">
-          <span className="label-text">Description</span>
+        <label className="label">
+          <span className="label-text">Content</span>
         </label>
         <textarea
-          id="client-description"
           className="textarea textarea-bordered"
-          placeholder="Client Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Write your post content..."
         ></textarea>
       </div>
 
-      <div className="form-control mb-4">
-        <label className="label" htmlFor="order">
-          <span className="label-text">Order</span>
-        </label>
-        <input
-          id="order"
-          type="number"
-          className="input input-bordered"
-          value={order}
-          onChange={(e) => setOrder(Number(e.target.value))}
-        />
-      </div>
-
-      <div className="form-control mb-4">
-        <label className="label" htmlFor="is-active">
-          <span className="label-text">Active</span>
-        </label>
-        <input
-          id="is-active"
-          type="checkbox"
-          checked={isActive}
-          onChange={() => setIsActive(!isActive)}
-        />
-      </div>
-
+      {/* Publish Button */}
       <div className="form-control">
         <button type="submit" className="btn btn-primary">
-          Add Client
-        </button>
-        <button type="button" className="btn" onClick={onClose}>
-          Cancel
+          Publish
         </button>
       </div>
     </form>
   );
 }
 
-export default ClientForm; 
+export default ClientForm;
