@@ -126,10 +126,10 @@ const SocialMediaLayout = () => {
           <table className="table w-full ">
             <thead>
               <tr className="text-base text-neutral-content">
-                <th className="w-1/4">Platform</th>
-                <th className="w-1/4">URL</th>
-                <th className="w-1/4">Status</th>
-                <th className="w-1/4 ">Actions</th>
+                <th className="w-1/5">Platform</th>
+                <th className="w-1/5">URL</th>
+                <th className="w-1/5">Status</th>
+                <th className="w-1/5 ">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -157,7 +157,7 @@ const SocialMediaLayout = () => {
                         type="text"
                         value={newLink}
                         onChange={(e) => setNewLink(e.target.value)}
-                        className="input input-bordered w-full max-w-xs text-neutral-content"
+                        className="input input-bordered w-full max-w-xs focus:outline-none  input-sm text-neutral-content"
                       />
                     ) : (
                       <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ const SocialMediaLayout = () => {
                   <td>
                     <button
                       onClick={() => handleToggleStatus(platform)}
-                      className={`badge badge-lg text-white ${details.active ? 'badge-success' : 'badge-error'} gap-1`}
+                      className={`badge badge-lg text-sm focus:outline-none hover:border-none text-white ${details.active ? 'badge-success' : 'badge-error'} gap-1`}
                     >
                       {details.active ? (
                         <CheckCircle className="w-4 h-4" />
