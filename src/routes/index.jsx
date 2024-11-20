@@ -11,6 +11,7 @@ import LoginPage from '../pages/auth/Login';
 import BlogsLayout from '../pages/blogs/BlogsLayout';
 import TestimonialLayout from '../pages/testimonials/TestimonialLayout';
 import SocialMediaLayout from '../pages/socialmedia/SocialMediaLayout';
+import ClientsLayout from '../pages/clients/ClientsLayout';
 
 
 export const router = createBrowserRouter([
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: '/posts', element: <BlogsLayout /> },
       { path: '/testimonials', element: <TestimonialLayout /> },
       { path: '/social', element: <SocialMediaLayout /> },
+      { path: '/clients', element: <ClientsLayout /> },
     ],
   },
   {
