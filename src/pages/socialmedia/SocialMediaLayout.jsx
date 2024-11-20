@@ -1,16 +1,47 @@
-import React, { useState } from "react";
-import { Instagram, Facebook, Share2, Twitter, Linkedin, Globe, MapPin } from "lucide-react";
 
-function SocialMediaLayout() {
+import React, { useState } from 'react';
+import { 
+  Instagram, 
+  Facebook, 
+  Share2, 
+  Twitter, 
+  Linkedin, 
+  Globe, 
+  MapPin 
+} from 'lucide-react';
+
+const SocialMediaLayout = () => {
   const [socialLinks, setSocialLinks] = useState({
-    instagram: "https://instagram.com/yourpage",
-    facebook: "https://facebook.com/yourpage",
-    whatsapp: "https://wa.me/1234567890",
-    twitter: "https://twitter.com/yourpage",
-    linkedin: "https://linkedin.com/in/yourprofile",
-    pinterest: "https://pinterest.com/yourpage",
-    location: "https://maps.google.com/?q=Your+Business+Location",
-    googleBusiness: "https://yourbusiness.google.com",
+    instagram: {
+      url: "https://instagram.com/yourpage",
+      name: "Instagram Official",
+      region: "Social Media",
+      icon: "/api/placeholder/48/48"
+    },
+    facebook: {
+      url: "https://facebook.com/yourpage",
+      name: "Facebook Page",
+      region: "Social Media",
+      icon: "/api/placeholder/48/48"
+    },
+    twitter: {
+      url: "https://twitter.com/yourpage",
+      name: "Twitter Profile",
+      region: "Social Media",
+      icon: "/api/placeholder/48/48"
+    },
+    linkedin: {
+      url: "https://linkedin.com/in/yourprofile",
+      name: "LinkedIn Business",
+      region: "Professional",
+      icon: "/api/placeholder/48/48"
+    },
+    whatsapp: {
+      url: "https://wa.me/1234567890",
+      name: "WhatsApp Business",
+      region: "Messaging",
+      icon: "/api/placeholder/48/48"
+    }
   });
 
   const [editing, setEditing] = useState(null);
@@ -21,95 +52,102 @@ function SocialMediaLayout() {
     facebook: <Facebook className="text-blue-600" />,
     whatsapp: <Share2 className="text-green-500" />,
     twitter: <Twitter className="text-blue-400" />,
-    linkedin: <Linkedin className="text-blue-700" />,
-    pinterest: <Globe className="text-red-500" />, // Replaced Pinterest with Globe
-    location: <MapPin className="text-red-600" />,
-    googleBusiness: <Globe className="text-yellow-500" />,
+    linkedin: <Linkedin className="text-blue-700" />
   };
 
   const handleEditClick = (platform) => {
     setEditing(platform);
-    setNewLink(socialLinks[platform]);
+    setNewLink(socialLinks[platform].url);
   };
 
   const handleSaveClick = () => {
     setSocialLinks((prev) => ({
       ...prev,
-      [editing]: newLink,
+      [editing]: {
+        ...prev[editing],
+        url: newLink
+      }
     }));
     setEditing(null);
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-neutral-content mb-6">Social Media Links</h1>
-      <div className="overflow-x-auto bg-base-200 shadow-md rounded-lg">
-        <table className="table-auto w-full text-left border-collapse">
+    <div className="p-6">
+      <div className="overflow-x-auto">
+        <table className="table w-full">
           <thead>
-            <tr className="bg-base-300 text-neutral-content">
-              <th className="p-4 text-sm uppercase">Platform</th>
-              <th className="p-4 text-sm uppercase">Link</th>
-              <th className="p-4 text-sm uppercase">Actions</th>
+            <tr>
+           
+              <th>Platform</th>
+              <th>URL</th>
+              <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            {Object.keys(socialLinks).map((platform, index) => (
-              <tr
-                key={index}
-                className="hover:bg-base-100 border-b border-neutral-content"
-              >
-                <td className="p-4 flex items-center space-x-2 text-neutral-content">
-                  <span className="text-lg">{platformIcons[platform]}</span>
-                  <span className="capitalize">{platform}</span>
+            {Object.entries(socialLinks).map(([platform, details]) => (
+              <tr key={platform}>
+                
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div className="avatar w-12 h-12  flex items-center justify-center">
+                      <div className="mask mask-squircle text-center  bg-base-300 ">
+                        {platformIcons[platform]}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{details.name}</div>
+                      <div className="text-sm opacity-50">{details.region}</div>
+                    </div>
+                  </div>
                 </td>
-                <td className="p-4">
+                <td>
                   {editing === platform ? (
                     <input
                       type="text"
                       value={newLink}
                       onChange={(e) => setNewLink(e.target.value)}
-                      className="input input-bordered w-full"
+                      className="input input-bordered w-full max-w-xs"
                     />
                   ) : (
-                    <a
-                      href={socialLinks[platform]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      {socialLinks[platform]}
-                    </a>
+                    <div>
+                      {details.url}
+                      <br/>
+                      <span className="badge badge-ghost badge-sm">{platform}</span>
+                    </div>
                   )}
                 </td>
-                <td className="p-4">
+                <td>Active</td>
+                <th>
                   {editing === platform ? (
                     <div className="flex space-x-2">
-                      <button className="btn btn-sm btn-success" onClick={handleSaveClick}>
-                        Save
+                      <button className="btn btn-ghost btn-xs" onClick={handleSaveClick}>
+                        save
                       </button>
                       <button
-                        className="btn btn-sm btn-error"
+                        className="btn btn-ghost btn-xs"
                         onClick={() => setEditing(null)}
                       >
-                        Cancel
+                        cancel
                       </button>
                     </div>
                   ) : (
                     <button
-                      className="btn btn-sm btn-primary"
+                      className="btn btn-ghost btn-xs"
                       onClick={() => handleEditClick(platform)}
                     >
-                      Edit
+                      details
                     </button>
                   )}
-                </td>
+                </th>
               </tr>
             ))}
           </tbody>
+          
         </table>
       </div>
     </div>
   );
-}
+};
 
 export default SocialMediaLayout;

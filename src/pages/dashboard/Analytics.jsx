@@ -11,7 +11,7 @@ function Analytics() {
   
     return (
       <div className="w-full ">
-        <h1 className="text-2xl font-bold mb-6 w-full">Analytics</h1>
+        <h1 className="text-2xl font-bold mb-6 w-full text-neutral-content">Analytics</h1>
         
         {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {metrics.map((metric, index) => (

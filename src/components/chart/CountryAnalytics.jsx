@@ -1,35 +1,28 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Chart } from "react-google-charts";
 import { useTheme } from "../../context/ThemeContext";
+import axiosInstance from "../../config/axios";
 
 export default function CountryAnalytics() {
   const [data, setData] = useState([["Country", "Total users"]]);
   const { theme } = useTheme(); // Access the theme from context
 
   useEffect(() => {
-const fetchData = async () => {
+    const fetchData = async () => {
       try {
-        // Simulated API response
-        const result = [
-          { country: "US", totalUsers: 100 },
-          { country: "GB", totalUsers: 50 },
-          { country: "IN", totalUsers: 75 }
-        ];
-
-        // Format the data for Google Charts
+        const response = await axiosInstance.get("/stats/country-analytics");
+      const result = response.data.data;
         const chartData = [["Country", "Total users"]];
-        result.forEach(item => {
-          chartData.push([item.country, item.totalUsers]);
+        result.forEach((item) => {
+          chartData.push([item.country, Number(item.totalUsers)]);
         });
-
         setData(chartData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
-    fetchData();
+    fetchData();
   }, []);
 
   const chartBackground = theme === "dark" ? "#191D23" : "#FFFFFF";
@@ -38,10 +31,10 @@ const fetchData = async () => {
 
   return (
     <div className={`w-full mx-auto p-6 rounded-xl shadow-lg ${containerClasses}`}>
-      <h1 className="text-3xl font-semibold text-center mb-6">
+      <h1 className="text-3xl font-semibold text-center text-neutral-content mb-6">
         Real-Time Active Users
       </h1>
-      <div className="w-full h-[400px]">
+      <div className="w-full h-[500px]">
         <Chart
           chartType="GeoChart"
           width="100%"
