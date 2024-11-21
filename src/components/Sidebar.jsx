@@ -35,7 +35,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             items: [
                 { name: 'Dashboard', path: '/', icon: Home },
                 { name: 'Analytics', path: '/analytics', icon: BarChart2 },
-                { name: 'Reports', path: '/reports', icon: FileText },
+                // { name: 'Reports', path: '/reports', icon: FileText },
             ]
         },
         {

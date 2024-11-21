@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Chart } from "react-google-charts";
 import axiosInstance from "../../config/axios";
 import { useTheme } from "../../context/ThemeContext";
+import { BarChart2, Users } from "lucide-react";
 
 const TrafficSourcesChart = () => {
     const [data, setData] = useState(null);
@@ -173,11 +174,46 @@ const TrafficSourcesChart = () => {
                         options={options}
                     />
                     {data && data.length > 1 && (
-                        <div className="mt-4 text-sm text-center">
-                            Total Sessions: {data.slice(1).reduce((sum, item) => sum + item[1], 0).toLocaleString()}
-                            <br />
-                            Total Users: {data.slice(1).reduce((sum, item) => sum + item[2], 0).toLocaleString()}
-                        </div>
+                        // <div className="mt-4 text-sm text-center">
+                        //     Total Sessions: 
+                        //     <br />
+                        //     Total Users: 
+                        // </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      {/* Sessions Card */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <BarChart2 className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm opacity-70">Total Sessions</p>
+              <h3 className="text-2xl font-bold">
+              {data.slice(1).reduce((sum, item) => sum + item[1], 0).toLocaleString()}
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Users Card */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Users className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm opacity-70">Total Users</p>
+              <h3 className="text-2xl font-bold">
+              {data.slice(1).reduce((sum, item) => sum + item[2], 0).toLocaleString()}
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
                     )}
                 </div>
             </div>
