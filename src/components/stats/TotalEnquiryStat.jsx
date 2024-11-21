@@ -1,7 +1,8 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import StatCard from '../ui/StatCard';
-import {Clipboard} from 'lucide-react'
+import { Clipboard } from 'lucide-react';
+import axiosInstance from '../../config/axios';
+import { SkeletonCard } from '../skeleton/Skeleton';
 
 const TotalEnquiryStat = () => {
     const [data, setData] = useState(null);
@@ -10,12 +11,11 @@ const TotalEnquiryStat = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/api/v1/admin/stats/total-enquiries");
+                const response = await axiosInstance.get("/stats/total-enquiries");
                 const result = response.data.data;
                 setData(result);
             } catch (error) {
                 console.error("Error fetching data:", error);
-                setError(error.message);
             } finally {
                 setLoading(false);
             }
@@ -23,15 +23,22 @@ const TotalEnquiryStat = () => {
 
         fetchData();
     }, []);
-    return (
-        <StatCard
-          title="Total Enquiries"
-          value={data}
-          description={'Recieved'}
-          icon={Clipboard}
-          iconColor="text-blue-500"
-        />
-    )
-}
 
-export default TotalEnquiryStat
+    return (
+        <div className="w-full">
+            {loading ? (
+                <SkeletonCard />
+            ) : (
+                <StatCard
+                    title="Total Enquiries"
+                    value={data}
+                    description="Received"
+                    icon={Clipboard}
+                    iconColor="text-blue-500"
+                />
+            )}
+        </div>
+    );
+};
+
+export default TotalEnquiryStat;
