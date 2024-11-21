@@ -4,6 +4,9 @@ import { Users, FileText, MessageSquare, Eye, BarChart, Mail, Clipboard } from '
 import TotalEnquiryStat from '../../components/stats/TotalEnquiryStat.jsx';
 import TotalSubscribers from '../../components/stats/TotalSubscribers.jsx';
 import TotalBlogStats from '../../components/stats/TotalBlogStats.jsx';
+import TotalPageViews from '../../components/stats/TotalPageViews.jsx';
+import TotalActiveUsers from '../../components/stats/TotalActiveusers.jsx';
+import TotalBounceRate from '../../components/stats/TotalbounceRate.jsx';
 
 function Overview() {
   // Define the CMS-related stats data in an array
@@ -69,9 +72,12 @@ function Overview() {
           trendValue={stat.trendValue}
         />
       ))} */}
+      <TotalPageViews/>
+      <TotalBlogStats/>
       <TotalEnquiryStat/>
       <TotalSubscribers/>
-      <TotalBlogStats/>
+      <TotalActiveUsers/>
+      <TotalBounceRate/>
     </div>
   );
 }

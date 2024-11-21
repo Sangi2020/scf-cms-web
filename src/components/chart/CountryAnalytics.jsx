@@ -5,7 +5,7 @@ import axiosInstance from "../../config/axios";
 
 export default function CountryAnalytics() {
   const [data, setData] = useState([["Country", "Total users"]]);
-  const { theme } = useTheme();
+  const { theme } = useTheme(); // Access the theme from context
 
   useEffect(() => {
     const fetchData = async () => {
