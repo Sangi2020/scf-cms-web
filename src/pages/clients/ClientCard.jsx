@@ -18,7 +18,7 @@ const ClientCard = ({ client, onDelete }) => {
     <>
       <div className="group relative bg-base-200  rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
         {/* Image Container */}
-        <div className="relative h-48 rounded-t-lg flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="relative h-48 rounded-t-lg flex items-center justify-center bg-base-200">
           <img
             src={client.logo || "/api/placeholder/400/250"}
             alt={client.name}

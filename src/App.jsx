@@ -1,8 +1,15 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
+import { requestNotificationPermission } from './config/firebaseConfig';
+import { useEffect } from 'react';
 
-function App() {
 
+
+
+  const App = () => {
+    useEffect(() => {
+      requestNotificationPermission();
+    }, []);
     // <======================================== NOTES START ==============================================>
 
   // Libraries used :   "tailwind-css" for css

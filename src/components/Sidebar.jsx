@@ -173,7 +173,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                                         `flex mx-auto px-2 py-2 mt-2 rounded-lg duration-300 ease-in-out group relative
                                         ${isActive
                                             ? 'bg-primary text-white'
-                                            : 'text-neutral-content hover:bg-primary/90 hover:text-white'
+                                            : 'text-neutral-content hover:bg-primary/30 hover:text-white'
                                         }`
                                     }
                                 >
