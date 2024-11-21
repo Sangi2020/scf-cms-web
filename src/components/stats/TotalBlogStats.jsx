@@ -1,7 +1,9 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import StatCard from '../ui/StatCard';
-import {FileText} from 'lucide-react'
+import { FileText } from 'lucide-react';
+import axiosInstance from '../../config/axios';
+import { SkeletonCard } from '../skeleton/Skeleton';
+
 const TotalBlogStats = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -9,10 +11,9 @@ const TotalBlogStats = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/api/v1/admin/stats/total-blogs");
+                const response = await axiosInstance.get("/stats/total-blogs");
                 const result = response.data.data;
                 setData(result);
-            
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -22,15 +23,22 @@ const TotalBlogStats = () => {
 
         fetchData();
     }, []);
-  return (
-    <StatCard
-    title="Blog Posts"
-    value={data}
-    description={'Published'}
-    icon={FileText}
-    iconColor="text-green-500"
-  />
-  )
-}
 
-export default TotalBlogStats
+    return (
+        <div className="w-full">
+            {loading ? (
+                <SkeletonCard />
+            ) : (
+                <StatCard
+                    title="Blog Posts"
+                    value={data}
+                    description="Published"
+                    icon={FileText}
+                    iconColor="text-green-500"
+                />
+            )}
+        </div>
+    );
+};
+
+export default TotalBlogStats;
