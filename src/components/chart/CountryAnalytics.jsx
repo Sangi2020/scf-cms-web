@@ -5,7 +5,7 @@ import axiosInstance from "../../config/axios";
 
 export default function CountryAnalytics() {
   const [data, setData] = useState([["Country", "Total users"]]);
-  const { theme } = useTheme(); // Access the theme from context
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,10 +30,11 @@ export default function CountryAnalytics() {
   const datalessRegionColor = theme === "dark" ? "#FFFFFF" : "#191D23";
 
   return (
-    <div className={`w-full mx-auto p-6 rounded-xl shadow-lg ${containerClasses}`}>
-      <h1 className="text-3xl font-semibold text-center text-neutral-content mb-6">
-        Real-Time Active Users
-      </h1>
+    // <div className={`w-full mx-auto p-6 rounded-xl shadow-lg ${containerClasses}`}>
+      <div className={`card-body shadow-lg w-full mx-auto mt-8 rounded-2xl ${containerClasses}`}>
+        <h2 className="card-title text-base md:text-2xl text-neutral-content flex items-center gap-2">
+         Real-Time Active Users
+        </h2>
       <div className="w-full h-[500px]">
         <Chart
           chartType="GeoChart"
@@ -49,6 +50,7 @@ export default function CountryAnalytics() {
           }}
         />
       </div>
-    </div>
+      </div>
+    // </div>
   );
 }
