@@ -1,18 +1,19 @@
+import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../config/axios';
-import React, { useEffect, useState } from 'react';
-import StatCard from '../ui/StatCard';
-import { Mail } from 'lucide-react';
 import { SkeletonCard } from '../skeleton/Skeleton';
+import StatCard from '../ui/StatCard';
+import { Eye, User } from 'lucide-react';
 
-const TotalSubscribers = () => {
-    const [data, setData] = useState(null);
+const TotalActiveUsers = () => {
+    const [data, setData] = useState();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axiosInstance.get("/stats/total-subscribers");
-                const result = response.data.data;
+                const response = await axiosInstance.get("/stats/active-users");
+                
+                const result = response.data.data.length > 0 ? response.data.data[0].activeUsers : null;
                 setData(result);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -20,7 +21,7 @@ const TotalSubscribers = () => {
                 setLoading(false);
             }
         };
-
+    
         fetchData();
     }, []);
 
@@ -30,15 +31,15 @@ const TotalSubscribers = () => {
                 <SkeletonCard />
             ) : (
                 <StatCard
-                    title="Total Subscribers"
+                    title="Active users"
                     value={data}
-                    description="Subscribed"
-                    icon={Mail}
-                    iconColor="text-yellow-500"
+                    description="Last 30 days"
+                    icon={User}
+                    iconColor="text-teal-500"
                 />
             )}
         </div>
     );
 };
 
-export default TotalSubscribers;
+export default TotalActiveUsers
