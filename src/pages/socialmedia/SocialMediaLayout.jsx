@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 
 const SocialMediaLayout = () => {
-  const [socialLinks, setSocialLinks] = useState({
+  // Initial full set of social links
+  const allSocialLinks = {
     instagram: {
       url: "https://instagram.com/yourpage",
       name: "Instagram Official",
@@ -49,11 +50,23 @@ const SocialMediaLayout = () => {
       active: true,
       lastChecked: "2024-03-15"
     }
+  };
+
+  // State to manage displayed and available links
+  const [displayedLinks, setDisplayedLinks] = useState({
+    instagram: allSocialLinks.instagram,
+    facebook: allSocialLinks.facebook
+  });
+
+  const [availableLinks, setAvailableLinks] = useState({
+    twitter: allSocialLinks.twitter,
+    linkedin: allSocialLinks.linkedin,
+    whatsapp: allSocialLinks.whatsapp
   });
 
   const [editing, setEditing] = useState(null);
   const [newLink, setNewLink] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
+  const [showAddLinkModal, setShowAddLinkModal] = useState(false);
 
   const platformIcons = {
     instagram: <Instagram className="w-6 h-6 text-pink-500" />,
@@ -65,7 +78,7 @@ const SocialMediaLayout = () => {
 
   const handleEditClick = (platform) => {
     setEditing(platform);
-    setNewLink(socialLinks[platform].url);
+    setNewLink(displayedLinks[platform].url);
   };
 
   const handleSaveClick = () => {
@@ -74,7 +87,7 @@ const SocialMediaLayout = () => {
       return;
     }
 
-    setSocialLinks((prev) => ({
+    setDisplayedLinks((prev) => ({
       ...prev,
       [editing]: {
         ...prev[editing],
@@ -95,13 +108,22 @@ const SocialMediaLayout = () => {
   };
 
   const handleToggleStatus = (platform) => {
-    setSocialLinks((prev) => ({
-      ...prev,
-      [platform]: {
-        ...prev[platform],
-        active: !prev[platform].active
-      }
-    }));
+    const isDisplayed = displayedLinks[platform];
+    
+    if (isDisplayed) {
+      // If the link is currently displayed
+      setDisplayedLinks((prev) => {
+        const newDisplayed = { ...prev };
+        delete newDisplayed[platform];
+        return newDisplayed;
+      });
+      
+      // Add back to available links
+      setAvailableLinks((prev) => ({
+        ...prev,
+        [platform]: allSocialLinks[platform]
+      }));
+    }
   };
 
   const copyToClipboard = async (url) => {
@@ -113,34 +135,59 @@ const SocialMediaLayout = () => {
     }
   };
 
+  const handleAddLink = (platform) => {
+    // Move the selected platform from available to displayed links
+    setDisplayedLinks((prev) => ({
+      ...prev,
+      [platform]: availableLinks[platform]
+    }));
+
+    // Remove the platform from available links
+    setAvailableLinks((prev) => {
+      const newAvailable = { ...prev };
+      delete newAvailable[platform];
+      return newAvailable;
+    });
+
+    setShowAddLinkModal(false);
+  };
+
   return (
     <div className="card w-full bg-base-200 shadow-xl">
       <div className="card-body">
-        <h2 className="card-title text-base md:text-2xl text-neutral-content flex items-center gap-2">
-          <Globe className="w-6 h-6 text-accent " />
-          Social Media Management
-        </h2>
-
+        <div className="card-title text-base md:text-2xl text-neutral-content flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Globe className="w-6 h-6 text-accent" />
+            Social Media Management
+          </div>
+          {Object.keys(availableLinks).length > 0 && (
+            <button 
+              className="btn btn-primary btn-sm"
+              onClick={() => setShowAddLinkModal(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Add Link
+            </button>
+          )}
+        </div>
 
         <div className="overflow-x-auto">
-          <table className="table w-full ">
+          <table className="table w-full">
             <thead>
               <tr className="text-base text-neutral-content">
                 <th className="w-1/5">Platform</th>
                 <th className="w-1/5">URL</th>
                 <th className="w-1/5">Status</th>
-                <th className="w-1/5 ">Actions</th>
+                <th className="w-1/5">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {Object.entries(socialLinks).map(([platform, details]) => (
-                <tr key={platform}className='border-t border-base-300'>
-    
+              {Object.entries(displayedLinks).map(([platform, details]) => (
+                <tr key={platform} className='border-t border-base-300'>
                   <td className='text-neutral-content'>
                     <div className="flex items-center gap-3">
                       <div className="avatar placeholder">
                         <div className="bg-base-200 rounded-lg w-12 h-12">
-                          <div className="flex items-center justify-center ">
+                          <div className="flex items-center justify-center">
                             {platformIcons[platform]}
                           </div>
                         </div>
@@ -157,7 +204,7 @@ const SocialMediaLayout = () => {
                         type="text"
                         value={newLink}
                         onChange={(e) => setNewLink(e.target.value)}
-                        className="input input-bordered w-full max-w-xs focus:outline-none  input-sm text-neutral-content"
+                        className="input input-bordered w-full max-w-xs focus:outline-none input-sm text-neutral-content"
                       />
                     ) : (
                       <div className="flex items-center gap-2">
@@ -215,6 +262,35 @@ const SocialMediaLayout = () => {
           </table>
         </div>
       </div>
+
+      {/* Add Link Modal */}
+      {showAddLinkModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">Add New Social Media Link</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(availableLinks).map(([platform, details]) => (
+                <button
+                  key={platform}
+                  onClick={() => handleAddLink(platform)}
+                  className="btn btn-outline flex items-center justify-start gap-3"
+                >
+                  {platformIcons[platform]}
+                  {details.name}
+                </button>
+              ))}
+            </div>
+            <div className="modal-action">
+              <button 
+                className="btn btn-ghost"
+                onClick={() => setShowAddLinkModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
