@@ -25,7 +25,7 @@ const TotalEnquiryStat = () => {
     }, []);
 
     return (
-        <div className="w-full">
+        <div className="w-full  animate-fade-in-down">
             {loading ? (
                 <SkeletonCard />
             ) : (
