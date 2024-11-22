@@ -12,6 +12,7 @@ import BlogsLayout from '../pages/blogs/BlogsLayout';
 import TestimonialLayout from '../pages/testimonials/TestimonialLayout';
 import SocialMediaLayout from '../pages/socialmedia/SocialMediaLayout';
 import ClientsLayout from '../pages/clients/ClientsLayout';
+import EnquiriesView from '../components/enquiry/EnquiriesView';
 
 
 export const router = createBrowserRouter([
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: '/testimonials', element: <TestimonialLayout /> },
       { path: '/social', element: <SocialMediaLayout /> },
       { path: '/clients', element: <ClientsLayout /> },
+      { path: '/enquiries', element: <EnquiriesView /> },
     ],
   },
   {
