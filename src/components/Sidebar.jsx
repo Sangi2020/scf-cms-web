@@ -36,6 +36,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'Dashboard', path: '/', icon: Home },
                 { name: 'Analytics', path: '/analytics', icon: BarChart2 },
                 // { name: 'Reports', path: '/reports', icon: FileText },
+                { name: 'Enquiries', path: '/enquiries', icon: FileText },
             ]
         },
         {
