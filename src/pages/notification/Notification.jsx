@@ -12,7 +12,7 @@ const Notification = () => {
     // Fetch existing notifications on component mount
     const fetchNotifications = async () => {
       const response = await axiosInstance.get('notification/get-all-notifications');
-      const data = await response.json();
+      const data = response.data;
       setNotifications(data);
     };
 
