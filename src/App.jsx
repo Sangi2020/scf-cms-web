@@ -1,6 +1,7 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
-
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 
   const App = () => {
@@ -28,8 +29,17 @@ import { router } from './routes';
   // Phase 3 :  Production  ||
 
   // <======================================== NOTES END ==============================================>
-  return <RouterProvider router={router} />;
+  return(
+    <>
+
+      <RouterProvider router={router} />
+
+      <ToastContainer autoClose={5000}  position="bottom-right" />
+    </>
+  )
 }
+  
+  
 
 export default App;
 

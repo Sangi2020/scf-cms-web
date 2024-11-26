@@ -13,6 +13,7 @@ import TestimonialLayout from '../pages/testimonials/TestimonialLayout';
 import SocialMediaLayout from '../pages/socialmedia/SocialMediaLayout';
 import ClientsLayout from '../pages/clients/ClientsLayout';
 import EnquiriesView from '../components/enquiry/EnquiriesView';
+import Notification from '../pages/notification/Notification';
 
 
 export const router = createBrowserRouter([
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
       { path: '/social', element: <SocialMediaLayout /> },
       { path: '/clients', element: <ClientsLayout /> },
       { path: '/enquiries', element: <EnquiriesView /> },
+      {path : '/notifications', element: <Notification />}
     ],
   },
   {
