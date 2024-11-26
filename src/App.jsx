@@ -1,15 +1,11 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
-import { requestNotificationPermission } from './config/firebaseConfig';
-import { useEffect } from 'react';
-
-
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 
   const App = () => {
-    useEffect(() => {
-      requestNotificationPermission();
-    }, []);
+
     // <======================================== NOTES START ==============================================>
 
   // Libraries used :   "tailwind-css" for css
@@ -33,8 +29,17 @@ import { useEffect } from 'react';
   // Phase 3 :  Production  ||
 
   // <======================================== NOTES END ==============================================>
-  return <RouterProvider router={router} />;
+  return(
+    <>
+
+      <RouterProvider router={router} />
+
+      <ToastContainer autoClose={5000}  position="bottom-right" />
+    </>
+  )
 }
+  
+  
 
 export default App;
 

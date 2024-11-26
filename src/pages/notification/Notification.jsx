@@ -1,66 +1,53 @@
-import { onMessage } from "firebase/messaging";
-import { useEffect, useState } from "react";
-import { messaging } from "../../config/firebaseConfig";
+// Notification.js
+import React, { useState, useEffect } from 'react';
+import { useSocket } from '../../context/SocketContext';
+import { toast } from 'react-toastify';
+import axiosInstance from '../../config/axios';
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
-
-  // Load notifications from localStorage on component mount
-  useEffect(() => {
-    const savedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
-    setNotifications(savedNotifications);
-  }, []);
+  const socket = useSocket(); // Get the socket connection
 
   useEffect(() => {
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Message received: ", payload);
-
-      const { title, body } = payload.notification;
-
-      const newNotification = { title, body, id: Date.now() };
-
-      // Add the new notification to the state
-      setNotifications((prevNotifications) => {
-        const updatedNotifications = [...prevNotifications, newNotification];
-
-        // Save the updated notifications to localStorage
-        localStorage.setItem("notifications", JSON.stringify(updatedNotifications));
-
-        return updatedNotifications;
-      });
-    });
-
-    // Cleanup on component unmount
-    return () => {
-      unsubscribe();
+    // Fetch existing notifications on component mount
+    const fetchNotifications = async () => {
+      const response = await axiosInstance.get('notification/get-all-notifications');
+      const data = await response.json();
+      setNotifications(data);
     };
-  }, []);
+
+    fetchNotifications();
+
+    if (socket) {
+      // Listen for new notifications via socket
+      socket.on('new-notification', (notification) => {
+        console.log('New notification received:', notification);
+        setNotifications((prevNotifications) => [...prevNotifications, notification]);
+        toast.info(`New Notification: ${notification.subject}`);
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('new-notification'); // Cleanup event listener
+      }
+    };
+  }, [socket]);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">
-          Your Notifications
-        </h1>
-
+    <div>
+      <h1>Notifications</h1>
+      <ul>
         {notifications.length === 0 ? (
-          <p className="text-center text-gray-600">No notifications yet.</p>
+          <li>No new notifications</li>
         ) : (
-          <div className="space-y-4">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className="bg-white shadow-lg rounded-lg p-4 flex flex-col space-y-2"
-              >
-                <h2 className="text-xl font-semibold text-gray-800">
-                  {notification.title}
-                </h2>
-                <p className="text-gray-600">{notification.body}</p>
-              </div>
-            ))}
-          </div>
+          notifications.map((notification) => (
+            <li key={notification.id}>
+              <strong>{notification.subject}</strong>: {notification.message}
+            </li>
+          ))
         )}
-      </div>
+      </ul>
     </div>
   );
 };
