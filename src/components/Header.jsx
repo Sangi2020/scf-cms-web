@@ -61,7 +61,7 @@ function Header({ onToggleSidebar, isCollapsed }) {
           <div
             className={`text-base md:text-xl font-semibold text-neutral-content ${
               isCollapsed
-                ? "pl-16 opacity-100"
+                ? "pl-10 opacity-100"
                 : "transition-all duration-300 ease-in-out opacity-0"
             }`}
           >

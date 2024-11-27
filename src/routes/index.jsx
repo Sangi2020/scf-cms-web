@@ -16,6 +16,7 @@ import EnquiriesView from '../components/enquiry/EnquiriesView';
 import Notification from '../pages/notification/Notification';
 import TeamManagement from "../pages/teams/TeamsLayout";
 import PageLayout from '../pages/webpages/PageLayout';
+import HelpDocumentation from '../pages/help/Help';
 
 export const router = createBrowserRouter([
    {
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       {path : '/notifications', element: <Notification />},
       {path : '/team', element: <TeamManagement />},
       {path : '/pages', element: <PageLayout />},
+      {path : '/help', element: <HelpDocumentation />},
     ],
   },
   {

@@ -15,7 +15,7 @@ function PageLayout() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-base-300">
+    <div className="flex flex-col items-center justify-center scrollbar-hidden h-screen bg-base-300">
       {/* Buttons for switching screen sizes */}
       <div className="flex justify-between w-full ">
 <h1 className='text-neutral-content text-3xl  font-bold'>Page view </h1>
@@ -48,11 +48,11 @@ function PageLayout() {
             </div>
 
       {/* iFrame Preview */}
-      <div className={`bg-white rounded-xl overflow-hidden border shadow-lg ${screenClasses[screenSize]}`}>
+      <div className={` rounded-xl overflow-y-auto   scrollbar-hidden shadow-lg ${screenClasses[screenSize]}`}>
         <iframe
           src="https://www.scfstrategies.com/"
           title="SCF Strategies"
-          className="w-full h-full border-none"
+          className="w-full h-full  overflow-y-auto scrollbar-hidden"
         ></iframe>
       </div>
     </div>
