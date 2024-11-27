@@ -83,6 +83,16 @@ const Notification = () => {
     }
   };
 
+  const clearAllNotifications = async () => {
+    try {
+      await axiosInstance.delete('notification/clear-all-notifications');
+      setNotifications([]);
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+      toast.error('Failed to delete all notifications');
+    }
+  };
+
   const formatTimeAgo = (date) => {
     const now = new Date();
     const past = new Date(date);
@@ -114,7 +124,7 @@ const Notification = () => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <div className="p-4 min-h-screen">
+    <div className="py-2 min-h-screen">
       <div className="mx-auto">
         <div className="bg-base-100 shadow-xl rounded-box overflow-hidden">
           {/* Header */}
@@ -131,13 +141,22 @@ const Notification = () => {
                 </div>
                 <h1 className="text-2xl font-bold">Notifications</h1>
               </div>
+              <div className="flex  flex-col justify-end md:flex-row ">
               <button 
                 className="btn btn-ghost btn-sm"
                 onClick={markAllAsRead}
                 disabled={unreadCount === 0}
               >
-                Mark all as read
+                Mark read
               </button>
+              <button 
+                className="btn btn-ghost btn-sm"
+                onClick={clearAllNotifications}
+                disabled={notifications.length === 0}
+              >
+                Clear all
+              </button>
+              </div>
             </div>
 
             {/* Filter Tabs */}
@@ -158,7 +177,7 @@ const Notification = () => {
           </div>
 
           {/* Notifications List */}
-          <div className="divide-y divide-base-300">
+          <div className="divide-y min-h-[75dvh] divide-base-300">
             {filteredNotifications.length === 0 ? (
               <div className="p-12 text-center text-base-content/60">
                 <Bell className="w-16 h-16 mx-auto mb-4 opacity-50" />
