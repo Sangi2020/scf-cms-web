@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import axiosInstance from "../../config/axios";
-import axios from "axios";
-import { 
-  Mail, 
-  Clock, 
-  ChevronDown, 
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"
+import {
+  Mail,
+  Clock,
+  ChevronDown,
   Filter,
   RefreshCw,
   Phone,
@@ -32,8 +33,8 @@ const EnquiryItem = ({ enquiry, onStatusChange }) => {
   return (
     <div className="card bg-base-200 shadow-lg hover:shadow-xl transition-all duration-200">
       <div className="card-body p-4">
-        <div 
-          className="cursor-pointer" 
+        <div
+          className="cursor-pointer"
           onClick={handleClick}
         >
           <div className="flex items-center justify-between">
@@ -62,10 +63,9 @@ const EnquiryItem = ({ enquiry, onStatusChange }) => {
               </div>
             </div>
             <button className="btn btn-ghost btn-sm">
-              <ChevronDown 
-                className={`h-5 w-5 transition-transform duration-200 ${
-                  showMessage ? "rotate-180" : ""
-                }`}
+              <ChevronDown
+                className={`h-5 w-5 transition-transform duration-200 ${showMessage ? "rotate-180" : ""
+                  }`}
               />
             </button>
           </div>
@@ -84,8 +84,21 @@ const EnquiryItem = ({ enquiry, onStatusChange }) => {
 };
 
 const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    onDateRangeChange("startDate", date ? format(date, "yyyy-MM-dd") : "");
+  };
+
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    onDateRangeChange("endDate", date ? format(date, "yyyy-MM-dd") : "");
+  };
+
   if (!isVisible) return null;
-  
+
   return (
     <div className="bg-base-200 p-4 rounded-lg mb-6 animate-in slide-in-from-top duration-200">
       <div className="flex flex-col md:flex-row gap-4">
@@ -93,8 +106,8 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
           <label className="label">
             <span className="label-text">Filter by Status</span>
           </label>
-          <select 
-            className="select select-bordered select-sm w-full "
+          <select
+            className="select select-bordered select-sm w-full"
             onChange={(e) => onFilterChange(e.target.value)}
             defaultValue=""
           >
@@ -103,23 +116,29 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
             <option value="read">Read</option>
           </select>
         </div>
-        
+
         <div className="flex-1">
           <label className="label">
             <span className="label-text">Date Range</span>
           </label>
-          <div className="flex gap-2 items-center">
-            <input
-              type="date"
-              className="input input-bordered input-sm flex-1"
-              placeholder="Start Date"
-              onChange={(e) => onDateRangeChange('startDate', e.target.value)}
+          <div className="flex flex-col sm:flex-row gap-2 items-center">
+            <ReactDatePicker
+              selected={startDate}
+              onChange={handleStartDateChange}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Start Date"
+              className="input input-bordered input-sm w-full sm:flex-1 placeholder:text-neutral-content"
+              wrapperClassName="w-full"
             />
-            <span className="text-gray-500">to</span>
-            <input
-              type="date"
-              className="input input-bordered  input-sm flex-1"
-              onChange={(e) => onDateRangeChange('endDate', e.target.value)}
+            <span className="text-gray-500 hidden sm:inline">to</span>
+            <ReactDatePicker
+              selected={endDate}
+              onChange={handleEndDateChange}
+              dateFormat="yyyy-MM-dd"
+              minDate={startDate}
+              placeholderText="End Date"
+              className="input input-bordered input-sm w-full sm:flex-1 placeholder:text-neutral-content"
+              wrapperClassName="w-full"
             />
           </div>
         </div>
@@ -132,7 +151,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPageNumbers = () => {
     let pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       pages = Array.from({ length: totalPages }, (_, i) => i + 1);
     } else {
@@ -157,24 +176,23 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         >
           «
         </button>
-        
+
         {getPageNumbers().map((page, index) => (
           <button
             key={index}
-            className={`join-item btn btn-sm ${
-              currentPage === page 
-                ? 'btn-primary' 
-                : page === '...' 
-                  ? 'btn-disabled' 
-                  : ''
-            }`}
+            className={`join-item btn btn-sm ${currentPage === page
+              ? 'btn-primary'
+              : page === '...'
+                ? 'btn-disabled'
+                : ''
+              }`}
             onClick={() => typeof page === 'number' && onPageChange(page)}
             disabled={page === '...'}
           >
             {page}
           </button>
         ))}
-        
+
         <button
           className="join-item btn btn-sm"
           disabled={currentPage === totalPages}
@@ -263,15 +281,19 @@ const EnquiriesView = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={toggleFilters}
               className="btn btn-ghost gap-2"
               aria-label="Toggle Filters"
             >
+              {/* Icon visible on all screens */}
               <Filter className="h-5 w-5" />
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              {/* Text hidden on smaller screens */}
+              <span className="hidden sm:inline">
+                {showFilters ? 'Hide Filters' : 'Show Filters'}
+              </span>
             </button>
-            <button 
+            <button
               onClick={fetchEnquiries}
               className="btn btn-ghost btn-circle"
               aria-label="Refresh"
