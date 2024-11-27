@@ -42,7 +42,7 @@ export default function CountryAnalytics() {
           height="100%"
           data={data}
           options={{
-            colorAxis: { colors: ["#c799f8", "#7c3aed"] },
+            colorAxis: { colors: ["#27e7f8", "#05909c"] },
             backgroundColor: chartBackground,
             displayMode: "regions",
             resolution: "countries",
