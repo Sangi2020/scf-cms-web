@@ -15,6 +15,7 @@ import ClientsLayout from '../pages/clients/ClientsLayout';
 import EnquiriesView from '../components/enquiry/EnquiriesView';
 import Notification from '../pages/notification/Notification';
 import TeamManagement from "../pages/teams/TeamsLayout";
+import PageLayout from '../pages/webpages/PageLayout';
 
 export const router = createBrowserRouter([
    {
@@ -33,7 +34,8 @@ export const router = createBrowserRouter([
       { path: '/clients', element: <ClientsLayout /> },
       { path: '/enquiries', element: <EnquiriesView /> },
       {path : '/notifications', element: <Notification />},
-      {path : '/teams', element: <TeamManagement />},
+      {path : '/team', element: <TeamManagement />},
+      {path : '/pages', element: <PageLayout />},
     ],
   },
   {
