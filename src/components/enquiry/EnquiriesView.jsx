@@ -112,6 +112,7 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
             <input
               type="date"
               className="input input-bordered input-sm flex-1"
+              placeholder="Start Date"
               onChange={(e) => onDateRangeChange('startDate', e.target.value)}
             />
             <span className="text-gray-500">to</span>
