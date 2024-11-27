@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Instagram, 
   Facebook, 
@@ -11,63 +11,20 @@ import {
   Globe,
   Plus
 } from 'lucide-react';
+import axiosInstance from '../../config/axios';
+import { toast } from 'react-toastify';
 
 const SocialMediaLayout = () => {
-  // Initial full set of social links
-  const allSocialLinks = {
-    instagram: {
-      url: "https://instagram.com/yourpage",
-      name: "Instagram Official",
-      region: "Social Media",
-      active: true,
-      lastChecked: "2024-03-15"
-    },
-    facebook: {
-      url: "https://facebook.com/yourpage",
-      name: "Facebook Page",
-      region: "Social Media",
-      active: true,
-      lastChecked: "2024-03-15"
-    },
-    twitter: {
-      url: "https://twitter.com/yourpage",
-      name: "Twitter Profile",
-      region: "Social Media",
-      active: false,
-      lastChecked: "2024-03-14"
-    },
-    linkedin: {
-      url: "https://linkedin.com/in/yourprofile",
-      name: "LinkedIn Business",
-      region: "Professional",
-      active: true,
-      lastChecked: "2024-03-15"
-    },
-    whatsapp: {
-      url: "https://wa.me/1234567890",
-      name: "WhatsApp Business",
-      region: "Messaging",
-      active: true,
-      lastChecked: "2024-03-15"
-    }
-  };
-
-  // State to manage displayed and available links
-  const [displayedLinks, setDisplayedLinks] = useState({
-    instagram: allSocialLinks.instagram,
-    facebook: allSocialLinks.facebook
-  });
-
-  const [availableLinks, setAvailableLinks] = useState({
-    twitter: allSocialLinks.twitter,
-    linkedin: allSocialLinks.linkedin,
-    whatsapp: allSocialLinks.whatsapp
-  });
-
+  // State for managing social links
+  const [displayedLinks, setDisplayedLinks] = useState({});
+  const [availableLinks, setAvailableLinks] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editing, setEditing] = useState(null);
   const [newLink, setNewLink] = useState("");
   const [showAddLinkModal, setShowAddLinkModal] = useState(false);
 
+  // Platform icons mapping
   const platformIcons = {
     instagram: <Instagram className="w-6 h-6 text-pink-500" />,
     facebook: <Facebook className="w-6 h-6 text-blue-600" />,
@@ -76,26 +33,84 @@ const SocialMediaLayout = () => {
     linkedin: <Linkedin className="w-6 h-6 text-blue-700" />
   };
 
+  // Fetch social links from API
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("http://localhost:8080/api/v1/web/social/get-social");
+        console.log(response.data.data);
+        // Transform API data into the required format
+        const links = response.data.data.reduce((acc, link) => {
+          const platform = link.platform.toLowerCase();
+          acc[platform] = {
+            id: link.id,
+            url: link.url,
+            name: link.platform,
+            region: "Social Media",
+            active: link.isActive,
+            lastChecked: new Date(link.updatedAt).toISOString().split('T')[0]
+          };
+          return acc;
+        }, {});
+
+        setDisplayedLinks(links);
+        setError(null);
+      } catch (err) {
+        setError("Failed to load social media links");
+        console.error("Error fetching social links:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSocialLinks();
+  }, []);
+
   const handleEditClick = (platform) => {
     setEditing(platform);
     setNewLink(displayedLinks[platform].url);
   };
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     if (!isValidUrl(newLink)) {
       alert("Please enter a valid URL");
       return;
     }
 
-    setDisplayedLinks((prev) => ({
-      ...prev,
-      [editing]: {
-        ...prev[editing],
-        url: newLink,
-        lastChecked: new Date().toISOString().split('T')[0]
+    try {
+      // Get the current social media entry being edited
+      const currentEntry = displayedLinks[editing];
+      
+      // Make the API call to update with id in URL
+      const response = await axiosInstance.put(
+        `http://localhost:8080/api/v1/admin/social/update-social/${currentEntry.id}`, 
+        {
+          platform: currentEntry.name,
+          url: newLink,
+          isActive: currentEntry.active
+        }
+      );
+
+      if (response.data.success) {
+        // Update local state
+        setDisplayedLinks((prev) => ({
+          ...prev,
+          [editing]: {
+            ...prev[editing],
+            url: newLink,
+            lastChecked: new Date().toISOString().split('T')[0]
+          }
+        }));
+        setEditing(null);
+        toast.success("Social media link updated successfully!");
+      } else {
+        throw new Error(response.data.message || "Failed to update");
       }
-    }));
-    setEditing(null);
+    } catch (error) {
+      console.error("Error updating social media link:", error);
+      toast.error("Failed to update social media link. Please try again.");
+    }
   };
 
   const isValidUrl = (url) => {
@@ -121,7 +136,7 @@ const SocialMediaLayout = () => {
       // Add back to available links
       setAvailableLinks((prev) => ({
         ...prev,
-        [platform]: allSocialLinks[platform]
+        [platform]: displayedLinks[platform]
       }));
     }
   };
@@ -129,9 +144,9 @@ const SocialMediaLayout = () => {
   const copyToClipboard = async (url) => {
     try {
       await navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard!");
+      toast.success("Link copied to clipboard!");
     } catch (err) {
-      alert("Failed to copy link");
+      toast.error("Failed to copy link");
     }
   };
 
@@ -152,6 +167,37 @@ const SocialMediaLayout = () => {
     setShowAddLinkModal(false);
   };
 
+  if (loading) {
+    return (
+      <div className="card w-full bg-base-200 shadow-xl p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-base-300 rounded w-1/4 mb-6"></div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-base-300 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card w-full bg-base-200 shadow-xl p-6">
+        <div className="text-error text-center">
+          <p>{error}</p>
+          <button 
+            className="btn btn-primary mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card w-full bg-base-200 shadow-xl">
       <div className="card-body">
@@ -170,110 +216,114 @@ const SocialMediaLayout = () => {
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table w-full">
-            <thead>
-              <tr className="text-base text-neutral-content">
-                <th className="w-1/5">Platform</th>
-                <th className="w-1/5">URL</th>
-                <th className="w-1/5">Status</th>
-                <th className="w-1/5">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(displayedLinks).map(([platform, details]) => (
-                <tr key={platform} className='border-t border-base-300'>
-                  <td className='text-neutral-content'>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar placeholder">
-                        <div className="bg-base-200 rounded-lg w-12 h-12">
-                          <div className="flex items-center justify-center">
-                            {platformIcons[platform]}
+        {/* Table Section */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="min-w-full align-middle">
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-base-300">
+                <thead>
+                  <tr className="text-xs sm:text-sm text-neutral-content">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3 text-left">Platform</th>
+                    <th className="px-2 py-2 sm:px-4 sm:py-3 text-left">URL</th>
+                    <th className="px-2 py-2 sm:px-4 sm:py-3 text-center">Status</th>
+                    <th className="px-2 py-2 sm:px-4 sm:py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-base-300">
+                  {Object.entries(displayedLinks).map(([platform, details]) => (
+                    <tr key={platform} className="hover:bg-base-300/10">
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-neutral-content whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div className="avatar placeholder">
+                            <div className="bg-base-200 rounded-lg w-8 h-8">
+                              <div className="flex items-center justify-center">
+                                {platformIcons[platform]}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="hidden sm:block">
+                            <div className="font-medium text-sm">{details.name}</div>
+                            <div className="text-xs opacity-70">{details.region}</div>
                           </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="font-bold">{details.name}</div>
-                        <div className="text-sm">{details.region}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    {editing === platform ? (
-                      <input
-                        type="text"
-                        value={newLink}
-                        onChange={(e) => setNewLink(e.target.value)}
-                        className="input input-bordered w-full max-w-xs focus:outline-none input-sm text-neutral-content"
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <span className="truncate font-mono max-w-xs text-neutral-content">{details.url}</span>
+                      </td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3">
+                        {editing === platform ? (
+                          <input
+                            type="text"
+                            value={newLink}
+                            onChange={(e) => setNewLink(e.target.value)}
+                            className="input input-bordered input-sm w-full max-w-[120px] sm:max-w-xs"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="truncate text-xs sm:text-sm max-w-[100px] sm:max-w-xs font-mono">
+                              {details.url}
+                            </span>
+                            <button
+                              onClick={() => copyToClipboard(details.url)}
+                              className="btn btn-ghost btn-xs"
+                            >
+                              <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-center">
                         <button
-                          onClick={() => copyToClipboard(details.url)}
-                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleToggleStatus(platform)}
+                          className={`badge badge-sm text-xs focus:outline-none ${
+                            details.active ? 'badge-success' : 'badge-error'
+                          }`}
                         >
-                          <LinkIcon className="w-4 h-4 text-neutral-content" />
+                          {details.active ? 'Active' : 'Inactive'}
                         </button>
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => handleToggleStatus(platform)}
-                      className={`badge badge-lg text-sm focus:outline-none hover:border-none text-white ${details.active ? 'badge-success' : 'badge-error'} gap-1`}
-                    >
-                      {details.active ? (
-                        <CheckCircle className="w-4 h-4" />
-                      ) : (
-                        <XCircle className="w-4 h-4" />
-                      )}
-                      {details.active ? 'Active' : 'Inactive'}
-                    </button>
-                  </td>
-                  <td className="">
-                    {editing === platform ? (
-                      <div className="flex gap-2">
-                        <button
-                          className="btn btn-success btn-sm text-white"
-                          onClick={handleSaveClick}
-                        >
-                          Save
-                        </button>
-                        <button
-                          className="btn btn-error text-white btn-sm"
-                          onClick={() => setEditing(null)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => handleEditClick(platform)}
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-right">
+                        {editing === platform ? (
+                          <div className="flex justify-end gap-1">
+                            <button
+                              className="btn btn-success btn-xs"
+                              onClick={handleSaveClick}
+                            >
+                              Save
+                            </button>
+                            <button
+                              className="btn btn-error btn-xs"
+                              onClick={() => setEditing(null)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn-primary btn-xs"
+                            onClick={() => handleEditClick(platform)}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Add Link Modal */}
+      {/* Add Link Modal - Made more mobile friendly */}
       {showAddLinkModal && (
         <div className="modal modal-open">
-          <div className="modal-box">
+          <div className="modal-box w-11/12 max-w-sm sm:max-w-md p-4">
             <h3 className="font-bold text-lg mb-4">Add New Social Media Link</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {Object.entries(availableLinks).map(([platform, details]) => (
                 <button
                   key={platform}
                   onClick={() => handleAddLink(platform)}
-                  className="btn btn-outline flex items-center justify-start gap-3"
+                  className="btn btn-outline flex items-center justify-start gap-3 text-sm"
                 >
                   {platformIcons[platform]}
                   {details.name}
@@ -282,13 +332,14 @@ const SocialMediaLayout = () => {
             </div>
             <div className="modal-action">
               <button 
-                className="btn btn-ghost"
+                className="btn btn-ghost btn-sm"
                 onClick={() => setShowAddLinkModal(false)}
               >
                 Cancel
               </button>
             </div>
           </div>
+          <div className="modal-backdrop" onClick={() => setShowAddLinkModal(false)}></div>
         </div>
       )}
     </div>
