@@ -12,7 +12,9 @@ import BlogsLayout from '../pages/blogs/BlogsLayout';
 import TestimonialLayout from '../pages/testimonials/TestimonialLayout';
 import SocialMediaLayout from '../pages/socialmedia/SocialMediaLayout';
 import ClientsLayout from '../pages/clients/ClientsLayout';
-
+import EnquiriesView from '../components/enquiry/EnquiriesView';
+import Notification from '../pages/notification/Notification';
+import TeamManagement from "../pages/teams/TeamsLayout";
 
 export const router = createBrowserRouter([
    {
@@ -29,6 +31,9 @@ export const router = createBrowserRouter([
       { path: '/testimonials', element: <TestimonialLayout /> },
       { path: '/social', element: <SocialMediaLayout /> },
       { path: '/clients', element: <ClientsLayout /> },
+      { path: '/enquiries', element: <EnquiriesView /> },
+      {path : '/notifications', element: <Notification />},
+      {path : '/teams', element: <TeamManagement />},
     ],
   },
   {
@@ -37,6 +42,6 @@ export const router = createBrowserRouter([
   },
   // {
   //   path: '/forgot-password',
-  //   element: <ForgotPassword />,
-  // },
+  //   element: <ForgotPassword />,
+  // },
 ]);
