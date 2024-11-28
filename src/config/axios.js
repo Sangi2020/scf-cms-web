@@ -2,8 +2,12 @@ import axios from 'axios';
 
 // Create Axios instance
 const axiosInstance = axios.create({
-  baseURL: 'https://scf-cms-be-hz4e.onrender.com/api/v1/admin', // Base URL for your API
+  baseURL: 'https://scf-cms-be-hz4e.onrender.com/api/v1/admin',
 });
+
+// const axiosInstance = axios.create({
+//   baseURL: 'http://localhost:8080/api/v1/admin',
+// });
 
 // Add a request interceptor to include token from localStorage
 axiosInstance.interceptors.request.use(

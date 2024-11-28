@@ -7,6 +7,8 @@ import TotalBlogStats from '../../components/stats/TotalBlogStats.jsx';
 import TotalPageViews from '../../components/stats/TotalPageViews.jsx';
 import TotalActiveUsers from '../../components/stats/TotalActiveusers.jsx';
 import TotalBounceRate from '../../components/stats/TotalbounceRate.jsx';
+import EnquiryChart from '../../components/chart/EnquiryChart.jsx';
+import SessionChart from '../../components/chart/SessionChart.jsx';
 
 function Overview() {
   // Define the CMS-related stats data in an array
@@ -59,26 +61,24 @@ function Overview() {
   // ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2  xl:grid-cols-3 gap-6">
-      {/* {stats.map((stat, index) => (
-        <StatCard
-          key={index}  // Using index as a unique key (consider using a unique ID in production)
-          title={stat.title}
-          value={stat.value}
-          description={stat.description}
-          icon={stat.icon}
-          iconColor={stat.iconColor}
-          trend={stat.trend}
-          trendValue={stat.trendValue}
-        />
-      ))} */}
-      <TotalPageViews/>
-      <TotalBlogStats/>
-      <TotalEnquiryStat/>
-      <TotalSubscribers/>
-      <TotalActiveUsers/>
-      <TotalBounceRate/>
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2  xl:grid-cols-3 gap-6">
+
+        <TotalPageViews />
+        <TotalBlogStats />
+        <TotalEnquiryStat />
+        <TotalSubscribers />
+        <TotalActiveUsers />
+        <TotalBounceRate />
+      </div>
+      <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
+        <SessionChart/>
+        <EnquiryChart/>
+
+      </div>
+
+    </>
+
   );
 }
 

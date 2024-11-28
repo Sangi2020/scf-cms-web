@@ -19,7 +19,7 @@ function StatCard({
             <span className={`p-2 rounded-lg ${iconColor} bg-opacity-10`}>
               <Icon className={`w-6 h-6 ${iconColor}`} />
             </span>
-            <h3 className="text-xl font-semibold text-neutral-content">
+            <h3 className="text-xl font-medium text-neutral-content">
               {title}
             </h3>
           </div>

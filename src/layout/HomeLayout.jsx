@@ -23,8 +23,8 @@ const HomeLayout = () => {
           isCollapsed={isCollapsed}
         />
         
-        <main className="pt-16">
-          <div className="p-4 md:p-6">
+        <main className="pt-16 scrollbar-hidden">
+          <div className="p-4 md:p-6 scrollbar-hidden">
             <Outlet />
           </div>
         </main>

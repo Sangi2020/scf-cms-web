@@ -135,19 +135,17 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
                         isCollapsed ? 'w-0' : 'w-40'
                     }`}>
-                        <h1 className="text-xl whitespace-nowrap font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            SCF Admin
-                        </h1>
-                    </div>
+                                   <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm"/>
+                                   </div>
 
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 focus:outline-none text-white hover:from-blue-600 hover:to-purple-600 rounded-full shadow-md transition-all duration-300 ease-in-out lg:flex hidden"
+                        className="p-2  focus:outline-none text-white rounded-xl shadow-md transition-all duration-300 ease-in-out lg:flex hidden"
                     >
                         {isCollapsed ? (
-                            <ChevronRight className="w-5 h-5 text-white" />
+                            <ChevronRight className="w-5 h-5 text-neutral-content" />
                         ) : (
-                            <ChevronLeft className="w-5 h-5 text-white" />
+                            <ChevronLeft className="w-5 h-5 text-neutral-content" />
                         )}
                     </button>
                     <button onClick={onClose} className="lg:hidden p-1">

@@ -14,7 +14,10 @@ import SocialMediaLayout from '../pages/socialmedia/SocialMediaLayout';
 import ClientsLayout from '../pages/clients/ClientsLayout';
 import EnquiriesView from '../components/enquiry/EnquiriesView';
 import Notification from '../pages/notification/Notification';
-
+import TeamManagement from "../pages/teams/TeamsLayout";
+import PageLayout from '../pages/webpages/PageLayout';
+import HelpDocumentation from '../pages/help/Help';
+import Newsletter from '../pages/newsletter/Newsletter';
 
 export const router = createBrowserRouter([
    {
@@ -32,7 +35,11 @@ export const router = createBrowserRouter([
       { path: '/social', element: <SocialMediaLayout /> },
       { path: '/clients', element: <ClientsLayout /> },
       { path: '/enquiries', element: <EnquiriesView /> },
-      {path : '/notifications', element: <Notification />}
+      {path : '/notifications', element: <Notification />},
+      {path : '/team', element: <TeamManagement />},
+      {path : '/pages', element: <PageLayout />},
+      {path : '/help', element: <HelpDocumentation />},
+      {path : '/newsletters', element: <Newsletter />},
     ],
   },
   {
@@ -41,6 +48,6 @@ export const router = createBrowserRouter([
   },
   // {
   //   path: '/forgot-password',
-  //   element: <ForgotPassword />,
-  // },
+  //   element: <ForgotPassword />,
+  // },
 ]);
