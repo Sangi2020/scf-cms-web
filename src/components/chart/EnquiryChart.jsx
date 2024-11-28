@@ -82,13 +82,13 @@ function EnquiryChart() {
                         Enquiry Statistics
                     </h2>
                 </div>
-                <div className="card-body ">
+                <div className="card-body h-[450px]">
                     {loading && <p>Loading chart data...</p>}
                     {error && <p className="text-red-500">{error}</p>}
                     {!loading && !error && chartData.length > 0 && (
                         <Chart
                             chartType="ColumnChart"
-                            width="100%"
+                            width="90%"
                             height="400px"
                             data={chartData}
                             options={options}

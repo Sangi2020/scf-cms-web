@@ -82,7 +82,7 @@ function SessionChart() {
         : "bg-base-100 text-neutral-content";
 
     return (
-        <div className={`mt-6 p-4 rounded-xl shadow-lg ${containerClasses}`}>
+        <div className={`mt-6 p-4 rounded-xl shadow-lg animate-fade-in-down  ${containerClasses}`}>
             <div className="card">
                 <div className="card-header">
                     <h2 className="card-title text-base md:text-2xl text-neutral-content flex items-center gap-2">
@@ -95,7 +95,7 @@ function SessionChart() {
                     {!loading && !error && chartData.length > 0 && (
                         <Chart
                             chartType="BarChart"
-                            width="100%"
+                            width="90%"
                             height="400px"
                             data={chartData}
                             options={options}
