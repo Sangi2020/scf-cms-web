@@ -10,7 +10,8 @@ import {
   Filter,
   RefreshCw,
   Phone,
-  Inbox
+  Inbox,
+  Download
 } from "lucide-react";
 
 const EnquiryItem = ({ enquiry, onStatusChange }) => {
@@ -269,6 +270,41 @@ const EnquiriesView = () => {
     setShowFilters(!showFilters);
   };
 
+
+  const exportData = async () => {
+    try {
+      // Pass the current filters as query parameters
+      const queryParams = new URLSearchParams({
+        status: filters.status || "",
+        startDate: filters.startDate || "",
+        endDate: filters.endDate || "",
+      });
+  
+      const response = await axiosInstance.get(`/enquiries/export-enquiry?${queryParams}`, {
+        responseType: "blob",
+      });
+  
+      // Create a blob from the response data
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+  
+      const downloadUrl = window.URL.createObjectURL(blob);
+  
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = "enquiries.xlsx";
+  
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  }
+
   return (
     <div className="py-8 min-h-screen">
       <div className="bg-base-100 p-6 rounded-lg shadow-lg">
@@ -282,6 +318,19 @@ const EnquiriesView = () => {
           </div>
           <div className="flex gap-2">
             <button
+              onClick={exportData}
+              className="btn btn-accent hidden md:inline-flex text-neutral-content gap-2"
+              aria-label="Export Data"
+            >
+              {/* Icon visible on all screens */}
+              <Download className="h-5 w-5" />
+              {/* Text hidden on smaller screens */}
+              <span className="hidden sm:inline">
+                Export Data
+              </span>
+            </button>
+
+            <button
               onClick={toggleFilters}
               className="btn btn-ghost gap-2"
               aria-label="Toggle Filters"
@@ -293,6 +342,7 @@ const EnquiriesView = () => {
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </span>
             </button>
+
             <button
               onClick={fetchEnquiries}
               className="btn btn-ghost btn-circle"
@@ -300,6 +350,7 @@ const EnquiriesView = () => {
             >
               <RefreshCw className="h-5 w-5" />
             </button>
+
           </div>
         </div>
 
