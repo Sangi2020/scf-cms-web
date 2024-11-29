@@ -11,7 +11,10 @@ import {
   RefreshCw,
   Phone,
   Inbox,
-  Download
+  Download,
+  FileSpreadsheet,
+  FileType,
+  FileText
 } from "lucide-react";
 
 const EnquiryItem = ({ enquiry, onStatusChange }) => {
@@ -210,6 +213,7 @@ const EnquiriesView = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
     startDate: '',
@@ -222,7 +226,6 @@ const EnquiriesView = () => {
     pages: 1,
     currentPage: 1
   });
-
   const fetchEnquiries = async () => {
     setLoading(true);
     try {
@@ -271,39 +274,52 @@ const EnquiriesView = () => {
   };
 
 
-  const exportData = async () => {
+  const exportData = async (format) => {
     try {
-      // Pass the current filters as query parameters
       const queryParams = new URLSearchParams({
         status: filters.status || "",
         startDate: filters.startDate || "",
         endDate: filters.endDate || "",
+        format: format // Add format to query params
       });
-  
+
       const response = await axiosInstance.get(`/enquiries/export-enquiry?${queryParams}`, {
         responseType: "blob",
       });
-  
-      // Create a blob from the response data
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
+
+      // Determine file extension and mime type based on format
+      const fileExtension = {
+        excel: '.xlsx',
+        pdf: '.pdf',
+        docs: '.docx',
+        googlesheet: '.xlsx' // Will be handled differently on the backend
+      }[format];
+
+      const mimeTypes = {
+        excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        pdf: 'application/pdf',
+        docs: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        googlesheet: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      }[format];
+
+      const blob = new Blob([response.data], { type: mimeTypes });
       const downloadUrl = window.URL.createObjectURL(blob);
-  
+
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = "enquiries.xlsx";
-  
+      link.download = `enquiries${fileExtension}`;
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       window.URL.revokeObjectURL(downloadUrl);
+      setShowExportDropdown(false); // Close dropdown after export
     } catch (error) {
       console.error("Error downloading file:", error);
     }
-  }
+  };
+
 
   return (
     <div className="py-8 min-h-screen">
@@ -317,18 +333,51 @@ const EnquiriesView = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={exportData}
-              className="btn btn-accent hidden md:inline-flex text-neutral-content gap-2"
-              aria-label="Export Data"
-            >
-              {/* Icon visible on all screens */}
-              <Download className="h-5 w-5" />
-              {/* Text hidden on smaller screens */}
-              <span className="hidden sm:inline">
-                Export Data
-              </span>
-            </button>
+            <div className="relative dropdown ">
+              <a
+                tabIndex={0}
+                className="btn btn-accent text-neutral-content gap-2 hidden md:inline-flex"
+                aria-label="Export Data"
+              >
+                <Download className="h-5 w-5" />
+                <span className="hidden sm:inline">Export</span>
+                <ChevronDown className="h-4 w-4" />
+              </a>
+
+              {/* DaisyUI Dropdown Menu */}
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow mt-2"
+              >
+                <li>
+                  <button
+                    onClick={() => exportData("excel")}
+                    className="text-neutral-content hover:bg-base-200"
+                  >
+                    <FileSpreadsheet className="inline-block mr-2" />
+                    Excel
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => exportData("pdf")}
+                    className="text-neutral-content hover:bg-base-200"
+                  >
+                    <FileText className="inline-block mr-2" />
+                    PDF
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => exportData("docs")}
+                    className="text-neutral-content hover:bg-base-200"
+                  >
+                    <FileType className="inline-block mr-2" />
+                    Docs
+                  </button>
+                </li>
+              </ul>
+            </div>
 
             <button
               onClick={toggleFilters}
