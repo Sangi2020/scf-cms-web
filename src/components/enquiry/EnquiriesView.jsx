@@ -90,15 +90,34 @@ const EnquiryItem = ({ enquiry, onStatusChange }) => {
 const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [status, setStatus] = useState("");  // Track the selected status
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
-    onDateRangeChange("startDate", date ? format(date, "yyyy-MM-dd") : "");
   };
 
   const handleEndDateChange = (date) => {
     setEndDate(date);
-    onDateRangeChange("endDate", date ? format(date, "yyyy-MM-dd") : "");
+  };
+
+  const handleStatusChange = (statusValue) => {
+    setStatus(statusValue);
+    onFilterChange(statusValue);  // Pass the selected status to parent
+  };
+
+  const handleApplyFilter = () => {
+    // Apply date range filter only when 'Apply' is clicked
+    onDateRangeChange("startDate", startDate ? format(startDate, "yyyy-MM-dd") : "");
+    onDateRangeChange("endDate", endDate ? format(endDate, "yyyy-MM-dd") : "");
+  };
+
+  const handleClearFilter = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setStatus(""); 
+    onDateRangeChange("startDate", "");
+    onDateRangeChange("endDate", "");
+    onFilterChange(""); 
   };
 
   if (!isVisible) return null;
@@ -112,8 +131,8 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
           </label>
           <select
             className="select select-bordered select-sm w-full"
-            onChange={(e) => onFilterChange(e.target.value)}
-            defaultValue=""
+            value={status}
+            onChange={(e) => handleStatusChange(e.target.value)}
           >
             <option value="">All Status</option>
             <option value="unread">Unread</option>
@@ -132,7 +151,7 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
               dateFormat="yyyy-MM-dd"
               placeholderText="Start Date"
               className="input input-bordered input-sm w-full sm:flex-1 placeholder:text-neutral-content"
-              wrapperClassName="w-full"
+              wrapperClassName="w-full md:max-w-xs" 
             />
             <span className="text-gray-500 hidden sm:inline">to</span>
             <ReactDatePicker
@@ -142,8 +161,12 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
               minDate={startDate}
               placeholderText="End Date"
               className="input input-bordered input-sm w-full sm:flex-1 placeholder:text-neutral-content"
-              wrapperClassName="w-full"
+              wrapperClassName="w-full md:max-w-xs" 
             />
+            <div className="flex gap-2 ">
+              <button className="btn  btn-primary btn-sm text-white" onClick={handleApplyFilter}>Apply</button>
+              <button className="btn btn-outline btn-sm" onClick={handleClearFilter}>Clear</button>
+            </div>
           </div>
         </div>
       </div>
@@ -213,7 +236,6 @@ const EnquiriesView = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
     startDate: '',
@@ -291,8 +313,6 @@ const EnquiriesView = () => {
       const fileExtension = {
         excel: '.xlsx',
         pdf: '.pdf',
-        docs: '.docx',
-        googlesheet: '.xlsx' // Will be handled differently on the backend
       }[format];
 
       const mimeTypes = {
@@ -307,14 +327,13 @@ const EnquiriesView = () => {
 
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `enquiries${fileExtension}`;
+      link.download = `Enquiry-report${fileExtension}`;
 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       window.URL.revokeObjectURL(downloadUrl);
-      setShowExportDropdown(false); // Close dropdown after export
     } catch (error) {
       console.error("Error downloading file:", error);
     }
@@ -365,15 +384,6 @@ const EnquiriesView = () => {
                   >
                     <FileText className="inline-block mr-2" />
                     PDF
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => exportData("docs")}
-                    className="text-neutral-content hover:bg-base-200"
-                  >
-                    <FileType className="inline-block mr-2" />
-                    Docs
                   </button>
                 </li>
               </ul>
