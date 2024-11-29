@@ -18,6 +18,7 @@ import PageLayout from '../pages/webpages/PageLayout';
 import HelpDocumentation from '../pages/help/Help';
 import Newsletter from '../pages/newsletter/Newsletter';
 import ProtectedRoute from  '../routes/ProtectedRoute'
+import ForgotPassword from '../pages/auth/ForgotPassword';
 
 export const router = createBrowserRouter([
   {
@@ -94,4 +95,8 @@ export const router = createBrowserRouter([
     path: '/login',
     element: <LoginPage />,
   },
+  {
+    path:'/forgot-password' ,
+    element: <ForgotPassword />
+  }
 ]);
