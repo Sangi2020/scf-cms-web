@@ -16,7 +16,7 @@ const [clients, setClients] = useState([]);
       try {
         setLoading(true);
         const response = await axiosInstance.get("https://scf-cms-be-hz4e.onrender.com/api/v1/web/client/get-all-clients");
-        console.log(response.data)
+        console.log("getdata",response.data)
         // Access the 'data' array within the response
         setClients(response.data.data)
       } catch (err) {
