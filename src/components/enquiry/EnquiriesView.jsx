@@ -11,7 +11,10 @@ import {
   RefreshCw,
   Phone,
   Inbox,
-  Download
+  Download,
+  FileSpreadsheet,
+  FileType,
+  FileText
 } from "lucide-react";
 
 const EnquiryItem = ({ enquiry, onStatusChange }) => {
@@ -87,15 +90,34 @@ const EnquiryItem = ({ enquiry, onStatusChange }) => {
 const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [status, setStatus] = useState("");  // Track the selected status
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
-    onDateRangeChange("startDate", date ? format(date, "yyyy-MM-dd") : "");
   };
 
   const handleEndDateChange = (date) => {
     setEndDate(date);
-    onDateRangeChange("endDate", date ? format(date, "yyyy-MM-dd") : "");
+  };
+
+  const handleStatusChange = (statusValue) => {
+    setStatus(statusValue);
+    onFilterChange(statusValue);  // Pass the selected status to parent
+  };
+
+  const handleApplyFilter = () => {
+    // Apply date range filter only when 'Apply' is clicked
+    onDateRangeChange("startDate", startDate ? format(startDate, "yyyy-MM-dd") : "");
+    onDateRangeChange("endDate", endDate ? format(endDate, "yyyy-MM-dd") : "");
+  };
+
+  const handleClearFilter = () => {
+    setStartDate(null);
+    setEndDate(null);
+    setStatus(""); 
+    onDateRangeChange("startDate", "");
+    onDateRangeChange("endDate", "");
+    onFilterChange(""); 
   };
 
   if (!isVisible) return null;
@@ -109,8 +131,8 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
           </label>
           <select
             className="select select-bordered select-sm w-full"
-            onChange={(e) => onFilterChange(e.target.value)}
-            defaultValue=""
+            value={status}
+            onChange={(e) => handleStatusChange(e.target.value)}
           >
             <option value="">All Status</option>
             <option value="unread">Unread</option>
@@ -129,7 +151,7 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
               dateFormat="yyyy-MM-dd"
               placeholderText="Start Date"
               className="input input-bordered input-sm w-full sm:flex-1 placeholder:text-neutral-content"
-              wrapperClassName="w-full"
+              wrapperClassName="w-full md:max-w-xs" 
             />
             <span className="text-gray-500 hidden sm:inline">to</span>
             <ReactDatePicker
@@ -139,8 +161,12 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, isVisible }) => {
               minDate={startDate}
               placeholderText="End Date"
               className="input input-bordered input-sm w-full sm:flex-1 placeholder:text-neutral-content"
-              wrapperClassName="w-full"
+              wrapperClassName="w-full md:max-w-xs" 
             />
+            <div className="flex gap-2 ">
+              <button className="btn  btn-primary btn-sm text-white" onClick={handleApplyFilter}>Apply</button>
+              <button className="btn btn-outline btn-sm" onClick={handleClearFilter}>Clear</button>
+            </div>
           </div>
         </div>
       </div>
@@ -222,7 +248,6 @@ const EnquiriesView = () => {
     pages: 1,
     currentPage: 1
   });
-
   const fetchEnquiries = async () => {
     setLoading(true);
     try {
@@ -271,39 +296,49 @@ const EnquiriesView = () => {
   };
 
 
-  const exportData = async () => {
+  const exportData = async (format) => {
     try {
-      // Pass the current filters as query parameters
       const queryParams = new URLSearchParams({
         status: filters.status || "",
         startDate: filters.startDate || "",
         endDate: filters.endDate || "",
+        format: format // Add format to query params
       });
-  
+
       const response = await axiosInstance.get(`/enquiries/export-enquiry?${queryParams}`, {
         responseType: "blob",
       });
-  
-      // Create a blob from the response data
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-  
+
+      // Determine file extension and mime type based on format
+      const fileExtension = {
+        excel: '.xlsx',
+        pdf: '.pdf',
+      }[format];
+
+      const mimeTypes = {
+        excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        pdf: 'application/pdf',
+        docs: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        googlesheet: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      }[format];
+
+      const blob = new Blob([response.data], { type: mimeTypes });
       const downloadUrl = window.URL.createObjectURL(blob);
-  
+
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = "enquiries.xlsx";
-  
+      link.download = `Enquiry-report${fileExtension}`;
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Error downloading file:", error);
     }
-  }
+  };
+
 
   return (
     <div className="py-8 min-h-screen">
@@ -317,18 +352,42 @@ const EnquiriesView = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={exportData}
-              className="btn btn-accent hidden md:inline-flex text-neutral-content gap-2"
-              aria-label="Export Data"
-            >
-              {/* Icon visible on all screens */}
-              <Download className="h-5 w-5" />
-              {/* Text hidden on smaller screens */}
-              <span className="hidden sm:inline">
-                Export Data
-              </span>
-            </button>
+            <div className="relative dropdown ">
+              <a
+                tabIndex={0}
+                className="btn btn-accent text-neutral-content gap-2 hidden md:inline-flex"
+                aria-label="Export Data"
+              >
+                <Download className="h-5 w-5" />
+                <span className="hidden sm:inline">Export</span>
+                <ChevronDown className="h-4 w-4" />
+              </a>
+
+              {/* DaisyUI Dropdown Menu */}
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow mt-2"
+              >
+                <li>
+                  <button
+                    onClick={() => exportData("excel")}
+                    className="text-neutral-content hover:bg-base-200"
+                  >
+                    <FileSpreadsheet className="inline-block mr-2" />
+                    Excel
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => exportData("pdf")}
+                    className="text-neutral-content hover:bg-base-200"
+                  >
+                    <FileText className="inline-block mr-2" />
+                    PDF
+                  </button>
+                </li>
+              </ul>
+            </div>
 
             <button
               onClick={toggleFilters}

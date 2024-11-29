@@ -3,12 +3,15 @@ import { Bell, Menu, Moon, Sun, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BsChevronDoubleLeft, BsChevronDoubleRight } from "react-icons/bs";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 function Header({ onToggleSidebar, isCollapsed }) {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
+  const {logout} = useAuth();
   // Local state for history stacks
   const [historyStack, setHistoryStack] = useState([]);
   const [forwardStack, setForwardStack] = useState([]);
@@ -47,6 +50,12 @@ function Header({ onToggleSidebar, isCollapsed }) {
     }
   };
 
+  const handleLogout = () => {
+    logout(); 
+    navigate("/login");
+  };
+
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-base-200 shadow-lg z-30 ">
       <div className="flex items-center justify-between h-16 px-6 md:px-8">
@@ -59,13 +68,12 @@ function Header({ onToggleSidebar, isCollapsed }) {
             <Menu className="w-6 h-6 text-neutral-content" />
           </div>
           <div
-            className={`text-base md:text-xl font-semibold text-neutral-content ${
-              isCollapsed
-                ? "pl-10 opacity-100"
-                : "transition-all duration-300 ease-in-out opacity-0"
-            }`}
+            className={`text-base md:text-xl font-semibold text-neutral-content ${isCollapsed
+              ? "pl-10 opacity-100"
+              : "transition-all duration-300 ease-in-out opacity-0"
+              }`}
           >
-                                   <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm"/>
+            <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm" />
 
           </div>
         </div>
@@ -122,6 +130,25 @@ function Header({ onToggleSidebar, isCollapsed }) {
           <div className="p-2 bg-base-300 rounded-lg transition-all ease-in-out cursor-pointer">
             <User className="w-6 h-6 text-neutral-content hover:text-primary" />
           </div>
+
+          <div className="dropdown dropdown-hover dropdown-end p-2 bg-base-300 rounded-lg transition-all duration-300 ease-in-out group cursor-pointer">
+            {/* User icon with hover effect */}
+            <User className="w-6 h-6 text-neutral-content hover:text-primary" />
+
+            {/* Dropdown menu */}
+            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+              <li className="">
+                <a className="text-sm font-medium">Profile</a>
+              </li>
+              <li className="">
+              <a
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-red-500"
+                >Logout</a>
+              </li>
+            </ul>
+          </div>
+
         </div>
       </div>
     </header>
