@@ -1,8 +1,12 @@
 import React, { useState, useRef } from "react";
+import axios from "axios";
 
 function ClientForm() {
   const [imageFile, setImageFile] = useState(null); // State for the uploaded image file
   const [imagePreview, setImagePreview] = useState(null); // State for image preview
+  const [website, setWebsite] = useState(""); // State for website URL
+  const [title, setTitle] = useState(""); // State for title
+  const [content, setContent] = useState(""); // State for content
   const inputRef = useRef(null); // Ref for file input
 
   // Handle image selection via input
@@ -37,8 +41,40 @@ function ClientForm() {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('name', title);
+    formData.append('website', website);
+    formData.append('description', content);
+    if (imageFile) {
+      formData.append('logo', imageFile); // Append the image file if it exists
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/v1/admin/client/create-client', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.data.success) {
+        // Handle success (e.g., reset form, show success message)
+        handleRemoveImage(); // Clear the image after submission
+        setTitle(""); // Reset title input
+        setContent(""); // Reset content input
+        setWebsite(""); // Reset website input
+        // Optionally, redirect or update the UI
+      } else {
+        console.error("Failed to create client:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error creating client:", error);
+    }
+  };
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       {/* Title Input */}
       <div className="form-control mb-4">
         <label className="label">
@@ -47,7 +83,9 @@ function ClientForm() {
         <input
           type="text"
           placeholder="Post title"
-          className="input input-bordered border-accent "
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="input input-bordered border-accent"
         />
       </div>
 
@@ -108,7 +146,23 @@ function ClientForm() {
         <textarea
           className="textarea textarea-bordered"
           placeholder="Write your post content..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
         ></textarea>
+      </div>
+
+      {/* Website Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Website</span>
+        </label>
+        <input
+          type="url"
+          placeholder="Enter website URL"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          className="input input-bordered border-accent"
+        />
       </div>
 
       {/* Publish Button */}
