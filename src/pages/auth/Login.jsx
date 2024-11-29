@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,7 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 
 function LoginPage() {
     const navigate = useNavigate();
-    const { login } = useAuth(); 
+    const { login } = useAuth();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -47,7 +47,7 @@ function LoginPage() {
     // Form submission handler
     const onSubmit = async (data) => {
         setLoading(true);
-        setError(''); 
+        setError('');
 
         try {
             const response = await axiosInstance.post('/auth/login', data);
@@ -172,7 +172,7 @@ function LoginPage() {
                         </div>
 
                         <div className="text-sm">
-                            <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</a>
+                            <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</Link>
                         </div>
                     </div>
 

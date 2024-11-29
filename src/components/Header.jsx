@@ -126,11 +126,6 @@ function Header({ onToggleSidebar, isCollapsed }) {
           <div className="p-2 bg-base-300 rounded-lg transition-all duration-300 ease-in-out group cursor-pointer">
             <Bell className="w-6 h-6 text-neutral-content group-hover:text-primary" />
           </div>
-
-          <div className="p-2 bg-base-300 rounded-lg transition-all ease-in-out cursor-pointer">
-            <User className="w-6 h-6 text-neutral-content hover:text-primary" />
-          </div>
-
           <div className="dropdown dropdown-hover dropdown-end p-2 bg-base-300 rounded-lg transition-all duration-300 ease-in-out group cursor-pointer">
             {/* User icon with hover effect */}
             <User className="w-6 h-6 text-neutral-content hover:text-primary" />
