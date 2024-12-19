@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
 
-// Validation schema
+// Validation schema remains the same
 const mailConfigSchema = yup.object().shape({
   host: yup
     .string()
@@ -56,7 +58,6 @@ const MailConfig = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testEmail, setTestEmail] = useState('');
-  const [status, setStatus] = useState({ type: '', message: '' });
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -70,83 +71,104 @@ const MailConfig = () => {
         setConfigId(data.id);
         setIsEnabled(true);
       } catch (error) {
-        setStatus({
-          type: 'error',
-          message: 'Failed to load email configuration'
-        });
+        toast.error('Failed to load email configuration');
       }
     };
     fetchConfig();
   }, [setValue]);
 
   const onSubmit = async (data) => {
+    const toastId = toast.loading('Saving configuration...');
     try {
-      // No need to manually convert port as Yup handles it
       if (configId) {
         await axiosInstance.put(`/config/email-config/${configId}`, data);
-        setStatus({
+        toast.update(toastId, {
+          render: 'Email configuration updated successfully',
           type: 'success',
-          message: 'Email configuration updated successfully'
+          isLoading: false,
+          autoClose: 3000
         });
       } else {
-        setStatus({
+        toast.update(toastId, {
+          render: 'No email configuration found to update',
           type: 'error',
-          message: 'No email configuration found to update'
+          isLoading: false,
+          autoClose: 3000
         });
       }
     } catch (error) {
-      setStatus({
+      toast.update(toastId, {
+        render: error.response?.data?.message || 'Failed to update configuration',
         type: 'error',
-        message: error.response?.data?.message || 'Failed to update configuration'
+        isLoading: false,
+        autoClose: 3000
       });
     }
   };
 
   const handleTestEmail = async () => {
     if (!testEmail) {
-      setStatus({
-        type: 'error',
-        message: 'Please enter a test email address'
-      });
+      toast.error('Please enter a test email address');
       return;
     }
 
     if (!yup.string().email().isValidSync(testEmail)) {
-      setStatus({
-        type: 'error',
-        message: 'Please enter a valid email address for testing'
-      });
+      toast.error('Please enter a valid email address for testing');
       return;
     }
 
+    const toastId = toast.loading('Sending test email...'); // Capture toast ID
     setIsTesting(true);
     try {
-      await axiosInstance.post('/api/test-email', { email: testEmail });
-      setStatus({
+      await axiosInstance.post('/config/test-email', { email: testEmail });
+      toast.update(toastId, {
+        render: 'Test email sent successfully',
         type: 'success',
-        message: 'Test email sent successfully'
+        isLoading: false,
+        autoClose: 3000
       });
     } catch (error) {
-      setStatus({
+      toast.update(toastId, {
+        render: error.response?.data?.message || 'Failed to send test email',
         type: 'error',
-        message: error.response?.data?.message || 'Failed to send test email'
+        isLoading: false,
+        autoClose: 3000
       });
     } finally {
       setIsTesting(false);
     }
   };
 
+  const handleReset = () => {
+    reset();
+    setIsEnabled(false);
+    toast.success('Form reset successfully');
+  };
+
   return (
     <div className="p-6 bg-base-100 rounded-lg space-y-6">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
       <div className="flex items-center gap-3">
         <Inbox className="w-6 h-6 text-primary" />
         <div>
-          <h1 className="text-2xl font-bold text-neutral-content">Enquiries</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage and respond to your enquiries</p>
+          <h1 className="text-2xl font-bold text-neutral-content">Mail Configuration</h1>
+          <p className="text-sm text-gray-500 mt-1">Configure your email settings</p>
         </div>
       </div>
 
-      {/* Test Email Section */}
+      {/* Rest of the JSX remains the same */}
       <div className="p-4 bg-base-200 rounded-lg shadow">
         <div className="flex gap-4 items-center">
           <input
@@ -167,23 +189,26 @@ const MailConfig = () => {
         </div>
       </div>
 
-      {/* Configuration Form */}
       <div className="bg-base-200 rounded-lg shadow">
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-lg font-medium">Mail Configuration Status</h2>
-          <div className="form-control">
+          {/* <div className="form-control">
             <label className="label cursor-pointer">
               <input
                 type="checkbox"
                 className="toggle toggle-primary"
                 checked={isEnabled}
-                onChange={() => setIsEnabled(!isEnabled)}
+                onChange={() => {
+                  const newState = !isEnabled;
+                  setIsEnabled(newState);
+                }}
               />
             </label>
-          </div>
+          </div> */}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-4">
+          {/* Form fields remain the same */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="form-control">
               <label className="label">
@@ -260,7 +285,7 @@ const MailConfig = () => {
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => reset()}
+              onClick={handleReset}
             >
               Reset
             </button>
