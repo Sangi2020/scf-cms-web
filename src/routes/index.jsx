@@ -19,6 +19,7 @@ import HelpDocumentation from '../pages/help/Help';
 import Newsletter from '../pages/newsletter/Newsletter';
 import ProtectedRoute from  '../routes/ProtectedRoute'
 import ForgotPassword from '../pages/auth/ForgotPassword';
+import MailConfig from '../components/mail-config/MailConfig';
 
 export const router = createBrowserRouter([
   {
@@ -88,6 +89,14 @@ export const router = createBrowserRouter([
       {
         path: '/newsletters',
         element: <ProtectedRoute><Newsletter /></ProtectedRoute>,
+      },
+      {
+        path: 'mail-config',
+        element: <ProtectedRoute><MailConfig/></ProtectedRoute>,
+      },
+      {
+        path: '/documents',
+        element: <ProtectedRoute><DocumentPage /></ProtectedRoute>,
       },
     ],
   },
