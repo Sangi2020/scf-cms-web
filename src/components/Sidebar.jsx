@@ -22,13 +22,20 @@ import {
     Folder,
     PenTool,
     HelpCircle,
-    Lock
+    Lock,
+    Server,
+    Database,
+    Shield,
+    MailIcon
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
+import { useAuth } from "../context/AuthContext";
+
 
 function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
+    const { authState } = useAuth();
     const navigation = [
         {
             section: "Dashboard",
@@ -70,10 +77,24 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             items: [
                 { name: 'Notifications', path: '/notifications', icon: Bell },
                 { name: 'SEO', path: '/seo', icon: Globe },
+                { name: 'Mail Config', path: '/mail-config', icon: MailIcon },
                 { name: 'Settings', path: '/settings', icon: Settings },
                 { name: 'Help & Docs', path: '/help', icon: HelpCircle }
             ]
-        }
+        },
+        // ...(authState.role === "superadmin" // Dynamically add the section for Super Admin
+        //     ? [
+        //         {
+        //             section: "System Management",
+        //             items: [
+        //                 { name: 'Server Status', path: '/server-status', icon: Server },
+        //                 { name: 'Database Logs', path: '/database-logs', icon: Database },
+        //                 { name: 'Security', path: '/security', icon: Shield },
+        //                 { name: 'Settings', path: '/settings', icon: Settings },
+        //             ],
+        //         },
+        //     ]
+        //     : []),
     ];
 
     const NavItem = ({ item, isActive }) => {
