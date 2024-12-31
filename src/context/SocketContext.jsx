@@ -13,13 +13,18 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Initialize socket connection
-    const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
-    // const socketInstance = io('http://localhost:8080');
+    // const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
+    const socketInstance = io('http://localhost:8080');
 
     setSocket(socketInstance);
 
+    const notificationSound = new Audio('/notification sound.mp3');
     // Listen for new notifications globally
     socketInstance.on('new-notification', (notification) => {
+
+      notificationSound.play().catch((error) => {
+        console.error('Error playing notification sound:', error);
+      });
       toast.info(`New Notification: ${notification.subject}`);
     });
 

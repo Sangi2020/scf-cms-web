@@ -32,26 +32,68 @@ import { NavLink } from "react-router-dom";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import { useAuth } from "../context/AuthContext";
-
+import { useEffect, useState } from "react";
+import { use } from "react";
+import axiosInstance from "../config/axios";
 
 function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
     const { authState } = useAuth();
+
+    const [count, setCount] = useState({
+        enquiries: 0,
+        comments: 0,
+        notifications: 0,
+        blogs: 0,
+        testimonials: 0,
+        newsletters: 0,
+        clients: 0,
+        socialMedia: 0,
+      });
+      
+      useEffect(() => {
+        const fetchCounts = async () => {
+          try {
+            const { data } = await axiosInstance.get('/stats/total-counts');
+            
+            setCount({
+              enquiries: data.counts.enquiries.unread || 0,
+              comments: 0,
+              notifications: data.counts.notifications.unread || 0,
+              blogs: data.counts.blogs.total || 0,
+              testimonials: data.counts.testimonials.total || 0,
+              newsletters: data.counts.newsletter.subscribers || 0,
+              clients: data.counts.clients.total || 0,
+              socialMedia: data.counts.social.active || 0,
+            });
+          } catch (error) {
+            console.error('Error fetching sidebar counts:', error);
+            // Keep the previous state on error
+            setCount(prevCount => prevCount);
+          }
+        };
+      
+        fetchCounts();
+      
+        const interval = setInterval(fetchCounts, 60000); // Refresh every minute
+      
+        return () => clearInterval(interval);
+      }, []);
+
     const navigation = [
         {
             section: "Dashboard",
             items: [
                 { name: 'Dashboard', path: '/', icon: Home },
                 { name: 'Analytics', path: '/analytics', icon: BarChart2 },
-                // { name: 'Reports', path: '/reports', icon: FileText },
-                { name: 'Enquiries', path: '/enquiries', icon: FileText },
+                { name: 'Enquiries', path: '/enquiries', icon: FileText, count: count.enquiries },
             ]
         },
         {
             section: "Content Management",
             items: [
                 { name: 'Pages', path: '/pages', icon: Layout },
-                { name: 'Blog Posts', path: '/posts', icon: PenTool },
-                { name: 'Clients', path: '/clients', icon: Briefcase },
+                { name: 'Blog Posts', path: '/posts', icon: PenTool, count: count.blogs },
+                { name: 'Clients', path: '/clients', icon: Briefcase , count: count.clients },
                 { name: 'Documents', path: '/documents', icon: FileText },
             ]
         },
@@ -59,74 +101,81 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             section: "User Management",
             items: [
                 { name: 'Users', path: '/users', icon: Users },
-                { name: 'Team Members', path: '/team', icon: Users },
+                { name: 'Team Members', path: '/team', icon: Users, count: count.clients },
                 { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
         },
         {
             section: "Marketing",
             items: [
-                { name: 'Newsletters', path: '/newsletters', icon: Mail },
-                { name: 'Comments', path: '/comments', icon: MessageSquare },
-                { name: 'Testimonials', path: '/testimonials', icon: MessageSquare },
-                { name: 'Social Media', path: '/social', icon: Globe },
+                { name: 'Newsletters', path: '/newsletters', icon: Mail , count: count.newsletters },
+                { name: 'Comments', path: '/comments', icon: MessageSquare, count: count.comments },
+                { name: 'Testimonials', path: '/testimonials', icon: MessageSquare , count: count.testimonials },
+                { name: 'Social Media', path: '/social', icon: Globe , count: count.socialMedia },
             ]
         },
         {
             section: "System",
             items: [
-                { name: 'Notifications', path: '/notifications', icon: Bell },
+                { name: 'Notifications', path: '/notifications', icon: Bell, count: count.notifications },
                 { name: 'SEO', path: '/seo', icon: Globe },
                 { name: 'Mail Config', path: '/mail-config', icon: MailIcon },
                 { name: 'Settings', path: '/settings', icon: Settings },
                 { name: 'Help & Docs', path: '/help', icon: HelpCircle }
             ]
         },
-        // ...(authState.role === "superadmin" // Dynamically add the section for Super Admin
-        //     ? [
-        //         {
-        //             section: "System Management",
-        //             items: [
-        //                 { name: 'Server Status', path: '/server-status', icon: Server },
-        //                 { name: 'Database Logs', path: '/database-logs', icon: Database },
-        //                 { name: 'Security', path: '/security', icon: Shield },
-        //                 { name: 'Settings', path: '/settings', icon: Settings },
-        //             ],
-        //         },
-        //     ]
-        //     : []),
     ];
 
     const NavItem = ({ item, isActive }) => {
         const content = (
-            <div className="flex items-center w-full">
-                <div className="flex-shrink-0">
-                    <item.icon
-                        className={`w-7 h-7 text-primary group-hover:text-white ${
-                            isActive ? 'text-white' : ''
-                        }`}
-                    />
+            <div className="flex items-center justify-between w-full">
+                <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                        <item.icon
+                            className={`w-7 h-7 text-primary group-hover:text-white ${
+                                isActive ? 'text-white' : ''
+                            }`}
+                        />
+                    </div>
+                    <span
+                        className={`ml-3 font-medium ease-in-out ${
+                            isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                        } ${isActive ? 'text-white' : ''}`}
+                        style={{
+                            transform: isCollapsed ? 'translateX(-20px)' : 'translateX(0)',
+                            display: isCollapsed ? 'none' : 'block'
+                        }}
+                    >
+                        {item.name}
+                    </span>
                 </div>
-                <span
-                    className={`ml-3 font-medium  ease-in-out ${
-                        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                    } ${isActive ? 'text-white' : ''}`}
-                    style={{
-                        transform: isCollapsed ? 'translateX(-20px)' : 'translateX(0)',
-                        display: isCollapsed ? 'none' : 'block'
-                    }}
+                {item.count > 0 && (
+                <div 
+                    className={`badge badge-primary ${
+                        isCollapsed ? 'hidden' : 'ml-2'
+                    }`}
                 >
-                    {item.name}
-                </span>
+                    <span className="text-white">{item.count}</span>
+                </div>
+            )}
             </div>
         );
 
         return isCollapsed ? (
             <Tippy
-                content={<div className="font-medium  " >{item.name}</div>}
+                content={
+                    <div className="font-medium flex items-center">
+                        {item.name}
+                        {item.count && (
+                            <div className="badge badge-primary ml-2">
+                                {item.count}
+                            </div>
+                        )}
+                    </div>
+                }
                 placement="right"
                 arrow={true}
-                className="tippy-box ml-2 "
+                className="tippy-box ml-2"
             >
                 {content}
             </Tippy>
@@ -156,12 +205,12 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
                         isCollapsed ? 'w-0' : 'w-40'
                     }`}>
-                                   <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm"/>
-                                   </div>
+                        <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm"/>
+                    </div>
 
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="p-2  focus:outline-none text-white rounded-xl shadow-md transition-all duration-300 ease-in-out lg:flex hidden"
+                        className="p-2 focus:outline-none text-white rounded-xl shadow-md transition-all duration-300 ease-in-out lg:flex hidden"
                     >
                         {isCollapsed ? (
                             <ChevronRight className="w-5 h-5 text-neutral-content" />
