@@ -13,8 +13,16 @@ import {
   Database,
   Save
 } from 'lucide-react';
+import { useNotification } from '../../context/SocketContext';
 
 const Settings = () => {
+  const {
+    soundEnabled,
+    toggleSound,
+    notificationsEnabled,
+    toggleNotifications,
+  } = useNotification();
+
   return (
     <div className=" ">
       <div className="mb-8">
@@ -48,34 +56,41 @@ const Settings = () => {
 
       {/* Notification Settings */}
       <Card className="p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Bell className="w-5 h-5 mr-2" />
-          Notifications
-        </h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Email Notifications</p>
-              <p className="text-sm text-gray-600">Receive email updates</p>
-            </div>
-            <Switch />
+      <h2 className="text-lg font-semibold mb-4 flex items-center">
+        <Bell className="w-5 h-5 mr-2" />
+        Notifications
+      </h2>
+      <div className="space-y-4">
+        {/* Enable Notifications */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Enable Notifications</p>
+            <p className="text-sm text-gray-600">Receive notifications from the system</p>
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Push Notifications</p>
-              <p className="text-sm text-gray-600">Receive push notifications</p>
-            </div>
-            <Switch />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Desktop Notifications</p>
-              <p className="text-sm text-gray-600">Show desktop alerts</p>
-            </div>
-            <Switch />
-          </div>
+          <input
+            type="checkbox"
+            className="toggle toggle-primary toggle-lg"
+            checked={notificationsEnabled}
+            onChange={toggleNotifications}
+          />
         </div>
-      </Card>
+        
+        {/* Notification Sound */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Notification Sound</p>
+            <p className="text-sm text-gray-600">Play sound for new notifications</p>
+          </div>
+          <input
+            type="checkbox"
+            className="toggle toggle-primary toggle-lg"
+            checked={soundEnabled}
+            onChange={toggleSound}
+            disabled={!notificationsEnabled}
+          />
+        </div>
+      </div>
+    </Card>
 
       {/* Security Settings */}
       <Card className="p-6 mb-6">
@@ -120,7 +135,7 @@ const Settings = () => {
           <div>
             <label className="block text-sm font-medium mb-1">Time Zone</label>
             <select className="w-full border rounded-lg px-3 py-2">
-              <option>UTC-08:00) Pacific Time</option>
+              <option>(UTC-08:00) Pacific Time</option>
               <option>(UTC-05:00) Eastern Time</option>
               <option>(UTC+00:00) UTC</option>
               <option>(UTC+01:00) Central European Time</option>
