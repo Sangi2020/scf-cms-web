@@ -58,8 +58,8 @@ export const SocketProvider = ({ children }) => {
   // Initialize the socket and handle new notifications
   useEffect(() => {
     // Initialize socket connection
-    // const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
-    const socketInstance = io('http://localhost:8080');
+    const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
+    // const socketInstance = io('http://localhost:8080');
 
     setSocket(socketInstance);
 
