@@ -13,8 +13,8 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Initialize socket connection
-    const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
-    // const socketInstance = io('http://localhost:8080');
+    // const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
+    const socketInstance = io('http://localhost:8080');
 
     setSocket(socketInstance);
 
