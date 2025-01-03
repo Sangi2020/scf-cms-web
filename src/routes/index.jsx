@@ -21,6 +21,7 @@ import ProtectedRoute from  '../routes/ProtectedRoute'
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import MailConfig from '../components/mail-config/MailConfig';
 import DocumentPage from '../pages/documents/documentPage.jsx'
+import SeoLayout from '../pages/seo/SEOLayout.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -98,6 +99,10 @@ export const router = createBrowserRouter([
       {
         path: '/documents',
         element: <ProtectedRoute><DocumentPage /></ProtectedRoute>,
+      },
+      {
+        path: '/seo-editor',
+        element: <ProtectedRoute><SeoLayout /></ProtectedRoute>,
       },
     ],
   },

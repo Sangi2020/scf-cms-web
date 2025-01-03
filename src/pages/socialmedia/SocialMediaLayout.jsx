@@ -38,7 +38,7 @@ const SocialMediaLayout = () => {
     const fetchSocialLinks = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get("http://localhost:8080/api/v1/web/social/get-social");
+        const response = await axiosInstance.get("/social/get-social");
         console.log(response.data.data);
         // Transform API data into the required format
         const links = response.data.data.reduce((acc, link) => {
@@ -84,7 +84,7 @@ const SocialMediaLayout = () => {
       
       // Make the API call to update with id in URL
       const response = await axiosInstance.put(
-        `http://localhost:8080/api/v1/admin/social/update-social/${currentEntry.id}`, 
+        `/social/update-social/${currentEntry.id}`, 
         {
           platform: currentEntry.name,
           url: newLink,

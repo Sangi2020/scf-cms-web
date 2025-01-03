@@ -63,12 +63,13 @@ function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-                <div className="text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900">Welcome back</h2>
-                    <p className="mt-2 text-sm text-gray-600">Please sign in to your account</p>
+        <div style={{backgroundImage:"url('https://avatars.mds.yandex.net/i?id=7411ebdd43f4443f7d737e2054c9549d_l-4507747-images-thumbs&ref=rim&n=13&w=2560&h=1457')"}} className="min-h-screen bg-cover bg-center w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-white/10 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+                <div className="flex justify-between flex-wrap"><div className="text-center">
+                    <h2 className="text-3xl font-extrabold text-gray-200">Welcome back</h2>
+                    <p className="mt-2 text-sm text-gray-200">Please sign in to your account</p>
                 </div>
+                <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" className='h-14 rounded-sm w-auto' alt="" /></div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
                     {error && (
@@ -86,7 +87,7 @@ function LoginPage() {
 
                     {/* Email Field */}
                     <div className="relative">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">Email address</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Mail className="h-5 w-5 text-gray-400" />
@@ -115,7 +116,7 @@ function LoginPage() {
 
                     {/* Password Field */}
                     <div className="relative">
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">Password</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-gray-400" />
@@ -164,15 +165,15 @@ function LoginPage() {
                                         type="checkbox"
                                         checked={value}
                                         onChange={(e) => onChange(e.target.checked)}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        className="h-4 w-4 text-blue-300 focus:ring-blue-500 border-gray-300 rounded"
                                     />
                                 )}
                             />
-                            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">Remember me</label>
+                            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-200">Remember me</label>
                         </div>
 
                         <div className="text-sm">
-                            <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</Link>
+                            <Link to="/forgot-password" className="font-medium text-blue-300 hover:text-blue-500">Forgot your password?</Link>
                         </div>
                     </div>
 
@@ -193,9 +194,9 @@ function LoginPage() {
                     </button>
 
                     {/* Sign Up Link */}
-                    <p className="mt-2 text-center text-sm text-gray-600">
+                    <p className="mt-2 text-center text-sm text-gray-200">
                         Don't have an account?{' '}
-                        <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">Sign up</a>
+                        <a href="/signup" className="font-medium text-blue-300 hover:text-blue-500">Sign up</a>
                     </p>
                 </form>
             </div>

@@ -23,11 +23,12 @@ import {
     PenTool,
     HelpCircle,
     Lock,
-    Server,
+    Layers,
     Database,
     Shield,
     MailIcon
 } from "lucide-react";
+
 import { NavLink } from "react-router-dom";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
@@ -95,6 +96,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'Blog Posts', path: '/posts', icon: PenTool, count: count.blogs },
                 { name: 'Clients', path: '/clients', icon: Briefcase , count: count.clients },
                 { name: 'Documents', path: '/documents', icon: FileText },
+                { name: 'SEO editor', path: '/seo-editor', icon: Layers },
             ]
         },
         {

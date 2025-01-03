@@ -208,7 +208,7 @@ const Notification = () => {
                           </h3>
                           <p className="text-base-content/70 leading-relaxed">
                             {notification.message}
-                          </p>
+                          </p>  
                           <div className="flex items-center gap-4 mt-2">
                             <div className="flex items-center gap-1 text-sm text-base-content/50">
                               <Clock className="w-4 h-4" />
