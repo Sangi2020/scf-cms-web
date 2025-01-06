@@ -6,30 +6,26 @@ const AuthContext = createContext();
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
     const [authState, setAuthState] = useState(() => {
-        // Check for token and role in localStorage or sessionStorage
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+        const storedUserData = localStorage.getItem('user') || sessionStorage.getItem('user');
         
-        // Return initial state with values from storage
-        return { token, role };
+        return storedUserData ? JSON.parse(storedUserData) : { token: null, role: null };
     });
 
     const login = (token, role, rememberMe) => {
+        const userData = { token, role };
+
         if (rememberMe) {
-            localStorage.setItem('token', token);
-            localStorage.setItem('role', role);
+            localStorage.setItem('user', JSON.stringify(userData));
         } else {
-            sessionStorage.setItem('token', token);
-            sessionStorage.setItem('role', role);
+            sessionStorage.setItem('user', JSON.stringify(userData));
         }
-        setAuthState({ token, role });
+        
+        setAuthState(userData);
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('role');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
         setAuthState({ token: null, role: null });
     };
 

@@ -1,29 +1,25 @@
 import axios from 'axios';
 
-// Create Axios instance
+
 const axiosInstance = axios.create({
-  baseURL: 'https://scf-cms-be-hz4e.onrender.com/api/v1/admin',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
-// const axiosInstance = axios.create({
-//   baseURL: 'http://localhost:8080/api/v1/admin',
-// });
 
-// Add a request interceptor to include token from either localStorage or sessionStorage
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Try to get the token from localStorage first
-    let token = localStorage.getItem('token');
+
+    let userData = JSON.parse(localStorage.getItem('user'));
     
-    // If not found in localStorage, try sessionStorage
-    if (!token) {
-      token = sessionStorage.getItem('token');
+
+    if (!userData) {
+      userData = JSON.parse(sessionStorage.getItem('user'));
     }
 
-    // Add the Authorization header if the token exists
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    if (userData && userData.token) {
+      config.headers['Authorization'] = `Bearer ${userData.token}`;
     }
+
     return config;
   },
   (error) => {

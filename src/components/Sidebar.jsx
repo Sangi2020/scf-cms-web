@@ -32,13 +32,11 @@ import {
 import { NavLink } from "react-router-dom";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
-import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { use } from "react";
 import axiosInstance from "../config/axios";
 
 function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
-    const { authState } = useAuth();
 
     const [count, setCount] = useState({
         enquiries: 0,
@@ -96,7 +94,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'Blog Posts', path: '/posts', icon: PenTool, count: count.blogs },
                 { name: 'Clients', path: '/clients', icon: Briefcase , count: count.clients },
                 { name: 'Documents', path: '/documents', icon: FileText },
-                { name: 'SEO editor', path: '/seo-editor', icon: Layers },
+                { name: 'SEO Editor', path: '/seo-editor', icon: Layers },
             ]
         },
         {
