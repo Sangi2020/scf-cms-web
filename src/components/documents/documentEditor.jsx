@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill/dist/quill.snow.css';
 import { toast } from 'react-toastify';
+import axiosInstance from '../../config/axios';
 
 const DocumentEditor = () => {
-  const [selectedOption, setSelectedOption] = useState('privacy');
+  const [selectedOption, setSelectedOption] = useState('PRIVACY');
   const [value, setValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -12,12 +13,10 @@ const DocumentEditor = () => {
 
   const fetchContent = async (option) => {
     try {
-      const mockBackendData = {
-        privacy: 'This is the Privacy & Policy content.',
-        terms: 'This is the Terms & Conditions content.',
-        disclaimer: 'This is the Disclaimer content.',
-      };
-      setValue(mockBackendData[option]);
+      const response = await axiosInstance.get(`/document/${selectedOption}`)
+      if (response.status == 200) {
+        setValue(response.data.document.content);
+      }
     } catch (error) {
       console.error('Error fetching content:', error);
     }
@@ -26,17 +25,26 @@ const DocumentEditor = () => {
   const saveContent = async () => {
     try {
       setIsSaving(true);
-      console.log(`Saving content for ${selectedOption}:`, value);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      toast.success(`${selectedOption} has been saved successfully!`)
+      const payload = {
+        title: selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1),
+        content: value,
+        type: selectedOption,
+      };
+
+      // Send POST request to the backend to create or update the document
+      const response = await axiosInstance.post('/document/create-document', payload);
+
+      if (response.status === 200) {
+        toast.success(`${selectedOption} document has been saved successfully!`);
+      }
     } catch (error) {
       console.error('Error saving content:', error);
-    toast.success(`Failed to save content. Please try again.`)
-
+      toast.error('Failed to save document content. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
+
 
   useEffect(() => {
     fetchContent(selectedOption);
@@ -47,6 +55,7 @@ const DocumentEditor = () => {
       [{ header: [1, 2, 3, 4, 5, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ 'header': 1 }, { 'header': 2 }],
       [{ indent: '-1' }, { indent: '+1' }],
       [{ align: [] }],
       ['link', 'image'],
@@ -85,12 +94,11 @@ const DocumentEditor = () => {
           >
             {isSaving ? 'Saving...' : 'Save'}
           </button>
-          {['privacy', 'terms', 'disclaimer'].map((option) => (
+          {['PRIVACY', 'TERMS', 'DISCLAIMER'].map((option) => (
             <button
               key={option}
-              className={`btn ${
-                selectedOption === option ? 'btn-primary' : 'btn-outline'
-              }`}
+              className={`btn ${selectedOption === option ? 'btn-primary' : 'btn-outline'
+                }`}
               onClick={() => setSelectedOption(option)}
             >
               {option.charAt(0).toUpperCase() + option.slice(1)}
