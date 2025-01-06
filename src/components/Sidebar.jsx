@@ -33,8 +33,9 @@ import { NavLink } from "react-router-dom";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import { useEffect, useState } from "react";
-import { use } from "react";
 import axiosInstance from "../config/axios";
+import { useAuth } from "../context/AuthContext";
+
 
 function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
 
@@ -47,36 +48,36 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         newsletters: 0,
         clients: 0,
         socialMedia: 0,
-      });
-      
-      useEffect(() => {
+    });
+    const { authState } = useAuth();
+    useEffect(() => {
         const fetchCounts = async () => {
-          try {
-            const { data } = await axiosInstance.get('/stats/total-counts');
-            
-            setCount({
-              enquiries: data.counts.enquiries.unread || 0,
-              comments: 0,
-              notifications: data.counts.notifications.unread || 0,
-              blogs: data.counts.blogs.total || 0,
-              testimonials: data.counts.testimonials.total || 0,
-              newsletters: data.counts.newsletter.subscribers || 0,
-              clients: data.counts.clients.total || 0,
-              socialMedia: data.counts.social.active || 0,
-            });
-          } catch (error) {
-            console.error('Error fetching sidebar counts:', error);
-            // Keep the previous state on error
-            setCount(prevCount => prevCount);
-          }
+            try {
+                const { data } = await axiosInstance.get('/stats/total-counts');
+
+                setCount({
+                    enquiries: data.counts.enquiries.unread || 0,
+                    comments: 0,
+                    notifications: data.counts.notifications.unread || 0,
+                    blogs: data.counts.blogs.total || 0,
+                    testimonials: data.counts.testimonials.total || 0,
+                    newsletters: data.counts.newsletter.subscribers || 0,
+                    clients: data.counts.clients.total || 0,
+                    socialMedia: data.counts.social.active || 0,
+                });
+            } catch (error) {
+                console.error('Error fetching sidebar counts:', error);
+                // Keep the previous state on error
+                setCount(prevCount => prevCount);
+            }
         };
-      
+
         fetchCounts();
-      
+
         const interval = setInterval(fetchCounts, 60000); // Refresh every minute
-      
+
         return () => clearInterval(interval);
-      }, []);
+    }, []);
 
     const navigation = [
         {
@@ -92,7 +93,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             items: [
                 { name: 'Pages', path: '/pages', icon: Layout },
                 { name: 'Blog Posts', path: '/posts', icon: PenTool, count: count.blogs },
-                { name: 'Clients', path: '/clients', icon: Briefcase , count: count.clients },
+                { name: 'Clients', path: '/clients', icon: Briefcase, count: count.clients },
                 { name: 'Documents', path: '/documents', icon: FileText },
                 { name: 'SEO Editor', path: '/seo-editor', icon: Layers },
             ]
@@ -100,7 +101,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         {
             section: "User Management",
             items: [
-                { name: 'Users', path: '/users', icon: Users },
+                { name: 'Users', path: '/users', icon: Users,role: 'superadmin'  },
                 { name: 'Team Members', path: '/team', icon: Users, count: count.clients },
                 { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
@@ -108,10 +109,10 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         {
             section: "Marketing",
             items: [
-                { name: 'Newsletters', path: '/newsletters', icon: Mail , count: count.newsletters },
+                { name: 'Newsletters', path: '/newsletters', icon: Mail, count: count.newsletters },
                 { name: 'Comments', path: '/comments', icon: MessageSquare, count: count.comments },
-                { name: 'Testimonials', path: '/testimonials', icon: MessageSquare , count: count.testimonials },
-                { name: 'Social Media', path: '/social', icon: Globe , count: count.socialMedia },
+                { name: 'Testimonials', path: '/testimonials', icon: MessageSquare, count: count.testimonials },
+                { name: 'Social Media', path: '/social', icon: Globe, count: count.socialMedia },
             ]
         },
         {
@@ -132,15 +133,13 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 <div className="flex items-center">
                     <div className="flex-shrink-0">
                         <item.icon
-                            className={`w-7 h-7 text-primary group-hover:text-white ${
-                                isActive ? 'text-white' : ''
-                            }`}
+                            className={`w-7 h-7 text-primary group-hover:text-white ${isActive ? 'text-white' : ''
+                                }`}
                         />
                     </div>
                     <span
-                        className={`ml-3 font-medium ease-in-out ${
-                            isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                        } ${isActive ? 'text-white' : ''}`}
+                        className={`ml-3 font-medium ease-in-out ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                            } ${isActive ? 'text-white' : ''}`}
                         style={{
                             transform: isCollapsed ? 'translateX(-20px)' : 'translateX(0)',
                             display: isCollapsed ? 'none' : 'block'
@@ -150,14 +149,13 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     </span>
                 </div>
                 {item.count > 0 && (
-                <div 
-                    className={`badge badge-primary ${
-                        isCollapsed ? 'hidden' : 'ml-2'
-                    }`}
-                >
-                    <span className="text-white">{item.count}</span>
-                </div>
-            )}
+                    <div
+                        className={`badge badge-primary ${isCollapsed ? 'hidden' : 'ml-2'
+                            }`}
+                    >
+                        <span className="text-white">{item.count}</span>
+                    </div>
+                )}
             </div>
         );
 
@@ -188,9 +186,8 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         <>
             {/* Overlay for mobile */}
             <div
-                className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity lg:hidden ${
-                    isOpen ? 'opacity-100 z-40' : 'opacity-0 pointer-events-none'
-                }`}
+                className={`fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity lg:hidden ${isOpen ? 'opacity-100 z-40' : 'opacity-0 pointer-events-none'
+                    }`}
                 onClick={onClose}
             />
 
@@ -202,10 +199,9 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
             >
                 <div className="flex items-center justify-between h-16 px-3">
-                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                        isCollapsed ? 'w-0' : 'w-40'
-                    }`}>
-                        <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm"/>
+                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isCollapsed ? 'w-0' : 'w-40'
+                        }`}>
+                        <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" alt="" className="h-10 w-auto rounded-sm" />
                     </div>
 
                     <button
@@ -226,31 +222,37 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 <nav className="px-2 h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hidden pb-24">
                     {navigation.map((section, index) => (
                         <div key={section.section} className={`${index > 0 ? 'mt-6' : 'mt-2'}`}>
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                                isCollapsed ? 'h-0 opacity-0' : 'h-6 opacity-100'
-                            }`}>
+                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isCollapsed ? 'h-0 opacity-0' : 'h-6 opacity-100'
+                                }`}>
                                 <h2 className="text-xs font-semibold text-neutral-content/70 uppercase tracking-wider px-2 mb-2">
                                     {section.section}
                                 </h2>
                             </div>
-                            {section.items.map((item) => (
-                                <NavLink
-                                    key={item.path}
-                                    to={item.path}
-                                    onClick={() => window.innerWidth < 1024 && onClose()}
-                                    className={({ isActive }) =>
-                                        `flex mx-auto px-2 py-2 mt-2 rounded-lg duration-300 ease-in-out group relative
-                                        ${isActive
-                                            ? 'bg-primary text-white'
-                                            : 'text-neutral-content hover:bg-primary/30 hover:text-white'
-                                        }`
-                                    }
-                                >
-                                    {({ isActive }) => (
-                                        <NavItem item={item} isActive={isActive} />
-                                    )}
-                                </NavLink>
-                            ))}
+                            {section.items.map((item) => {
+                                // Skip rendering if the role does not match (if a role is defined)
+                                if (item.role && authState.role !== item.role) {
+                                    return null;
+                                }
+
+                                return (
+                                    <NavLink
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={() => window.innerWidth < 1024 && onClose()}
+                                        className={({ isActive }) =>
+                                            `flex mx-auto px-2 py-2 mt-2 rounded-lg duration-300 ease-in-out group relative
+                            ${isActive
+                                                ? 'bg-primary text-white'
+                                                : 'text-neutral-content hover:bg-primary/30 hover:text-white'
+                                            }`
+                                        }
+                                    >
+                                        {({ isActive }) => (
+                                            <NavItem item={item} isActive={isActive} />
+                                        )}
+                                    </NavLink>
+                                );
+                            })}
                         </div>
                     ))}
                 </nav>
