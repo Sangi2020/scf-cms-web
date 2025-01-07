@@ -64,6 +64,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                     newsletters: data.counts.newsletter.subscribers || 0,
                     clients: data.counts.clients.total || 0,
                     socialMedia: data.counts.social.active || 0,
+                    team: data.counts.team.active || 0
                 });
             } catch (error) {
                 console.error('Error fetching sidebar counts:', error);
@@ -102,7 +103,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             section: "User Management",
             items: [
                 { name: 'Users', path: '/users', icon: Users,role: 'superadmin'  },
-                { name: 'Team Members', path: '/team', icon: Users, count: count.clients },
+                { name: 'Team Members', path: '/team', icon: Users, count: count.team },
                 { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
         },
