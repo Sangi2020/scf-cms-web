@@ -11,6 +11,22 @@
   scrollbar-width: none;
 }
 
+/* data compact */
+
+[data-compact="true"] .compact-padding {
+  padding: 4px;
+  margin: 4px;
+}
+
+[data-compact="false"] .compact-padding {
+  padding: 16px;
+  margin: 16px;
+}
+
+
+
+
+
 
 /*<============== quill Tool style ==============>*/
 
