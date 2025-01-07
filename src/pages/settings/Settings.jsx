@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Switch } from '../../components/ui/Switch';
-import { 
-  Bell, 
-  Moon, 
-  Shield, 
-  Globe, 
+import {
+  Bell,
+  Moon,
+  Shield,
+  Globe,
   Mail,
   Smartphone,
   Clock,
@@ -14,6 +14,9 @@ import {
   Save
 } from 'lucide-react';
 import { useNotification } from '../../context/SocketContext';
+import { useTheme } from '../../context/ThemeContext';
+import axiosInstance from '../../config/axios';
+
 
 const Settings = () => {
   const {
@@ -23,11 +26,48 @@ const Settings = () => {
     toggleNotifications,
   } = useNotification();
 
+  const [storageUsage, setStorageUsage] = useState({
+    totalSpace: 0,
+    usedSpace: 0,
+    freeSpace: 0,
+  });
+
+  // Fetch storage usage using axios
+  const fetchStorageUsage = async () => {
+    try {
+      const response = await axiosInstance.get('/settings/storage');
+      const data = response.data;
+      setStorageUsage({
+        totalSpace: parseFloat(data.totalSpace),
+        usedSpace: parseFloat(data.usedSpace),
+        freeSpace: parseFloat(data.freeSpace),
+      });
+    } catch (error) {
+      console.error('Error fetching storage usage:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStorageUsage();
+  }, []);
+
+  const { theme, toggleTheme, selectedFont, setSelectedFont } = useTheme();
+
+  const getTimeZoneOffset = () => {
+    const offset = new Date().getTimezoneOffset();
+    const sign = offset > 0 ? '-' : '+';
+    const hours = Math.floor(Math.abs(offset) / 60);
+    const minutes = Math.abs(offset) % 60;
+    return `UTC${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  };
+
+  const currentTimeZone = getTimeZoneOffset();
+
   return (
-    <div className=" ">
+    <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your application preferences and configurations</p>
+        <p className="">Manage your application preferences and configurations</p>
       </div>
 
       {/* Appearance Settings */}
@@ -37,85 +77,76 @@ const Settings = () => {
           Appearance
         </h2>
         <div className="space-y-4">
+          {/* Dark Mode */}
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Dark Mode</p>
-              <p className="text-sm text-gray-600">Toggle dark mode on/off</p>
+              <p className="text-sm ">Toggle dark mode on/off</p>
             </div>
-            <Switch />
+            <input
+              type="checkbox"
+              className="toggle toggle-primary toggle-lg"
+              checked={theme === "dark"}
+              onChange={toggleTheme}
+            />
           </div>
+
+          {/* Custom Font */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Compact Mode</p>
-              <p className="text-sm text-gray-600">Reduce padding and margins</p>
+              <p className="font-mediu">Custom Font</p>
+              <p className="text-sm ">Choose a custom font for the app</p>
             </div>
-            <Switch />
+            <select
+              value={selectedFont}
+              onChange={(e) => setSelectedFont(e.target.value)}
+              className="select select-primary"
+            >
+              <option value="sans-serif">Sans-serif</option>
+              <option value="serif">Serif</option>
+              <option value="Poppins">Poppins</option>
+            </select>
           </div>
         </div>
       </Card>
 
       {/* Notification Settings */}
       <Card className="p-6 mb-6">
-      <h2 className="text-lg font-semibold mb-4 flex items-center">
-        <Bell className="w-5 h-5 mr-2" />
-        Notifications
-      </h2>
-      <div className="space-y-4">
-        {/* Enable Notifications */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">Enable Notifications</p>
-            <p className="text-sm text-gray-600">Receive notifications from the system</p>
-          </div>
-          <input
-            type="checkbox"
-            className="toggle toggle-primary toggle-lg"
-            checked={notificationsEnabled}
-            onChange={toggleNotifications}
-          />
-        </div>
-        
-        {/* Notification Sound */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">Notification Sound</p>
-            <p className="text-sm text-gray-600">Play sound for new notifications</p>
-          </div>
-          <input
-            type="checkbox"
-            className="toggle toggle-primary toggle-lg"
-            checked={soundEnabled}
-            onChange={toggleSound}
-            disabled={!notificationsEnabled}
-          />
-        </div>
-      </div>
-    </Card>
-
-      {/* Security Settings */}
-      <Card className="p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Shield className="w-5 h-5 mr-2" />
-          Security
+          <Bell className="w-5 h-5 mr-2" />
+          Notifications
         </h2>
         <div className="space-y-4">
+          {/* Enable Notifications */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Two-Factor Authentication</p>
-              <p className="text-sm text-gray-600">Add an extra layer of security</p>
+              <p className="font-medium">Enable Notifications</p>
+              <p className="text-sm ">Receive notifications from the system</p>
             </div>
-            <Switch />
+            <input
+              type="checkbox"
+              className="toggle toggle-primary toggle-lg"
+              checked={notificationsEnabled}
+              onChange={toggleNotifications}
+            />
           </div>
+
+          {/* Notification Sound */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Login Alerts</p>
-              <p className="text-sm text-gray-600">Get notified of new sign-ins</p>
+              <p className="font-medium">Notification Sound</p>
+              <p className="text-sm ">Play sound for new notifications</p>
             </div>
-            <Switch />
+            <input
+              type="checkbox"
+              className="toggle toggle-primary toggle-lg"
+              checked={soundEnabled}
+              onChange={toggleSound}
+              disabled={!notificationsEnabled}
+            />
           </div>
         </div>
       </Card>
-
       {/* Language and Region */}
       <Card className="p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -123,22 +154,26 @@ const Settings = () => {
           Language & Region
         </h2>
         <div className="space-y-4">
+          {/* Language Dropdown - Only show English */}
           <div>
             <label className="block text-sm font-medium mb-1">Language</label>
-            <select className="w-full border rounded-lg px-3 py-2">
+            <select
+              className="w-full bg-base-200 rounded-lg px-3 py-2"
+              disabled
+            >
               <option>English</option>
-              <option>Spanish</option>
-              <option>French</option>
-              <option>German</option>
             </select>
           </div>
+
+          {/* Time Zone Dropdown - Show current time zone */}
           <div>
             <label className="block text-sm font-medium mb-1">Time Zone</label>
-            <select className="w-full border rounded-lg px-3 py-2">
-              <option>(UTC-08:00) Pacific Time</option>
-              <option>(UTC-05:00) Eastern Time</option>
-              <option>(UTC+00:00) UTC</option>
-              <option>(UTC+01:00) Central European Time</option>
+            <select
+              className="w-full bg-base-200 rounded-lg px-3 py-2"
+              value={currentTimeZone}
+              disabled
+            >
+              <option>{currentTimeZone}</option>
             </select>
           </div>
         </div>
@@ -151,87 +186,37 @@ const Settings = () => {
           Data & Storage
         </h2>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Auto-save Frequency</label>
-            <select className="w-full border rounded-lg px-3 py-2">
-              <option>Every 5 minutes</option>
-              <option>Every 15 minutes</option>
-              <option>Every 30 minutes</option>
-              <option>Every hour</option>
-            </select>
-          </div>
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Clear Cache</p>
-              <p className="text-sm text-gray-600">Clear temporary files</p>
+              <p className="text-sm ">Clear temporary files</p>
             </div>
             <Button variant="outline">Clear</Button>
-          </div>
+          </div> */}
           <div>
-            <p className="text-sm text-gray-600 mb-2">Storage Usage</p>
+            <p className="text-sm  mb-2">Storage Usage</p>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full" style={{ width: '70%' }}></div>
+              <div
+                className="bg-blue-600 h-2 rounded-full"
+                style={{
+                  width: `${(storageUsage.usedSpace / storageUsage.totalSpace) * 100}%`,
+                }}
+              ></div>
             </div>
-            <p className="text-sm text-gray-600 mt-1">7.0 GB of 10 GB used</p>
-          </div>
-        </div>
-      </Card>
-
-      {/* Contact Preferences */}
-      <Card className="p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Mail className="w-5 h-5 mr-2" />
-          Contact Preferences
-        </h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Marketing Emails</p>
-              <p className="text-sm text-gray-600">Receive product updates and offers</p>
-            </div>
-            <Switch />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">System Emails</p>
-              <p className="text-sm text-gray-600">Important system notifications</p>
-            </div>
-            <Switch />
-          </div>
-        </div>
-      </Card>
-
-      {/* Mobile Settings */}
-      <Card className="p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Smartphone className="w-5 h-5 mr-2" />
-          Mobile Settings
-        </h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Mobile Data Usage</p>
-              <p className="text-sm text-gray-600">Sync on mobile data</p>
-            </div>
-            <Switch />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Download on Mobile</p>
-              <p className="text-sm text-gray-600">Allow downloads on mobile data</p>
-            </div>
-            <Switch />
+            <p className="text-sm  mt-1">
+            {(storageUsage.totalSpace - storageUsage.freeSpace).toFixed(2)} GB of {storageUsage.totalSpace.toFixed(2)} GB used
+            </p>
           </div>
         </div>
       </Card>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <Button className="flex items-center">
           <Save className="w-4 h-4 mr-2" />
           Save Changes
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };

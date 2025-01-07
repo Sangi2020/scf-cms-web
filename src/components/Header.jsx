@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Menu, Moon, Sun, User, Settings, LogOut } from "lucide-react";
+import { Bell, Menu, Moon, Sun, User, Settings, LogOut, User2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BsChevronDoubleLeft, BsChevronDoubleRight } from "react-icons/bs";
 import { useTheme } from "../context/ThemeContext";
@@ -273,11 +273,24 @@ function Header({ onToggleSidebar, isCollapsed }) {
                 </div>
                 <div className="py-1">
                   <button
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      navigate('/profile');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full px-4 py-2 text-sm text-neutral-content hover:bg-base-200 flex items-center gap-2"
+                  >
+                    <User2 className="w-4 h-4" />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/settings');
+                      setShowUserMenu(false);
+                    }}
                     className="w-full px-4 py-2 text-sm text-neutral-content hover:bg-base-200 flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Profile Settings</span>
+                    <span>Settings</span>
                   </button>
                   <button
                     onClick={handleLogout}

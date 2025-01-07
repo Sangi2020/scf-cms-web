@@ -7,7 +7,11 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['sans-serif','Poppins',]
+      },
+    },
   },
   plugins: [daisyui, animations],
   daisyui: {
