@@ -61,7 +61,7 @@ const SeoLayout = () => {
       try {
         const response = await axiosInstance.get(`seo/get/${selectedPage}`);
         const data = response.data;
-        
+
         reset({
           title: {
             default: data.title || '',
@@ -107,7 +107,7 @@ const SeoLayout = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchSEOData();
   }, [selectedPage, reset]);
 
@@ -127,7 +127,7 @@ const SeoLayout = () => {
         twitterDescription: data.twitter.description,
         twitterImage: data.twitter.image
       });
-      
+
       if (response.status === 200) {
         toast.success('SEO data saved successfully');
       }
@@ -162,13 +162,13 @@ const SeoLayout = () => {
 
       {isLoading ? (
         <div className="flex justify-center items-center min-h-screen">
-           <span className="loading loading-spinner loading-lg text-primary"></span>
+          <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <section className="space-y-4 bg-base-200 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-neutral-content">Basic Meta Tags</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-neutral-content block mb-1">Title</label>
@@ -212,7 +212,7 @@ const SeoLayout = () => {
 
           <section className="space-y-4 bg-base-200 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-neutral-content">Open Graph</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-neutral-content block mb-1">OG Title</label>
@@ -255,7 +255,7 @@ const SeoLayout = () => {
 
           <section className="space-y-4 bg-base-200 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-neutral-content">Twitter Card</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-neutral-content block mb-1">Twitter Title</label>
@@ -296,9 +296,9 @@ const SeoLayout = () => {
             </div>
           </section>
 
-          <button 
+          <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            className="btn btn-primary"
           >
             Save SEO Settings
           </button>
