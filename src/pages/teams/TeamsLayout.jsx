@@ -1,405 +1,221 @@
-import React, { useState } from 'react';
-import { Edit, Trash2, Plus, Linkedin, Twitter, Github, Instagram } from 'lucide-react';
-const initialTeamMembers = {
-  cLevel: [
-    {
-      id: 1,
-      name: 'John Doe',
-      title: 'CEO',
-      avatar: 'https://i.pravatar.cc/150?img=1',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/johndoe',
-        twitter: 'https://twitter.com/johndoe',
-        github: 'https://github.com/johndoe',
-        instagram: 'https://instagram.com/johndoe',
-      },
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      title: 'CFO',
-      avatar: 'https://i.pravatar.cc/150?img=2',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/janesmith',
-        twitter: 'https://twitter.com/janesmith',
-      },
-    },
-    {
-      id: 3,
-      name: 'Michael Green',
-      title: 'COO',
-      avatar: 'https://i.pravatar.cc/150?img=6',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/michaelgreen',
-        github: 'https://github.com/michaelgreen',
-      },
-    },
-    {
-      id: 4,
-      name: 'Emily Carter',
-      title: 'CTO',
-      avatar: 'https://i.pravatar.cc/150?img=7',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/emilycarter',
-        twitter: 'https://twitter.com/emilycarter',
-      },
-    },
-    {
-      id: 5,
-      name: 'Sophia Brown',
-      title: 'Chief Strategy Officer',
-      avatar: 'https://i.pravatar.cc/150?img=8',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/sophiabrown',
-        instagram: 'https://instagram.com/sophiabrown',
-      },
-    },
-    {
-      id: 6,
-      name: 'James Williams',
-      title: 'Chief Marketing Officer',
-      avatar: 'https://i.pravatar.cc/150?img=9',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/jameswilliams',
-        twitter: 'https://twitter.com/jameswilliams',
-      },
-    },
-  ],
-  topLevel: [
-    {
-      id: 7,
-      name: 'Mike Johnson',
-      title: 'VP of Engineering',
-      avatar: 'https://i.pravatar.cc/150?img=3',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/mikejohnson',
-        github: 'https://github.com/mikejohnson',
-      },
-    },
-    {
-      id: 8,
-      name: 'Sarah Williams',
-      title: 'VP of Marketing',
-      avatar: 'https://i.pravatar.cc/150?img=4',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/sarahwilliams',
-        twitter: 'https://twitter.com/sarahwilliams',
-      },
-    },
-    {
-      id: 9,
-      name: 'Alex Brown',
-      title: 'VP of Sales',
-      avatar: 'https://i.pravatar.cc/150?img=5',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/alexbrown',
-        instagram: 'https://instagram.com/alexbrown',
-      },
-    },
-    {
-      id: 10,
-      name: 'Oliver Miller',
-      title: 'VP of HR',
-      avatar: 'https://i.pravatar.cc/150?img=10',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/olivermiller',
-        twitter: 'https://twitter.com/olivermiller',
-      },
-    },
-    {
-      id: 11,
-      name: 'Amelia Davis',
-      title: 'VP of Product',
-      avatar: 'https://i.pravatar.cc/150?img=11',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/ameliadavis',
-        github: 'https://github.com/ameliadavis',
-      },
-    },
-    {
-      id: 12,
-      name: 'Lucas Wilson',
-      title: 'VP of Operations',
-      avatar: 'https://i.pravatar.cc/150?img=12',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/in/lucaswilson',
-        twitter: 'https://twitter.com/lucaswilson',
-      },
-    },
-  ],
-};
-
+import React, { useEffect, useState } from 'react';
+import { Edit, Trash2, Plus, Linkedin } from 'lucide-react';
+import axiosInstance from '../../config/axios';
 
 const TeamManagement = () => {
-  const [teamMembers, setTeamMembers] = useState(initialTeamMembers);
-  const [editingMember, setEditingMember] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    title: '',
-    avatar: '',
-    socialLinks: {
-      linkedin: '',
-      twitter: '',
-      github: '',
-      instagram: '',
-    },
+    position: '',
+    bio: '',
+    linkedin: '',
+    email: '',
+    order: '',
+    isActive: true
   });
 
-  const SocialIcon = ({ type, url }) => {
-    const iconMap = {
-      linkedin: <Linkedin size={20} />,
-      twitter: <Twitter size={20} />,
-      github: <Github size={20} />,
-      instagram: <Instagram size={20} />,
-    };
-
-    return url ? (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-primary transition-colors"
-      >
-        {iconMap[type]}
-      </a>
-    ) : null;
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await axiosInstance.get('/team/all-team');
+      setTeamMembers(response.data.team);
+      console.log(response.data,"dataa");
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+    }
   };
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
 
   const handleAdd = () => {
     setFormData({
       name: '',
-      title: '',
-      avatar: '',
-      socialLinks: {
-        linkedin: '',
-        twitter: '',
-        github: '',
-        instagram: '',
-      },
+      position: '',
+      bio: '',
+      linkedin: '',
+      email: '',
+      order: '',
+      isActive: true
     });
-    setEditingMember(null);
+    setSelectedFile(null);
     setIsEditing(false);
     setIsDrawerOpen(true);
   };
 
   const handleEdit = (member) => {
     setFormData(member);
-    setEditingMember(member);
     setIsEditing(true);
     setIsDrawerOpen(true);
   };
 
-  const handleDelete = (member) => {
-    setMemberToDelete(member);
-    setIsModalOpen(true);
-  };
-
-  const confirmDelete = () => {
-    const updatedMembers = {
-      cLevel: teamMembers.cLevel.filter((m) => m.id !== memberToDelete.id),
-      topLevel: teamMembers.topLevel.filter((m) => m.id !== memberToDelete.id),
-    };
-    setTeamMembers(updatedMembers);
-    setIsModalOpen(false);
-    setMemberToDelete(null);
-  };
-
-  const saveMember = () => {
-    if (isEditing) {
-      const updatedMembers = {
-        cLevel: teamMembers.cLevel.map((m) =>
-          m.id === editingMember.id ? { ...formData, id: m.id } : m
-        ),
-        topLevel: teamMembers.topLevel.map((m) =>
-          m.id === editingMember.id ? { ...formData, id: m.id } : m
-        ),
-      };
-      setTeamMembers(updatedMembers);
-    } else {
-      const newMember = { ...formData, id: Date.now() };
-      setTeamMembers({
-        ...teamMembers,
-        cLevel: [...teamMembers.cLevel, newMember], // Add to C-Level for simplicity
-      });
+  const handleDelete = async () => {
+    try {
+      await axiosInstance.delete(`/team/delete/${memberToDelete.id}`);
+      await fetchTeamMembers();
+      setIsModalOpen(false);
+      setMemberToDelete(null);
+    } catch (error) {
+      console.error('Error deleting team member:', error);
     }
-    setIsDrawerOpen(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach(key => {
+      formDataToSend.append(key, formData[key]);
+    });
+    if (selectedFile) {
+      formDataToSend.append('file', selectedFile);
+    }
+
+    try {
+      if (isEditing) {
+        await axiosInstance.put(`/team/update/${formData.id}`, formDataToSend);
+      } else {
+        await axiosInstance.post('/team/add', formDataToSend);
+      }
+      await fetchTeamMembers();
+      setIsDrawerOpen(false);
+    } catch (error) {
+      console.error('Error saving team member:', error);
+    }
   };
 
   const TeamMemberCard = ({ member }) => (
-    <div className="relative bg-base-200 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-      <div className="absolute inset-0 bg-gradient-to-t from-base-100 to-transparent opacity-75"></div>
-      <div className="p-4 flex flex-col items-center relative space-y-5">
-        <div className="flex w-full justify-start gap-3 items-center">
+    <div className="relative bg-base-200 rounded-xl shadow-lg overflow-hidden">
+      <div className="p-4 flex flex-col space-y-4">
+        <div className="flex gap-4 items-center">
           <img
-            src={member.avatar}
+            src={member.image}
             alt={member.name}
             className="w-20 h-20 rounded-full object-cover"
           />
           <div>
-            <h3 className="text-xl font-bold text-accent">{member.name}</h3>
-            <p className="text-sm text-neutral-content">{member.title}</p>
+            <h3 className="text-xl font-bold">{member.name}</h3>
+            <p className="text-sm">{member.position}</p>
           </div>
         </div>
-        <div className="flex justify-between items-end w-full">
-          <div className="flex space-x-3">
-            {Object.entries(member.socialLinks || {}).map(([type, url]) => (
-              <SocialIcon key={type} type={type} url={url} />
-            ))}
-          </div>
-          <div className="flex space-x-2">
+        <p className="text-sm">{member.bio}</p>
+        <div className="flex justify-between items-center">
+          {member.linkedin && (
+            <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
+              <Linkedin className="h-5 w-5" />
+            </a>
+          )}
+          <div className="flex gap-2">
             <button
-              className="btn text-sm text-neutral-content hover:text-accent"
+              className="btn btn-sm"
               onClick={() => handleEdit(member)}
             >
-              <Edit size={16} />
+              <Edit className="h-4 w-4" />
             </button>
             <button
-              className="btn text-sm text-neutral-content hover:text-error"
-              onClick={() => handleDelete(member)}
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                setMemberToDelete(member);
+                setIsModalOpen(true);
+              }}
             >
-              <Trash2 size={16} />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         </div>
       </div>
     </div>
   );
-
-  const TeamMemberCardSkeleton = () => (
-    <div className="relative bg-base-200 rounded-xl shadow-lg overflow-hidden animate-pulse">
-      <div className="absolute inset-0 bg-gradient-to-t from-base-100 to-transparent opacity-75"></div>
-      <div className="p-4 flex flex-col items-center relative space-y-5">
-        <div className="flex w-full justify-start gap-3 items-center">
-          {/* Avatar Placeholder */}
-          <div className="w-20 h-20 bg-neutral-focus rounded-full"></div>
-  
-          <div>
-            {/* Name Placeholder */}
-            <div className="h-5 bg-neutral-focus rounded-md w-32 mb-2"></div>
-            {/* Title Placeholder */}
-            <div className="h-4 bg-neutral-focus rounded-md w-24"></div>
-          </div>
-        </div>
-        <div className="flex justify-between items-end w-full">
-          {/* Social Icons Placeholder */}
-          <div className="flex space-x-3">
-            <div className="w-5 h-5 bg-neutral-focus rounded-full"></div>
-            <div className="w-5 h-5 bg-neutral-focus rounded-full"></div>
-            <div className="w-5 h-5 bg-neutral-focus rounded-full"></div>
-          </div>
-          <div className="flex space-x-2">
-            {/* Buttons Placeholder */}
-            <div className="w-10 h-8 bg-neutral-focus rounded-md"></div>
-            <div className="w-10 h-8 bg-neutral-focus rounded-md"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-  
 
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Team Management</h1>
-        <button className="btn btn-primary flex items-center space-x-2" onClick={handleAdd}>
-          <Plus size={18} />
-          <span>Add Member</span>
+        <button className="btn btn-primary" onClick={handleAdd}>
+          <Plus className="h-5 w-5" />
+          Add Member
         </button>
       </div>
 
-      <div className="space-y-8">
-        <section>
-          <h2 className="text-2xl font-semibold mb-4">C-Level Executives</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {teamMembers.cLevel.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold mb-4">Top Level Employees</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {teamMembers.topLevel.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
-            ))}
-          </div>
-        </section>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {teamMembers.map((member) => (
+          <TeamMemberCard key={member.id} member={member} />
+        ))}
       </div>
 
-      {/* Drawer for Add/Edit */}
+      {/* Add/Edit Form Drawer */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end">
-          <div className="bg-base-200 rounded-2xl z-40 w-1/3 h-fit p-6">
-            <h3 className="text-xl font-bold mb-4">
-              {isEditing ? 'Edit Member' : 'Add New Member'}
-            </h3>
-            <form>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-base-200 p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">
+              {isEditing ? 'Edit Member' : 'Add Member'}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
                 placeholder="Name"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full p-2 border rounded-md mb-4"
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="input input-bordered w-full"
+                required
               />
               <input
                 type="text"
-                placeholder="Title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                className="w-full p-2 border rounded-md mb-4"
+                placeholder="Position"
+                value={formData.position}
+                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                className="input input-bordered w-full"
+                required
+              />
+              <textarea
+                placeholder="Bio"
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                className="textarea textarea-bordered w-full"
+                required
               />
               <input
                 type="text"
-                placeholder="Avatar URL"
-                value={formData.avatar}
-                onChange={(e) =>
-                  setFormData({ ...formData, avatar: e.target.value })
-                }
-                className="w-full p-2 border rounded-md mb-4"
+                placeholder="LinkedIn URL"
+                value={formData.linkedin}
+                onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                className="input input-bordered w-full"
               />
-              {/* Social Links */}
-              {Object.keys(formData.socialLinks).map((platform) => (
-                <input
-                  key={platform}
-                  type="text"
-                  placeholder={`${platform.charAt(0).toUpperCase() + platform.slice(1)} URL`}
-                  value={formData.socialLinks[platform]}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      socialLinks: {
-                        ...formData.socialLinks,
-                        [platform]: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full p-2 border rounded-md mb-4"
-                />
-              ))}
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={saveMember}
-                >
-                  Save
-                </button>
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="number"
+                placeholder="Order"
+                value={formData.order}
+                onChange={(e) => setFormData({ ...formData, order: e.target.value })}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="file"
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                className="file-input file-input-bordered w-full"
+                accept="image/*"
+                required={!isEditing}
+              />
+              <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   className="btn btn-ghost"
                   onClick={() => setIsDrawerOpen(false)}
                 >
                   Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save
                 </button>
               </div>
             </form>
@@ -409,14 +225,13 @@ const TeamManagement = () => {
 
       {/* Delete Confirmation Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-base-100 p-6 rounded-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-base-200 p-6 rounded-lg">
             <h3 className="text-lg font-semibold mb-4">
-              Are you sure you want to delete{' '}
-              <span className="font-bold">{memberToDelete?.name}</span>?
+              Confirm delete {memberToDelete?.name}?
             </h3>
-            <div className="flex justify-end space-x-4">
-            <button
+            <div className="flex justify-end gap-2">
+              <button
                 className="btn btn-ghost"
                 onClick={() => setIsModalOpen(false)}
               >
@@ -424,11 +239,10 @@ const TeamManagement = () => {
               </button>
               <button
                 className="btn btn-error"
-                onClick={confirmDelete}
+                onClick={handleDelete}
               >
                 Delete
               </button>
-              
             </div>
           </div>
         </div>

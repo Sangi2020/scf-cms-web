@@ -5,7 +5,7 @@ import DocumentEditor from '../../components/documents/documentEditor'
 const DocumentPage = () => {
   return (
     <div>
-        <DocumentEditor/>
+      <DocumentEditor />
 
     </div>
   )
