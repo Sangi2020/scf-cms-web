@@ -64,7 +64,7 @@ function LoginPage() {
 
     return (
         <div style={{backgroundImage:"url('https://avatars.mds.yandex.net/i?id=7411ebdd43f4443f7d737e2054c9549d_l-4507747-images-thumbs&ref=rim&n=13&w=2560&h=1457')"}} className="min-h-screen bg-cover bg-center w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white/10 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+            <div className="max-w-md w-full space-y-8 bg-black/70 backdrop-blur-sm p-8 rounded-xl shadow-lg">
                 <div className="flex justify-between flex-wrap"><div className="text-center">
                     <h2 className="text-3xl font-extrabold text-gray-200">Welcome back</h2>
                     <p className="mt-2 text-sm text-gray-200">Please sign in to your account</p>
@@ -99,7 +99,7 @@ function LoginPage() {
                                     <input
                                         {...field}
                                         type="email"
-                                        className={`appearance-none block w-full pl-10 pr-3 py-2 border rounded-lg
+                                        className={`appearance-none block text-slate-900 placeholder:text-slate-900  w-full pl-10 pr-3 py-2 border rounded-lg
                       focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm
                       ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                                         placeholder="Enter your email"
@@ -128,7 +128,7 @@ function LoginPage() {
                                     <input
                                         {...field}
                                         type={showPassword ? "text" : "password"}
-                                        className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-lg
+                                        className={`appearance-none block text-slate-900 placeholder:text-slate-900  w-full pl-10 pr-10 py-2 border rounded-lg
                       focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm
                       ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
                                         placeholder="Enter your password"

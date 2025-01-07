@@ -58,7 +58,10 @@ export const SocketProvider = ({ children }) => {
   // Initialize the socket and handle new notifications
   useEffect(() => {
     // Initialize socket connection
-    const socketInstance = io('https://scf-cms-be-hz4e.onrender.com');
+
+      const baseURL= import.meta.env.VITE_API_BASE_URL
+
+    const socketInstance = io(baseURL);
     // const socketInstance = io('http://localhost:8080');
 
     setSocket(socketInstance);
