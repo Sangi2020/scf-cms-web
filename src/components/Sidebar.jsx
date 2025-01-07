@@ -111,7 +111,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             section: "Marketing",
             items: [
                 { name: 'Newsletters', path: '/newsletters', icon: Mail, count: count.newsletters },
-                { name: 'Comments', path: '/comments', icon: MessageSquare, count: count.comments },
+                // { name: 'Comments', path: '/comments', icon: MessageSquare, count: count.comments },
                 { name: 'Testimonials', path: '/testimonials', icon: MessageSquare, count: count.testimonials },
                 { name: 'Social Media', path: '/social', icon: Globe, count: count.socialMedia },
             ]
@@ -120,7 +120,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             section: "System",
             items: [
                 { name: 'Notifications', path: '/notifications', icon: Bell, count: count.notifications },
-                { name: 'SEO', path: '/seo', icon: Globe },
+                // { name: 'SEO', path: '/seo', icon: Globe },
                 { name: 'Mail Config', path: '/mail-config', icon: MailIcon },
                 { name: 'Settings', path: '/settings', icon: Settings },
                 { name: 'Help & Docs', path: '/help', icon: HelpCircle }

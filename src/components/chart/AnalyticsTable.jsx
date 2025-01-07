@@ -78,8 +78,8 @@ const AnalyticsTable = () => {
     };
 
     return (
-        <div className="card bg-base-200 shadow-xl mt-8 w-full">
-            <div className="card-body gap-4 !min-h[600px]">
+        <div className="card bg-base-200 shadow-xl mt-8 w-full ">
+             <div className="card-body gap-4 min-h-[600px] max-h-[800px] overflow-y-auto scrollbar-none">
                 <div className="flex flex-wrap justify-between">
                     <h2 className="card-title text-2xl mb-4">Page Analytics Overview</h2>
                     <select
@@ -116,7 +116,7 @@ const AnalyticsTable = () => {
                 )}
 
                     <div className="overflow-x-auto">
-                        <table className="table w-full table-zebra">
+                        <table className="table w-full table-zebra ">
                             <thead>
                                 <tr>
                                     <th>Page Path</th>
