@@ -273,11 +273,24 @@ function Header({ onToggleSidebar, isCollapsed }) {
                 </div>
                 <div className="py-1">
                   <button
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      navigate('/profile');
+                      setShowUserMenu(false);
+                    }}
                     className="w-full px-4 py-2 text-sm text-neutral-content hover:bg-base-200 flex items-center gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Profile Settings</span>
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/settings');
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full px-4 py-2 text-sm text-neutral-content hover:bg-base-200 flex items-center gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Settings</span>
                   </button>
                   <button
                     onClick={handleLogout}
