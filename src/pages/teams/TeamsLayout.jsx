@@ -77,7 +77,7 @@ const TeamManagement = () => {
 
     try {
       if (isEditing) {
-        await axiosInstance.put(`/team/update/${formData.id}`, formDataToSend);
+        await axiosInstance.put(`/team/update-team/${formData.id}`, formDataToSend);
       } else {
         await axiosInstance.post('/team/add', formDataToSend);
       }
