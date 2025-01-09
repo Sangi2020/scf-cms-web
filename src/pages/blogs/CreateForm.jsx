@@ -1,11 +1,17 @@
 import React, { useState, useRef } from "react";
+import { toast } from "react-toastify";
+import axiosInstance from "../../config/axios";
 
-function BlogPostForm() {
-  const [imageFile, setImageFile] = useState(null); // State for the uploaded image file
-  const [imagePreview, setImagePreview] = useState(null); // State for image preview
-  const inputRef = useRef(null); // Ref for file input
+function BlogPostForm({ onBlogCreated }) {
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [date, setDate] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const inputRef = useRef(null);
 
-  // Handle image selection via input
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -17,18 +23,6 @@ function BlogPostForm() {
     }
   };
 
-  // Handle drag-and-drop upload
-  const handleDragOver = (event) => event.preventDefault();
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  // Remove selected image
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -37,8 +31,52 @@ function BlogPostForm() {
     }
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!title || !author || !date || !excerpt || !content || !imageFile) {
+      toast.error("Please fill in all fields and upload an image.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("author", author);
+    formData.append("date", date);
+    formData.append("excerpt", excerpt);
+    formData.append("content", content);
+    formData.append("image", imageFile);
+
+    try {
+      const response = await axiosInstance.post(
+        "/blog/create-blog",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      toast.success("Blog post created successfully!");
+      if (onBlogCreated) {
+        onBlogCreated(); // Call the function to refresh the blog list
+      }
+      // Reset form
+      setTitle("");
+      setAuthor("");
+      setDate("");
+      setExcerpt("");
+      setContent("");
+      setImageFile(null);
+      setImagePreview(null);
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      toast.error("Failed to create blog post. Please try again.");
+    }
+  };
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       {/* Title Input */}
       <div className="form-control mb-4">
         <label className="label">
@@ -47,19 +85,59 @@ function BlogPostForm() {
         <input
           type="text"
           placeholder="Post title"
-          className="input input-bordered border-accent "
+          className="input input-bordered border-accent"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
       </div>
 
-      {/* Image Upload with Drag-and-Drop and Preview */}
+      {/* Author Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Author</span>
+        </label>
+        <input
+          type="text"
+          placeholder="Author name"
+          className="input input-bordered border-accent"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+        />
+      </div>
+
+      {/* Date Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Date</span>
+        </label>
+        <input
+          type="date"
+          className="input input-bordered border-accent"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </div>
+
+      {/* Excerpt Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Excerpt</span>
+        </label>
+        <textarea
+          className="textarea textarea-bordered"
+          placeholder="Short summary of the blog post..."
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
+        ></textarea>
+      </div>
+
+      {/* Image Upload */}
       <div className="form-control mb-4">
         <label className="label">
           <span className="label-text">Image</span>
         </label>
         <div
           className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
           {!imagePreview ? (
@@ -108,6 +186,8 @@ function BlogPostForm() {
         <textarea
           className="textarea textarea-bordered"
           placeholder="Write your post content..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
         ></textarea>
       </div>
 

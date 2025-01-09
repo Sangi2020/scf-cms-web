@@ -1,24 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import BlogPostForm from "./CreateForm";
 import BlogCard from "./BlogCard";
 import axiosInstance from "../../config/axios";
 
 function BlogsLayout() {
-  // State for blogs, loading, and error
-const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch blogs from API
+  const refreshBlogList = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get("/blog/get-all-blogs");
+      setBlogs(response.data.data);
+    } catch (err) {
+      setError("Failed to load blogs");
+      console.error("Error fetching blogs:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get("https://scf-cms-be-hz4e.onrender.com/api/v1/web/blog/get-all-blogs");
-        console.log(response.data)
-        // Access the 'data' array within the response
-        setBlogs(response.data.data)
+        const response = await axiosInstance.get("/blog/get-all-blogs");
+        setBlogs(response.data.data);
       } catch (err) {
         setError("Failed to load blogs");
         console.error("Error fetching blogs:", err);
@@ -26,9 +35,15 @@ const [blogs, setBlogs] = useState([]);
         setLoading(false);
       }
     };
-  
+
     fetchBlogs();
-  }, []);
+  }, [refreshBlogList]); 
+
+  // Handle blog deletion
+  const handleDeleteBlog = (blogId) => {
+    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+  };
+
 
   return (
     <div className="min-h-screen relative">
@@ -93,7 +108,7 @@ const [blogs, setBlogs] = useState([]);
 ) : (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {blogs.map((blog) => (
-      <BlogCard key={blog.id} blog={blog} />
+      <BlogCard key={blog.id} blog={blog} onDelete={handleDeleteBlog} />
     ))}
   </div>
 )}
@@ -104,7 +119,7 @@ const [blogs, setBlogs] = useState([]);
           <label htmlFor="new-post-drawer" className="drawer-overlay"></label>
           <div className="p-4 md:w-[40%] w-full sm:w-1/2 overflow-y-scroll bg-base-100 h-[85vh] text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg">
             <h2 className="text-lg font-bold mb-4">Add New Post</h2>
-            <BlogPostForm />
+            <BlogPostForm  onBlogCreated={refreshBlogList} />
           </div>
         </div>
       </div>
