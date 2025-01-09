@@ -1,25 +1,26 @@
-import { Eye, MessageSquare, Share2, Trash2, Edit } from "lucide-react";
+import { Eye, MessageSquare, Share2, Trash2, Edit, Pencil } from "lucide-react";
 import React, { useState } from "react";
 import axiosInstance from "../../config/axios";
-
-function BlogCard({ blog, onDelete }) {
+import { toast } from "react-toastify";
+import { format } from "date-fns";
+function BlogCard({ blog, onDelete, onEdit }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleDelete = async () => {
     try {
-      await axiosInstance.delete(`https://scf-cms-be-hz4e.onrender.com/api/v1/web/blog/delete-blog/${blog.id}`);
-      onDelete(blog.id); // Callback to remove from parent list
-      setShowDeleteModal(false);
+      await axiosInstance.delete(`/blog/delete-blog/${blog.id}`);
+      onDelete(blog.id);
+      toast.success("Blog post deleted successfully!");
     } catch (error) {
       console.error("Error deleting blog:", error);
+    } finally {
+      setShowDeleteModal(false); 
     }
   };
 
   return (
     <>
-      <div
-        className="card bg-base-200 transition-all duration-300 overflow-hidden group relative"
-      >
+      <div className="card bg-base-200 transition-all duration-300 overflow-hidden group relative">
         {/* Image Section */}
         <figure className="relative h-48 overflow-hidden">
           <img
@@ -27,50 +28,42 @@ function BlogCard({ blog, onDelete }) {
             alt={blog.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute bottom-4 right-4 p-1 rounded-full bg-base-100">
+          {/* <div className="absolute bottom-4 right-4 p-1 rounded-full bg-base-100">
             <p className="text-xs text-neutral-content">
               {new Date(blog.date).toLocaleDateString()}
             </p>
-          </div>
+          </div> */}
         </figure>
 
         {/* Content Section */}
         <div className="card-body p-4">
           <h2 className="card-title text-neutral-content text-lg font-bold">
-            {blog.title}
+            {blog.title} - {blog.author}
           </h2>
+          
           <p className="text-neutral-content text-sm">{blog.excerpt}</p>
 
           {/* Stats Section */}
           <div className="flex items-center gap-4 mt-2">
             <div className="flex items-center gap-1 text-neutral-content">
-              <MessageSquare className="w-4 h-4" />
-              <span className="text-sm">0</span>
-            </div>
-            <div className="flex items-center gap-1 text-neutral-content">
-              <Eye className="w-4 h-4" />
-              <span className="text-sm">0</span>
-            </div>
-            <div className="flex items-center gap-1 text-neutral-content">
-              <Share2 className="w-4 h-4" />
-              <span className="text-sm">0</span>
+              <span className="text-sm"> {format(new Date(blog.date), "dd MMM, yyyy")}</span>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="absolute bottom-4 right-4 flex gap-2">
-          <button 
-            className="btn btn-xs btn-square btn-ghost"
-            onClick={() => {/* TODO: Implement edit logic */}}
+        <button
+            className="btn btn-sm btn-square btn-ghost"
+            onClick={onEdit}
           >
-            <Edit className="w-4 h-4 text-neutral-content" />
+            <Pencil className="w-6 h-6 text-success" />
           </button>
-          <button 
-            className="btn btn-xs btn-square btn-error"
+          <button
+            className="btn btn-sm btn-square text-white btn-error"
             onClick={() => setShowDeleteModal(true)}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-6 h-6" />
           </button>
         </div>
       </div>

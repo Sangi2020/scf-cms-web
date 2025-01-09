@@ -1,24 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import BlogPostForm from "./CreateForm";
 import BlogCard from "./BlogCard";
 import axiosInstance from "../../config/axios";
 
 function BlogsLayout() {
-  // State for blogs, loading, and error
-const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editBlog, setEditBlog] = useState(null);
+  const [mode , setMode] = useState("add");
 
-  // Fetch blogs from API
+  const refreshBlogList = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get("/blog/get-all-blogs");
+      setBlogs(response.data.data);
+    } catch (err) {
+      setError("Failed to load blogs");
+      console.error("Error fetching blogs:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get("https://scf-cms-be-hz4e.onrender.com/api/v1/web/blog/get-all-blogs");
-        console.log(response.data)
-        // Access the 'data' array within the response
-        setBlogs(response.data.data)
+        const response = await axiosInstance.get("/blog/get-all-blogs");
+        setBlogs(response.data.data);
       } catch (err) {
         setError("Failed to load blogs");
         console.error("Error fetching blogs:", err);
@@ -26,22 +38,47 @@ const [blogs, setBlogs] = useState([]);
         setLoading(false);
       }
     };
-  
+
     fetchBlogs();
-  }, []);
+  }, [refreshBlogList]);
+
+  const handleDeleteBlog = (blogId) => {
+    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+  };
+
+  const handleEditBlog = (blog) => {
+    setEditBlog(blog); // Set the blog data to be edited
+    setMode("edit");
+    setIsDrawerOpen(true); // Open the drawer
+  };
+
+  const handleAddNewPost = () => {
+    setEditBlog("");
+    setMode("add");
+    setIsDrawerOpen(true);
+  };
 
   return (
     <div className="min-h-screen relative">
       {/* Drawer */}
       <div className="drawer drawer-end">
-        <input id="new-post-drawer" type="checkbox" className="drawer-toggle" />
+        <input
+          id="new-post-drawer"
+          type="checkbox"
+          className="drawer-toggle"
+          checked={isDrawerOpen}
+          onChange={() => setIsDrawerOpen(!isDrawerOpen)} // Toggle the drawer
+        />
         <div className="drawer-content">
           {/* Header Section */}
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-neutral-content">Blogs</h1>
-            <label htmlFor="new-post-drawer" className="btn btn-primary gap-2">
+            <button
+              className="btn btn-primary text-white gap-2"
+              onClick={handleAddNewPost} // Trigger add new post action
+            >
               + New post
-            </label>
+            </button>
           </div>
 
           {/* Search and Filter Section */}
@@ -63,48 +100,59 @@ const [blogs, setBlogs] = useState([]);
 
           {/* Blog Grid */}
           {loading ? (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {[...Array(6)].map((_, index) => (
-      <div 
-        key={index} 
-        className="card bg-base-100 animate-pulse transition-all duration-300 ease-in-out transform hover:scale-105"
-      >
-        {/* Image Skeleton */}
-        <div className="h-48 bg-base-100 rounded-3xl transition-colors duration-300"></div>
-        
-        {/* Content Skeleton */}
-        <div className="card-body p-4 space-y-3">
-          <div className="h-4 bg-base-200 w-1/2 transition-colors duration-300"></div>
-          <div className="h-6 bg-base-200 w-3/4 transition-colors duration-300"></div>
-          <div className="h-4 bg-base-200 w-full transition-colors duration-300"></div>
-          
-          {/* Stats Skeleton */}
-          <div className="flex gap-4 mt-4">
-            <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
-            <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
-            <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-) : error ? (
-  <div className="text-center text-red-500">{error}</div>
-) : (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {blogs.map((blog) => (
-      <BlogCard key={blog.id} blog={blog} />
-    ))}
-  </div>
-)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div
+                  key={index}
+                  className="card bg-base-100 animate-pulse transition-all duration-300 ease-in-out transform hover:scale-105"
+                >
+                  {/* Image Skeleton */}
+                  <div className="h-48 bg-base-100 rounded-3xl transition-colors duration-300"></div>
+
+                  {/* Content Skeleton */}
+                  <div className="card-body p-4 space-y-3">
+                    <div className="h-4 bg-base-200 w-1/2 transition-colors duration-300"></div>
+                    <div className="h-6 bg-base-200 w-3/4 transition-colors duration-300"></div>
+                    <div className="h-4 bg-base-200 w-full transition-colors duration-300"></div>
+
+                    {/* Stats Skeleton */}
+                    <div className="flex gap-4 mt-4">
+                      <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
+                      <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
+                      <div className="h-4 bg-base-200 w-1/4 transition-colors duration-300"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500">{error}</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.map((blog) => (
+                <BlogCard
+                  key={blog.id}
+                  blog={blog}
+                  onDelete={handleDeleteBlog}
+                  onEdit={() => handleEditBlog(blog)} // Add edit handler to the card
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Drawer Sidebar */}
         <div className="drawer-side">
           <label htmlFor="new-post-drawer" className="drawer-overlay"></label>
           <div className="p-4 md:w-[40%] w-full sm:w-1/2 overflow-y-scroll bg-base-100 h-[85vh] text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Add New Post</h2>
-            <BlogPostForm />
+            <h2 className="text-lg font-bold mb-4">{editBlog ? 'Edit Post' : 'Add New Post'}</h2>
+            <BlogPostForm
+              onBlogCreated={refreshBlogList}
+              initialData={editBlog}
+              mode = {mode}
+              // need to set drawer to false when form as props
+              setIsDrawerOpen={setIsDrawerOpen}
+            />
           </div>
         </div>
       </div>

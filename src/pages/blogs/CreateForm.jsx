@@ -1,11 +1,38 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { toast } from "react-toastify";
+import axiosInstance from "../../config/axios";
 
-function BlogPostForm() {
-  const [imageFile, setImageFile] = useState(null); // State for the uploaded image file
-  const [imagePreview, setImagePreview] = useState(null); // State for image preview
-  const inputRef = useRef(null); // Ref for file input
+function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [date, setDate] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const inputRef = useRef(null);
 
-  // Handle image selection via input
+  useEffect(() => {
+    if (mode === "edit" && initialData) {
+      // Populate fields with initial data when in edit mode
+      setTitle(initialData.title || "");
+      setAuthor(initialData.author || "");
+      setDate(initialData.date || "");
+      setExcerpt(initialData.excerpt || "");
+      setContent(initialData.content || "");
+      setImagePreview(initialData.image || null);
+    } else if (mode === "add") {
+      // Reset fields for add mode
+      setTitle("");
+      setAuthor("");
+      setDate("");
+      setExcerpt("");
+      setContent("");
+      setImageFile(null);
+      setImagePreview(null);
+    }
+  }, [mode, initialData]);
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -17,18 +44,6 @@ function BlogPostForm() {
     }
   };
 
-  // Handle drag-and-drop upload
-  const handleDragOver = (event) => event.preventDefault();
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  // Remove selected image
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -37,8 +52,70 @@ function BlogPostForm() {
     }
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+  
+    if (!title || !author || !date || !excerpt || !content) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("author", author);
+    formData.append("date", date);
+    formData.append("excerpt", excerpt);
+    formData.append("content", content);
+  
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+  
+    try {
+      let response;
+      if (mode === "add") {
+        // API call for adding a new blog post
+        response = await axiosInstance.post("/blog/create-blog", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        toast.success("Blog post created successfully!");
+      } else if (mode === "edit" && initialData) {
+        response = await axiosInstance.put(
+          `/blog/update-blog/${initialData.id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        setIsDrawerOpen(false);
+        toast.success("Blog post updated successfully!");
+      }
+  
+      if (onBlogCreated) {
+        onBlogCreated();
+      }
+  
+      // Reset form
+      setTitle("");
+      setAuthor("");
+      setDate("");
+      setExcerpt("");
+      setContent("");
+      setImageFile(null);
+      setImagePreview(null);
+      setIsDrawerOpen(false);
+    } catch (error) {
+      console.error("Error handling blog post:", error);
+      toast.error("Failed to save blog post. Please try again.");
+    }
+  };
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       {/* Title Input */}
       <div className="form-control mb-4">
         <label className="label">
@@ -47,19 +124,59 @@ function BlogPostForm() {
         <input
           type="text"
           placeholder="Post title"
-          className="input input-bordered border-accent "
+          className="input input-bordered border-accent"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
       </div>
 
-      {/* Image Upload with Drag-and-Drop and Preview */}
+      {/* Author Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Author</span>
+        </label>
+        <input
+          type="text"
+          placeholder="Author name"
+          className="input input-bordered border-accent"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+        />
+      </div>
+
+      {/* Date Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Date</span>
+        </label>
+        <input
+          type="date"
+          className="input input-bordered border-accent"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </div>
+
+      {/* Excerpt Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Excerpt</span>
+        </label>
+        <textarea
+          className="textarea textarea-bordered"
+          placeholder="Short summary of the blog post..."
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
+        ></textarea>
+      </div>
+
+      {/* Image Upload */}
       <div className="form-control mb-4">
         <label className="label">
           <span className="label-text">Image</span>
         </label>
         <div
           className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
           {!imagePreview ? (
@@ -108,13 +225,15 @@ function BlogPostForm() {
         <textarea
           className="textarea textarea-bordered"
           placeholder="Write your post content..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
         ></textarea>
       </div>
 
       {/* Publish Button */}
       <div className="form-control">
         <button type="submit" className="btn btn-primary">
-          Publish
+          {mode === "add" ? "Publish" : "Update"}
         </button>
       </div>
     </form>
