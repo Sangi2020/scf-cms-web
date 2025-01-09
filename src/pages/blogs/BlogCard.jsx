@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
-function BlogCard({ blog, onDelete }) {
+function BlogCard({ blog, onDelete, onEdit }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleDelete = async () => {
@@ -55,7 +55,7 @@ function BlogCard({ blog, onDelete }) {
         <div className="absolute bottom-4 right-4 flex gap-2">
           <button 
             className="btn btn-xs btn-square btn-ghost"
-            onClick={() => {/* TODO: Implement edit logic */}}
+            onClick={onEdit} // Call onEdit when the edit button is clicked
           >
             <Edit className="w-4 h-4 text-neutral-content" />
           </button>

@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axios";
 
-function BlogPostForm({ onBlogCreated }) {
+function BlogPostForm({ onBlogCreated ,initialData ,mode }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [date, setDate] = useState("");
@@ -11,6 +11,27 @@ function BlogPostForm({ onBlogCreated }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (mode === "edit" && initialData) {
+      // Populate fields with initial data when in edit mode
+      setTitle(initialData.title || "");
+      setAuthor(initialData.author || "");
+      setDate(initialData.date || "");
+      setExcerpt(initialData.excerpt || "");
+      setContent(initialData.content || "");
+      setImagePreview(initialData.image || null);
+    } else if (mode === "add") {
+      // Reset fields for add mode
+      setTitle("");
+      setAuthor("");
+      setDate("");
+      setExcerpt("");
+      setContent("");
+      setImageFile(null);
+      setImagePreview(null);
+    }
+  }, [mode, initialData]);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
