@@ -1,4 +1,4 @@
-import { Eye, MessageSquare, Share2, Trash2, Edit } from "lucide-react";
+import { Eye, MessageSquare, Share2, Trash2, Edit, Pencil } from "lucide-react";
 import React, { useState } from "react";
 import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
@@ -28,11 +28,11 @@ function BlogCard({ blog, onDelete, onEdit }) {
             alt={blog.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute bottom-4 right-4 p-1 rounded-full bg-base-100">
+          {/* <div className="absolute bottom-4 right-4 p-1 rounded-full bg-base-100">
             <p className="text-xs text-neutral-content">
               {new Date(blog.date).toLocaleDateString()}
             </p>
-          </div>
+          </div> */}
         </figure>
 
         {/* Content Section */}
@@ -53,17 +53,17 @@ function BlogCard({ blog, onDelete, onEdit }) {
 
         {/* Action Buttons */}
         <div className="absolute bottom-4 right-4 flex gap-2">
-          <button 
-            className="btn btn-xs btn-square btn-ghost"
-            onClick={onEdit} // Call onEdit when the edit button is clicked
+        <button
+            className="btn btn-sm btn-square btn-ghost"
+            onClick={onEdit}
           >
-            <Edit className="w-4 h-4 text-neutral-content" />
+            <Pencil className="w-6 h-6 text-success" />
           </button>
-          <button 
-            className="btn btn-xs btn-square btn-error"
+          <button
+            className="btn btn-sm btn-square text-white btn-error"
             onClick={() => setShowDeleteModal(true)}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-6 h-6" />
           </button>
         </div>
       </div>

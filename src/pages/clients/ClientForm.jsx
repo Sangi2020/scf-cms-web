@@ -1,38 +1,36 @@
-import React, { useState, useRef } from "react";
-import axios from "axios";
+import React, { useState, useRef, useEffect } from "react";
+import { toast } from "react-toastify";
+import axiosInstance from "../../config/axios";
 
-function ClientForm() {
-  const [imageFile, setImageFile] = useState(null); // State for the uploaded image file
-  const [imagePreview, setImagePreview] = useState(null); // State for image preview
-  const [website, setWebsite] = useState(""); // State for website URL
-  const [title, setTitle] = useState(""); // State for title
-  const [content, setContent] = useState(""); // State for content
-  const inputRef = useRef(null); // Ref for file input
+function ClientForm({ onClientCreated, initialData, mode, setIsDrawerOpen }) {
+  const [title, setTitle] = useState("");
+  const [website, setWebsite] = useState("");
+  const [content, setContent] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const inputRef = useRef(null);
 
-  // Handle image selection via input
+  useEffect(() => {
+    if (mode === "edit" && initialData) {
+      setTitle(initialData.name || "");
+      setWebsite(initialData.website || "");
+      setContent(initialData.description || "");
+      setImagePreview(initialData.logo || null);
+    } else if (mode === "add") {
+      resetForm();
+    }
+  }, [mode, initialData]);
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     } else {
-      setImageFile(null);
-      setImagePreview(null);
+      handleRemoveImage();
     }
   };
 
-  // Handle drag-and-drop upload
-  const handleDragOver = (event) => event.preventDefault();
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  // Remove selected image
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
@@ -41,35 +39,61 @@ function ClientForm() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const resetForm = () => {
+    setTitle("");
+    setWebsite("");
+    setContent("");
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!title || !website || !content) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
 
     const formData = new FormData();
-    formData.append('name', title);
-    formData.append('website', website);
-    formData.append('description', content);
+    formData.append("name", title);
+    formData.append("website", website);
+    formData.append("description", content);
     if (imageFile) {
-      formData.append('logo', imageFile); // Append the image file if it exists
+      formData.append("logo", imageFile);
     }
 
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/admin/client/create-client', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      if (response.data.success) {
-        // Handle success (e.g., reset form, show success message)
-        handleRemoveImage(); // Clear the image after submission
-        setTitle(""); // Reset title input
-        setContent(""); // Reset content input
-        setWebsite(""); // Reset website input
-        // Optionally, redirect or update the UI
-      } else {
-        console.error("Failed to create client:", response.data.message);
+      let response;
+      if (mode === "add") {
+        response = await axiosInstance.post("/client/create-client", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        toast.success("Client created successfully!");
+      } else if (mode === "edit" && initialData) {
+        response = await axiosInstance.put(
+          `/client/update-client/${initialData.id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        toast.success("Client updated successfully!");
       }
+
+      if (onClientCreated) {
+        onClientCreated();
+      }
+
+      resetForm();
+      setIsDrawerOpen(false);
     } catch (error) {
-      console.error("Error creating client:", error);
+      console.error("Error handling client:", error);
+      toast.error("Failed to save client. Please try again.");
     }
   };
 
@@ -82,22 +106,47 @@ function ClientForm() {
         </label>
         <input
           type="text"
-          placeholder="Post title"
+          placeholder="Client name"
+          className="input input-bordered border-accent"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="input input-bordered border-accent"
         />
       </div>
 
-      {/* Image Upload with Drag-and-Drop and Preview */}
+      {/* Website Input */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Image</span>
+          <span className="label-text">Website</span>
+        </label>
+        <input
+          type="url"
+          placeholder="Enter website URL"
+          className="input input-bordered border-accent"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+        />
+      </div>
+
+      {/* Content Input */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Description</span>
+        </label>
+        <textarea
+          className="textarea textarea-bordered"
+          placeholder="Write client description..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        ></textarea>
+      </div>
+
+      {/* Image Upload */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Logo</span>
         </label>
         <div
           className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
           {!imagePreview ? (
@@ -138,37 +187,10 @@ function ClientForm() {
         </div>
       </div>
 
-      {/* Content Input */}
-      <div className="form-control mb-4">
-        <label className="label">
-          <span className="label-text">Content</span>
-        </label>
-        <textarea
-          className="textarea textarea-bordered"
-          placeholder="Write your post content..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        ></textarea>
-      </div>
-
-      {/* Website Input */}
-      <div className="form-control mb-4">
-        <label className="label">
-          <span className="label-text">Website</span>
-        </label>
-        <input
-          type="url"
-          placeholder="Enter website URL"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          className="input input-bordered border-accent"
-        />
-      </div>
-
-      {/* Publish Button */}
+      {/* Submit Button */}
       <div className="form-control">
         <button type="submit" className="btn btn-primary">
-          Publish
+          {mode === "add" ? "Create" : "Update"}
         </button>
       </div>
     </form>
