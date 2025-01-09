@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axios";
 
-function BlogPostForm({ onBlogCreated ,initialData ,mode }) {
+function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [date, setDate] = useState("");
@@ -54,34 +54,51 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    if (!title || !author || !date || !excerpt || !content || !imageFile) {
-      toast.error("Please fill in all fields and upload an image.");
+  
+    if (!title || !author || !date || !excerpt || !content) {
+      toast.error("Please fill in all fields.");
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("title", title);
     formData.append("author", author);
     formData.append("date", date);
     formData.append("excerpt", excerpt);
     formData.append("content", content);
-    formData.append("image", imageFile);
-
+  
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+  
     try {
-      const response = await axiosInstance.post(
-        "/blog/create-blog",
-        formData,
-        {
+      let response;
+      if (mode === "add") {
+        // API call for adding a new blog post
+        response = await axiosInstance.post("/blog/create-blog", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
-      );
-      toast.success("Blog post created successfully!");
-      if (onBlogCreated) {
-        onBlogCreated(); // Call the function to refresh the blog list
+        });
+        toast.success("Blog post created successfully!");
+      } else if (mode === "edit" && initialData) {
+        response = await axiosInstance.put(
+          `/blog/update-blog/${initialData.id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        setIsDrawerOpen(false);
+        toast.success("Blog post updated successfully!");
       }
+  
+      if (onBlogCreated) {
+        onBlogCreated();
+      }
+  
       // Reset form
       setTitle("");
       setAuthor("");
@@ -90,9 +107,10 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode }) {
       setContent("");
       setImageFile(null);
       setImagePreview(null);
+      setIsDrawerOpen(false);
     } catch (error) {
-      console.error("Error creating blog post:", error);
-      toast.error("Failed to create blog post. Please try again.");
+      console.error("Error handling blog post:", error);
+      toast.error("Failed to save blog post. Please try again.");
     }
   };
 
@@ -215,7 +233,7 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode }) {
       {/* Publish Button */}
       <div className="form-control">
         <button type="submit" className="btn btn-primary">
-          Publish
+          {mode === "add" ? "Publish" : "Update"}
         </button>
       </div>
     </form>

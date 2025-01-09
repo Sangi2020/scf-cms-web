@@ -150,6 +150,8 @@ function BlogsLayout() {
               onBlogCreated={refreshBlogList}
               initialData={editBlog}
               mode = {mode}
+              // need to set drawer to false when form as props
+              setIsDrawerOpen={setIsDrawerOpen}
             />
           </div>
         </div>
