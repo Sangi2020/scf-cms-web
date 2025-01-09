@@ -194,10 +194,10 @@ function LoginPage() {
                     </button>
 
                     {/* Sign Up Link */}
-                    <p className="mt-2 text-center text-sm text-gray-200">
+                    {/* <p className="mt-2 text-center text-sm text-gray-200">
                         Don't have an account?{' '}
                         <a href="/signup" className="font-medium text-blue-300 hover:text-blue-500">Sign up</a>
-                    </p>
+                    </p> */}
                 </form>
             </div>
         </div>

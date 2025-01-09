@@ -104,7 +104,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
             items: [
                 { name: 'Users', path: '/users', icon: Users,role: 'superadmin'  },
                 { name: 'Team Members', path: '/team', icon: Users, count: count.team },
-                { name: 'Roles & Permissions', path: '/roles', icon: Lock },
+                // { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
         },
         {
@@ -123,7 +123,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 // { name: 'SEO', path: '/seo', icon: Globe },
                 { name: 'Mail Config', path: '/mail-config', icon: MailIcon },
                 { name: 'Settings', path: '/settings', icon: Settings },
-                { name: 'Help & Docs', path: '/help', icon: HelpCircle }
+                // { name: 'Help & Docs', path: '/help', icon: HelpCircle }
             ]
         },
     ];
