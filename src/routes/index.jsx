@@ -24,6 +24,11 @@ import DocumentPage from '../pages/documents/documentPage.jsx'
 import SeoLayout from '../pages/seo/SEOLayout.jsx';
 import Profile from '../pages/profile/Profile.jsx';
 import Error404 from '../pages/error/Error404.jsx';
+import Error400 from '../pages/error/Error400.jsx';
+import Error401 from '../pages/error/Error401.jsx';
+import Error403 from '../pages/error/Error403.jsx';
+import Error500 from '../pages/error/Error500.jsx';
+import Error503 from '../pages/error/Error503.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -44,7 +49,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'users',
-        element: <ProtectedRoute><UserList /></ProtectedRoute>,
+        element: <ProtectedRoute role={['superadmin']}><UserList /></ProtectedRoute>,
       },
       {
         path: 'users/:id',
@@ -120,5 +125,28 @@ export const router = createBrowserRouter([
     path:'/forgot-password' ,
     element: <ForgotPassword />
   },
-  { path: '*', element: <Error404 /> },
+  {
+    path: '/error/400',
+    element: <Error400 />
+  },
+  {
+    path: '/error/401',
+    element: <Error401 />
+  },
+  {
+    path: '/error/403',
+    element: <Error403 />
+  },
+  {
+    path: '/error/500',
+    element: <Error500 />
+  },
+  {
+    path: '/error/503',
+    element: <Error503 />
+  },
+  { 
+    path: '*', 
+    element: <Error404 /> 
+  },
 ]);
