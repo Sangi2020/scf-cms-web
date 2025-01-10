@@ -125,7 +125,7 @@ const FAQPage = () => {
                           {...provided.dragHandleProps}
                           className="bg-base-200 p-4 rounded-lg flex justify-between items-center"
                         >
-                          <div className="flex-1">
+                          <div className="flex-1 select-none">
                             <div className="text-xl font-bold text-accent">{faq.question}</div>
                             <p className="text-base-content">{faq.answer}</p>
                             <span className="text-sm opacity-70 ml-2">Order: {faq.order}</span>
