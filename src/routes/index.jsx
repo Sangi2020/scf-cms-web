@@ -23,6 +23,7 @@ import MailConfig from '../components/mail-config/MailConfig';
 import DocumentPage from '../pages/documents/documentPage.jsx'
 import SeoLayout from '../pages/seo/SEOLayout.jsx';
 import Profile from '../pages/profile/Profile.jsx';
+import Error404 from '../pages/error/Error404.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -118,5 +119,6 @@ export const router = createBrowserRouter([
   {
     path:'/forgot-password' ,
     element: <ForgotPassword />
-  }
+  },
+  { path: '*', element: <Error404 /> },
 ]);

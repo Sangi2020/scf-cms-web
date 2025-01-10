@@ -97,13 +97,13 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'Clients', path: '/clients', icon: Briefcase, count: count.clients },
                 { name: 'Documents', path: '/documents', icon: FileText },
                 { name: 'SEO Editor', path: '/seo-editor', icon: Layers },
+                { name: 'Team Members', path: '/team', icon: Users, count: count.team },
             ]
         },
         {
             section: "User Management",
             items: [
-                { name: 'Users', path: '/users', icon: Users,role: 'superadmin'  },
-                { name: 'Team Members', path: '/team', icon: Users, count: count.team },
+                { name: 'Users', path: '/users', icon: Users,role: 'superadmin'  },         
                 // { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
         },
