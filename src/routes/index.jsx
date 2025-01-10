@@ -29,6 +29,7 @@ import Error401 from '../pages/error/Error401.jsx';
 import Error403 from '../pages/error/Error403.jsx';
 import Error500 from '../pages/error/Error500.jsx';
 import Error503 from '../pages/error/Error503.jsx';
+import FAQPage from '../pages/faq/FAQPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -114,6 +115,10 @@ export const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProtectedRoute><Profile /></ProtectedRoute>,
+      },
+      {
+        path: 'faqs',
+        element: <ProtectedRoute><FAQPage /></ProtectedRoute>,
       }
     ],
   },

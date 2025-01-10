@@ -98,6 +98,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'Documents', path: '/documents', icon: FileText },
                 { name: 'SEO Editor', path: '/seo-editor', icon: Layers },
                 { name: 'Team Members', path: '/team', icon: Users, count: count.team },
+                { name: 'FAQs', path: '/faqs', icon: FileText, },
             ]
         },
         {

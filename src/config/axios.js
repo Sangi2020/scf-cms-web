@@ -29,30 +29,29 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log(response, 'response');
     return response;
   },
   (error) => {
     if (error.response) {
       const { status } = error.response;
       switch (status) {
-        case 400:
-          window.location.href = '/error/400';
-          break;
-        case 401:
-          localStorage.removeItem('user');
-          sessionStorage.removeItem('user');
-          window.location.href = '/login';
-          break;
-        case 403:
-          window.location.href = '/error/403';
-          break;
-        case 500:
-          window.location.href = '/error/500';
-          break;
-        case 503:
-          window.location.href = '/error/503';
-          break;
+        // case 400:
+        //   window.location.href = '/error/400';
+        //   break;
+        // case 401:
+        //   localStorage.removeItem('user');
+        //   sessionStorage.removeItem('user');
+        //   window.location.href = '/login';
+        //   break;
+        // case 403:
+        //   window.location.href = '/error/403';
+        //   break;
+        // case 500:
+        //   window.location.href = '/error/500';
+        //   break;
+        // case 503:
+        //   window.location.href = '/error/503';
+        //   break;
         default:
           break;
       }
