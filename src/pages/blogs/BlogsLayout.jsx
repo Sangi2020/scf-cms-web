@@ -10,7 +10,8 @@ function BlogsLayout() {
   const [error, setError] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editBlog, setEditBlog] = useState(null);
-  const [mode , setMode] = useState("add");
+  const [mode, setMode] = useState("add");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const refreshBlogList = useCallback(async () => {
     try {
@@ -40,16 +41,16 @@ function BlogsLayout() {
     };
 
     fetchBlogs();
-  }, [refreshBlogList]);
+  }, []);
 
   const handleDeleteBlog = (blogId) => {
     setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
   };
 
   const handleEditBlog = (blog) => {
-    setEditBlog(blog); // Set the blog data to be edited
+    setEditBlog(blog);
     setMode("edit");
-    setIsDrawerOpen(true); // Open the drawer
+    setIsDrawerOpen(true);
   };
 
   const handleAddNewPost = () => {
@@ -57,6 +58,11 @@ function BlogsLayout() {
     setMode("add");
     setIsDrawerOpen(true);
   };
+
+  const filteredBlogs = blogs.filter((blog) =>
+    blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    blog.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen relative">
@@ -67,7 +73,7 @@ function BlogsLayout() {
           type="checkbox"
           className="drawer-toggle"
           checked={isDrawerOpen}
-          onChange={() => setIsDrawerOpen(!isDrawerOpen)} // Toggle the drawer
+          onChange={() => setIsDrawerOpen(!isDrawerOpen)}
         />
         <div className="drawer-content">
           {/* Header Section */}
@@ -75,7 +81,7 @@ function BlogsLayout() {
             <h1 className="text-3xl font-bold text-neutral-content">Blogs</h1>
             <button
               className="btn btn-primary text-white gap-2"
-              onClick={handleAddNewPost} // Trigger add new post action
+              onClick={handleAddNewPost}
             >
               + New post
             </button>
@@ -89,13 +95,15 @@ function BlogsLayout() {
                 type="text"
                 placeholder="Search post..."
                 className="input input-bordered w-full focus:outline-none pl-10 bg-base-100 text-neutral-content"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <select className="select select-bordered focus:outline-none bg-base-100 text-neutral-content">
+            {/* <select className="select select-bordered focus:outline-none bg-base-100 text-neutral-content">
               <option>Latest</option>
               <option>Most Viewed</option>
               <option>Most Shared</option>
-            </select>
+            </select> */}
           </div>
 
           {/* Blog Grid */}
@@ -129,12 +137,12 @@ function BlogsLayout() {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blogs.map((blog) => (
+              {filteredBlogs.map((blog) => (
                 <BlogCard
                   key={blog.id}
                   blog={blog}
                   onDelete={handleDeleteBlog}
-                  onEdit={() => handleEditBlog(blog)} // Add edit handler to the card
+                  onEdit={() => handleEditBlog(blog)}
                 />
               ))}
             </div>
@@ -145,12 +153,13 @@ function BlogsLayout() {
         <div className="drawer-side">
           <label htmlFor="new-post-drawer" className="drawer-overlay"></label>
           <div className="p-4 md:w-[40%] w-full sm:w-1/2 overflow-y-scroll bg-base-100 h-[85vh] text-base-content absolute bottom-4 right-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-4">{editBlog ? 'Edit Post' : 'Add New Post'}</h2>
+            <h2 className="text-lg font-bold mb-4">
+              {editBlog ? "Edit Post" : "Add New Post"}
+            </h2>
             <BlogPostForm
               onBlogCreated={refreshBlogList}
               initialData={editBlog}
-              mode = {mode}
-              // need to set drawer to false when form as props
+              mode={mode}
               setIsDrawerOpen={setIsDrawerOpen}
             />
           </div>
