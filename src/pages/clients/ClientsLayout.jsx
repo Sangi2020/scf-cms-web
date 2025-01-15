@@ -11,6 +11,7 @@ function ClientsLayout() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editClient, setEditClient] = useState(null);
   const [mode, setMode] = useState("add");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch Clients
   const refreshClientList = useCallback(async () => {
@@ -51,6 +52,13 @@ function ClientsLayout() {
     );
   };
 
+  // Filter clients based on search query
+  const filteredClients = clients.filter((client) =>
+    client.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.company?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen relative">
       {/* Drawer */}
@@ -82,6 +90,8 @@ function ClientsLayout() {
                 type="text"
                 placeholder="Search client..."
                 className="input input-bordered w-full focus:outline-none pl-10 bg-base-100 text-neutral-content"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
@@ -110,7 +120,7 @@ function ClientsLayout() {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {clients.map((client) => (
+              {filteredClients.map((client) => (
                 <ClientCard
                   key={client.id}
                   client={client}
