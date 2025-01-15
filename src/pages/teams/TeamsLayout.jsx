@@ -56,7 +56,7 @@ const TeamManagement = () => {
 
   const handleDelete = async () => {
     try {
-      await axiosInstance.delete(`/team/delete/${memberToDelete.id}`);
+      await axiosInstance.delete(`/team/delete-team/${memberToDelete.id}`);
       await fetchTeamMembers();
       setIsModalOpen(false);
       setMemberToDelete(null);
@@ -72,14 +72,14 @@ const TeamManagement = () => {
       formDataToSend.append(key, formData[key]);
     });
     if (selectedFile) {
-      formDataToSend.append('file', selectedFile);
+      formDataToSend.append('image', selectedFile);
     }
 
     try {
       if (isEditing) {
         await axiosInstance.put(`/team/update-team/${formData.id}`, formDataToSend);
       } else {
-        await axiosInstance.post('/team/add', formDataToSend);
+        await axiosInstance.post('/team/add-team', formDataToSend);
       }
       await fetchTeamMembers();
       setIsDrawerOpen(false);
