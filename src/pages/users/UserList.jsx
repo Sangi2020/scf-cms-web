@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { toast } from 'react-toastify';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import axiosInstance from '../../config/axios';
+import DeleteConfirmModal from '../../components/ui/modal/DeleteConfirmModal';
 
 // Validation Schema using Yup
 const userSchema = yup.object().shape({
@@ -281,41 +282,15 @@ const UserList = () => {
         </form>
       </dialog>
 
-      {/* Delete Confirmation Modal */}
-      <dialog id="delete_modal" className={`modal ${isDeleteModalOpen ? 'modal-open' : ''}`}>
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Confirm Delete</h3>
-          <p className="py-4">
-            Are you sure you want to delete user "{userToDelete?.name}"? This action cannot be undone.
-          </p>
-          <div className="modal-action">
-            <button 
-              className="btn btn-ghost" 
-              onClick={() => setIsDeleteModalOpen(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </button>
-            <button 
-              className="btn btn-error" 
-              onClick={handleConfirmDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
-            </button>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={() => setIsDeleteModalOpen(false)}>close</button>
-        </form>
-      </dialog>
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete user "${userToDelete?.name}"? This action cannot be undone.`}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

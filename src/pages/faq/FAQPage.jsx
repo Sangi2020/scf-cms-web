@@ -4,14 +4,15 @@ import axiosInstance from '../../config/axios';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import FAQForm from './FAQForm';
 import { toast } from 'react-toastify';
+import DeleteConfirmModal from '../../components/ui/modal/DeleteConfirmModal';
 
 const FAQPage = () => {
   const [faqs, setFaqs] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editFAQ, setEditFAQ] = useState(null);
   const [mode, setMode] = useState("add");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false); // Loading state for delete
 
   const refreshFAQList = useCallback(async () => {
     try {
@@ -43,17 +44,20 @@ const FAQPage = () => {
   };
 
   const handleDeleteFAQ = async (id) => {
+    setIsDeleting(true); // Start loading state
     try {
       const response = await axiosInstance.delete(`/qna/delete-faq/${id}`);
       const result = response.data;
       if (result.success) {
         setFaqs(faqs.filter(faq => faq.id !== id));
-        setShowDeleteModal(false);
+        setFaqToDelete(null);
         toast.success('FAQ deleted successfully');
       }
     } catch (err) {
       console.error('Error deleting FAQ:', err);
       toast.error('Failed to delete FAQ');
+    } finally {
+      setIsDeleting(false); // End loading state
     }
   };
 
@@ -139,10 +143,7 @@ const FAQPage = () => {
                             </button>
                             <button
                               className="btn btn-sm btn-square text-white btn-error"
-                              onClick={() => {
-                                setFaqToDelete(faq.id);
-                                setShowDeleteModal(true);
-                              }}
+                              onClick={() => setFaqToDelete(faq.id)}
                             >
                               <Trash2 className="w-6 h-6" />
                             </button>
@@ -172,26 +173,15 @@ const FAQPage = () => {
         </div>
       </div>
 
-      {showDeleteModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="text-lg">Are you sure you want to delete this FAQ?</h3>
-            <div className="flex justify-end space-x-4 mt-4">
-              <button
-                className="btn btn-sm btn-ghost"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-sm btn-error"
-                onClick={() => handleDeleteFAQ(faqToDelete)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+      {faqToDelete && (
+        <DeleteConfirmModal
+          isOpen={faqToDelete !== null}
+          onClose={() => setFaqToDelete(null)}
+          onConfirm={() => handleDeleteFAQ(faqToDelete)}
+          title="Delete FAQ?"
+          message="Are you sure you want to delete this FAQ? This action cannot be undone."
+          isLoading={isDeleting} 
+        />
       )}
     </div>
   );

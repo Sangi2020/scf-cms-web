@@ -143,6 +143,7 @@ function ClientsLayout() {
               onClientUpdated={refreshClientList}
               initialData={editClient}
               mode={mode}
+              refreshClientList={refreshClientList}
               setIsDrawerOpen={setIsDrawerOpen}
             />
           </div>
