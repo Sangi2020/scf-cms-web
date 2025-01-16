@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, Trash2, Plus, Linkedin } from 'lucide-react';
 import axiosInstance from '../../config/axios';
+import DeleteConfirmModal from '../../components/ui/modal/DeleteConfirmModal';
+import { toast, } from 'react-toastify';
 
 const TeamManagement = () => {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -18,14 +20,17 @@ const TeamManagement = () => {
     order: '',
     isActive: true
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchTeamMembers = async () => {
     try {
+      setIsLoading(true);
       const response = await axiosInstance.get('/team/all-team');
       setTeamMembers(response.data.team);
-      console.log(response.data,"dataa");
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching team members:', error);
+      setIsLoading(false);;
     }
   };
 
@@ -56,19 +61,24 @@ const TeamManagement = () => {
 
   const handleDelete = async () => {
     try {
+      setIsLoading(true);
       await axiosInstance.delete(`/team/delete-team/${memberToDelete.id}`);
       await fetchTeamMembers();
       setIsModalOpen(false);
       setMemberToDelete(null);
+      setIsLoading(false);
+      toast.success(`Deleted ${memberToDelete.name} successfully!`);
     } catch (error) {
       console.error('Error deleting team member:', error);
+      setIsLoading(false);
+      toast.error('Failed to delete team member.');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
       formDataToSend.append(key, formData[key]);
     });
     if (selectedFile) {
@@ -76,15 +86,21 @@ const TeamManagement = () => {
     }
 
     try {
+      setIsLoading(true);
       if (isEditing) {
         await axiosInstance.put(`/team/update-team/${formData.id}`, formDataToSend);
+        toast.success('Team member updated successfully!');
       } else {
         await axiosInstance.post('/team/add-team', formDataToSend);
+        toast.success('Team member added successfully!');
       }
       await fetchTeamMembers();
       setIsDrawerOpen(false);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error saving team member:', error);
+      setIsLoading(false);
+      toast.error('Failed to save team member.');
     }
   };
 
@@ -135,9 +151,9 @@ const TeamManagement = () => {
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Team Management</h1>
-        <button className="btn btn-primary" onClick={handleAdd}>
+        <button className="btn btn-primary" onClick={handleAdd} disabled={isLoading}>
           <Plus className="h-5 w-5" />
-          Add Member
+          {isLoading ? 'Loading...' : 'Add Member'}
         </button>
       </div>
 
@@ -214,8 +230,8 @@ const TeamManagement = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Save
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save'}
                 </button>
               </div>
             </form>
@@ -224,29 +240,14 @@ const TeamManagement = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-base-200 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">
-              Confirm delete {memberToDelete?.name}?
-            </h3>
-            <div className="flex justify-end gap-2">
-              <button
-                className="btn btn-ghost"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-error"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDelete}
+        title={`Delete ${memberToDelete?.name}?`}
+        message={`Are you sure you want to delete ${memberToDelete?.name}? This action cannot be undone.`}
+        isLoading={isLoading}
+      />
     </div>
   );
 };

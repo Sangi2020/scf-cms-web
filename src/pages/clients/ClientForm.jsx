@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axios";
 
-function ClientForm({ onClientCreated, initialData, mode, setIsDrawerOpen }) {
+function ClientForm({ onClientCreated, refreshClientList, initialData, mode, setIsDrawerOpen }) {
   const [title, setTitle] = useState("");
   const [website, setWebsite] = useState("");
   const [content, setContent] = useState("");
@@ -64,16 +64,15 @@ function ClientForm({ onClientCreated, initialData, mode, setIsDrawerOpen }) {
     }
 
     try {
-      let response;
       if (mode === "add") {
-        response = await axiosInstance.post("/client/create-client", formData, {
+        await axiosInstance.post("/client/create-client", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
         toast.success("Client created successfully!");
       } else if (mode === "edit" && initialData) {
-        response = await axiosInstance.put(
+        await axiosInstance.put(
           `/client/update-client/${initialData.id}`,
           formData,
           {
@@ -85,8 +84,8 @@ function ClientForm({ onClientCreated, initialData, mode, setIsDrawerOpen }) {
         toast.success("Client updated successfully!");
       }
 
-      if (onClientCreated) {
-        onClientCreated();
+      if (refreshClientList) {
+        refreshClientList();
       }
 
       resetForm();
