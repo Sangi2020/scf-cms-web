@@ -17,7 +17,7 @@ import TeamManagement from "../pages/teams/TeamsLayout";
 import PageLayout from '../pages/webpages/PageLayout';
 import HelpDocumentation from '../pages/help/Help';
 import Newsletter from '../pages/newsletter/Newsletter';
-import ProtectedRoute from  '../routes/ProtectedRoute'
+import ProtectedRoute from '../routes/ProtectedRoute'
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import MailConfig from '../components/mail-config/MailConfig';
 import DocumentPage from '../pages/documents/documentPage.jsx'
@@ -30,6 +30,8 @@ import Error403 from '../pages/error/Error403.jsx';
 import Error500 from '../pages/error/Error500.jsx';
 import Error503 from '../pages/error/Error503.jsx';
 import FAQPage from '../pages/faq/FAQPage.jsx';
+import OrganizationDetails from '../pages/organization-details/OrganizationDetails.jsx';
+
 
 export const router = createBrowserRouter([
   {
@@ -102,7 +104,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'mail-config',
-        element: <ProtectedRoute><MailConfig/></ProtectedRoute>,
+        element: <ProtectedRoute><MailConfig /></ProtectedRoute>,
       },
       {
         path: '/documents',
@@ -119,6 +121,10 @@ export const router = createBrowserRouter([
       {
         path: 'faqs',
         element: <ProtectedRoute><FAQPage /></ProtectedRoute>,
+      },
+      {
+        path: 'organization-details',
+        element: <ProtectedRoute><OrganizationDetails /></ProtectedRoute>,
       }
     ],
   },
@@ -127,7 +133,7 @@ export const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path:'/forgot-password' ,
+    path: '/forgot-password',
     element: <ForgotPassword />
   },
   {
@@ -150,8 +156,8 @@ export const router = createBrowserRouter([
     path: '/error/503',
     element: <Error503 />
   },
-  { 
-    path: '*', 
-    element: <Error404 /> 
+  {
+    path: '*',
+    element: <Error404 />
   },
 ]);
