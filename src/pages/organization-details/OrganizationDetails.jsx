@@ -11,7 +11,7 @@ const organizationSchema = yup.object().shape({
   email: yup.string().email('Enter a valid email address'),
   location: yup.string(),
   mapUrl: yup.string(),
-  phone: yup.string().matches(/^\d+$/, 'Phone must contain only numbers'),
+  phone: yup.string().matches(/^\+?\d+$/, 'Invalid Phone')
 });
 
 const OrganizationDetails = () => {
@@ -22,38 +22,33 @@ const OrganizationDetails = () => {
 
   const {
     register,
-    setValue,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm({
     resolver: yupResolver(organizationSchema),
-    defaultValues: {
-      email: '',
-      location: '',
-      mapUrl: '',
-      phone: ''
-    }
+    mode: 'onChange',
   });
 
   // Fetch existing organization details
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axiosInstance.get('/company/settings');
-        // console.log('Fetched data:', response.data);
-
-
-        Object.keys(data).forEach((key) => {
-          if (key !== 'id') {
-            setValue(key, data[key]);
-          }
+        const response = await axiosInstance.get('/company/settings');// Debug log
+    
+        const organizationData = response.data.data;
+      
+        reset({
+          email: organizationData.email || '',
+          location: organizationData.location || '',
+          mapUrl: organizationData.mapUrl || '',
+          phone: organizationData.phone || ''
         });
-        // setConfigId(data.id);
-        // setIsEnabled(true);
-
-
-
+        
+        // Set logo preview if exists
+        if (organizationData.logo) {
+          setImagePreview(organizationData.logo);
+        }
       } catch (error) {
         console.error('Error fetching organization details:', error);
         toast.error('Failed to load organization details');
@@ -61,9 +56,9 @@ const OrganizationDetails = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [reset]);
+  }, []); // Keep empty dependency array
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -86,50 +81,46 @@ const OrganizationDetails = () => {
     }
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (formData) => {
     setIsLoading(true);
-    const formData = new FormData();
-
-    // Append all form fields
-    formData.append('email', data.email);
-    formData.append('location', data.location);
-    formData.append('mapUrl', data.mapUrl);
-    formData.append('phone', data.phone);
-
-    // Append logo if changed
+    const submitData = new FormData();
+  
+    // Append all form data, including empty/null values
+    Object.entries(formData).forEach(([key, value]) => {
+      submitData.append(key, value === undefined ? '' : value); // Append empty string for undefined
+    });
+  
+    // If there is a logo file, append it
     if (logoFile) {
-      formData.append('logo', logoFile);
+      submitData.append('logo', logoFile);
     }
-
+  
     const toastId = toast.loading('Saving organization details...');
-
+  
     try {
-      await axiosInstance.post('/company/settings', formData, {
+      const response = await axiosInstance.post('/company/settings', submitData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-
+  
       toast.update(toastId, {
         render: 'Organization details saved successfully',
         type: 'success',
         isLoading: false,
         autoClose: 3000,
       });
-
-      // Refresh the data
-      const response = await axiosInstance.get('/company/settings');
-      if (response.data) {
-        reset({
-          email: response.data.email || '',
-          location: response.data.location || '',
-          mapUrl: response.data.mapUrl || '',
-          phone: response.data.phone || '',
-        });
-
-        if (response.data.logo) {
-          setImagePreview(response.data.logo);
-        }
+  
+      const updatedData = response.data.data;
+      reset({
+        email: updatedData.email || '',
+        location: updatedData.location || '',
+        mapUrl: updatedData.mapUrl || '',
+        phone: updatedData.phone || '',
+      });
+  
+      if (updatedData.logo) {
+        setImagePreview(updatedData.logo);
       }
     } catch (error) {
       console.error('Error saving organization details:', error);
@@ -144,14 +135,6 @@ const OrganizationDetails = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-6 bg-base-100 rounded-lg space-y-6 flex justify-center items-center">
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 bg-base-100 rounded-lg space-y-6">
       <div className="flex items-center gap-3">
@@ -161,13 +144,13 @@ const OrganizationDetails = () => {
       <div className="bg-base-200 rounded-lg shadow">
         <form onSubmit={handleSubmit(onSubmit)} className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <div className="form-control mb-4">
+            {/* Image Upload Section */}
+            <div className="form-control col-span-1 md:col-span-2 flex justify-center mb-4">
               <label className="label">
                 <span className="label-text">Logo</span>
               </label>
               <div
-                className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
+                className="border-2 w-full md:w-96 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100"
                 onClick={() => inputRef.current?.click()}
               >
                 {!imagePreview ? (
@@ -184,10 +167,10 @@ const OrganizationDetails = () => {
                   </>
                 ) : (
                   <div className="relative">
-                    <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg shadow-lg" />
+                    <img src={imagePreview} alt="Preview" className="w-full h-32 rounded-lg shadow-lg" />
                     <button
                       type="button"
-                      className="absolute top-2 right-2 btn btn-xs btn-error"
+                      className="absolute top-2 right-0 btn btn-xs btn-error"
                       onClick={handleRemoveImage}
                     >
                       Remove
@@ -204,6 +187,7 @@ const OrganizationDetails = () => {
               </div>
             </div>
 
+            {/* Other Form Fields */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Email</span>
@@ -215,6 +199,19 @@ const OrganizationDetails = () => {
                 {...register('email')}
               />
               {errors.email && <span className="text-red-500 text-sm mt-1">{errors.email.message}</span>}
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Phone</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: 1234567890"
+                className={`input input-bordered ${errors.phone ? 'input-error' : ''}`}
+                {...register('phone')}
+              />
+              {errors.phone && <span className="text-red-500 text-sm mt-1">{errors.phone.message}</span>}
             </div>
 
             <div className="form-control">
@@ -243,26 +240,16 @@ const OrganizationDetails = () => {
               {errors.mapUrl && <span className="text-red-500 text-sm mt-1">{errors.mapUrl.message}</span>}
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Phone</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: 1234567890"
-                className={`input input-bordered ${errors.phone ? 'input-error' : ''}`}
-                {...register('phone')}
-              />
-              {errors.phone && <span className="text-red-500 text-sm mt-1">{errors.phone.message}</span>}
-            </div>
+            
           </div>
-          <div className="mt-6 flex justify-end">
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
-              disabled={isLoading}
+          <div className="flex justify-end mt-6">
+            <button
+              type="submit"
+              className={`btn ${isLoading ? 'btn-disabled' : 'btn-primary'} ${
+                isLoading ? 'loading' : ''
+              }`}
             >
-              {isLoading ? 'Saving...' : 'Save'}
+              Save
             </button>
           </div>
         </form>
