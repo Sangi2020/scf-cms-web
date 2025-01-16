@@ -26,7 +26,8 @@ import {
     Layers,
     Database,
     Shield,
-    MailIcon
+    MailIcon,
+    Info
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -99,12 +100,13 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'SEO Editor', path: '/seo-editor', icon: Layers },
                 { name: 'Team Members', path: '/team', icon: Users, count: count.team },
                 { name: 'FAQs', path: '/faqs', icon: FileText, },
+                { name: 'Organization Details', path: '/organization-details', icon: Info, },
             ]
         },
         {
             section: "User Management",
             items: [
-                { name: 'Users', path: '/users', icon: Users,role: 'superadmin'  },         
+                { name: 'Users', path: '/users', icon: Users, role: 'superadmin' },
                 // { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
         },
