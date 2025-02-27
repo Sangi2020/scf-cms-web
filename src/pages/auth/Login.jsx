@@ -53,10 +53,13 @@ function LoginPage() {
             const response = await axiosInstance.post('/auth/login', data);
             const { token, user } = response.data;
             login(token, user.role, data.rememberMe);
-            navigate('/');
+             navigate('/');
         } catch (error) {
             setError(error.response?.data?.message || 'Login failed');
-            reset({ password: '' });
+            //  reset({ password: '' });
+            setTimeout(()=>{
+                setError("")
+            },3000)
         } finally {
             setLoading(false);
         }
