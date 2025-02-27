@@ -31,9 +31,7 @@ axiosInstance.interceptors.response.use(
   (response) => {    
     return response;
   },
-  (error) => {  
-    console.log(error.response,'errror');
-      
+  (error) => {        
     if (error.response) {
       
       const { status } = error.response;
