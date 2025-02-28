@@ -11,7 +11,7 @@ const SpecialSymbol = ({ children }) => {
 
     useEffect(() => {
         if (invalidPattern.test(location.pathname)) {
-            navigate('/error/401', { replace: true }); // Redirect to 401 page
+            navigate('/error/400', { replace: true }); // Redirect to 401 page
         }
     }, [location.pathname, navigate]);
 
