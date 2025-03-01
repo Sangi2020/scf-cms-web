@@ -4,7 +4,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 const subURL = import.meta.env.VITE_API_SUB_URL;
 
 const axiosInstance = axios.create({
-  baseURL: "https://scf-cms-be-p7i0.onrender.com" + "/api/v1/admin",
+  baseURL: baseURL + subURL,
 });
 
 // Request Interceptor
@@ -28,11 +28,12 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => {
+  (response) => {    
     return response;
   },
-  (error) => {
+  (error) => {        
     if (error.response) {
+      
       const { status } = error.response;
       switch (status) {
         case 400:
@@ -41,7 +42,6 @@ axiosInstance.interceptors.response.use(
         case 401:
           localStorage.removeItem('user');
           sessionStorage.removeItem('user');
-          window.location.href = '/login';
           break;
         case 403:
           window.location.href = '/error/403';
