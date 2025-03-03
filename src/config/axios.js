@@ -4,7 +4,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 const subURL = import.meta.env.VITE_API_SUB_URL;
 
 const axiosInstance = axios.create({
-  baseURL: "https://scf-cms-be-p7i0.onrender.com" + "/api/v1/admin",
+  baseURL: "http://localhost:8080" + "/api/v1/admin",
 });
 
 // Request Interceptor
