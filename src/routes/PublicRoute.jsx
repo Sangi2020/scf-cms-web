@@ -2,9 +2,12 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ children, role = null }) => {
+const PublicRoute = ({ children }) => {
     const { authState } = useAuth();
     const location = useLocation();
+    
+    // Redirect location (where to send after login)
+    const from = location.state?.from || '/';
     
     // Check for special characters in URL
     const hasInvalidChars = () => {
@@ -23,22 +26,21 @@ const ProtectedRoute = ({ children, role = null }) => {
         );
     };
     
+    // Show loading screen while checking authentication
+ 
+    
     // First check for invalid URL characters
     if (hasInvalidChars()) {
         return <Navigate to="/error/400" replace />;
     }
     
-    // Then check authentication
-    if (!authState.token) {
-        return <Navigate to="/login" replace />;
+    // If user is already authenticated, redirect to dashboard
+    if (authState.token) {
+        return <Navigate to={from} replace />;
     }
     
-    // Finally check role permissions
-    if (role && !role.includes(authState.role)) {
-        return <Navigate to="/error/403" replace />;
-    }
-    
+    // Otherwise, show the login page
     return children;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;
