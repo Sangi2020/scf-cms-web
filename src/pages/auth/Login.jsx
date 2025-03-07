@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-
+import BackgroundImage from '../../assets/images/bg-img.jpg';
 import { Eye, EyeOff, Mail, Lock, Loader, X } from 'lucide-react';
 import axiosInstance from '../../config/axios';
 import { useAuth } from '../../context/AuthContext';
+import playNotificationSound from '../../utils/playNotification';
+import BubbleAnimation from '../../components/ui/Bubble';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -52,27 +54,29 @@ function LoginPage() {
         try {
             const response = await axiosInstance.post('/auth/login', data);
             const { token, user } = response.data;
+            playNotificationSound()
             login(token, user.role, data.rememberMe);
-             navigate('/');
+            navigate('/');
         } catch (error) {
             setError(error.response?.data?.message || 'Login failed');
-            //  reset({ password: '' });
-            setTimeout(()=>{
-                setError("")
-            },3000)
+            setTimeout(() => {
+                setError('');
+            }, 2000)
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{backgroundImage:"url('https://avatars.mds.yandex.net/i?id=7411ebdd43f4443f7d737e2054c9549d_l-4507747-images-thumbs&ref=rim&n=13&w=2560&h=1457')"}} className="min-h-screen bg-cover bg-center w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-black/70 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+        <div style={{ backgroundImage: `url(${BackgroundImage})` }} className=" relative min-h-screen bg-cover bg-center w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+           <BubbleAnimation/>
+            <div className='inset-0 absolute  bg-black/10 backdrop-blur-sm'></div>
+            <div className="max-w-md w-full space-y-8 bg-stone-100 bg-opacity-20 z-[999] p-8 rounded-xl shadow-lg">
                 <div className="flex justify-between flex-wrap"><div className="text-center">
                     <h2 className="text-3xl font-extrabold text-gray-200">Welcome back</h2>
-                    <p className="mt-2 text-sm text-gray-200">Please sign in to your account</p>
+                    <p className="mt-2 text-sm text-gray-200">Sign in to your account</p>
                 </div>
-                <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" className='h-14 rounded-sm w-auto' alt="" /></div>
+                    <img src="https://www.scfstrategies.com/_next/image?url=%2Fimages%2Flogo.png&w=96&q=75" className='h-14 rounded-sm w-auto' alt="" /></div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
                     {error && (
@@ -203,7 +207,19 @@ function LoginPage() {
                     </p> */}
                 </form>
             </div>
+                <div className="text-center mt-6 absolute z-[999] bottom-10 ">
+            <a
+                href="https://www.tltechnologies.net/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-300 text-sm bg-black/70 p-3"
+            >
+                © 2025 <span className="text-red-500 ">TL TECHNOLOGIES PRIVATE LIMITED</span> All rights reserved.
+            </a>
         </div>
+            
+        </div>
+        
     );
 }
 

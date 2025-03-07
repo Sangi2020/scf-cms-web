@@ -1,16 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Edit, Trash2, Plus, Linkedin } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Edit, Trash2, Plus, Linkedin, Eye } from 'lucide-react';
 import axiosInstance from '../../config/axios';
 import DeleteConfirmModal from '../../components/ui/modal/DeleteConfirmModal';
-import { toast, } from 'react-toastify';
+import { toast } from 'react-toastify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const TeamManagement = () => {
   const [teamMembers, setTeamMembers] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
     position: '',
@@ -22,6 +29,24 @@ const TeamManagement = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  // Quill editor modules and formats configuration
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link'
+  ];
+
   const fetchTeamMembers = async () => {
     try {
       setIsLoading(true);
@@ -30,7 +55,7 @@ const TeamManagement = () => {
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching team members:', error);
-      setIsLoading(false);;
+      setIsLoading(false);
     }
   };
 
@@ -51,6 +76,7 @@ const TeamManagement = () => {
     setSelectedFile(null);
     setIsEditing(false);
     setIsDrawerOpen(true);
+    setErrors({})
   };
 
   const handleEdit = (member) => {
@@ -74,34 +100,120 @@ const TeamManagement = () => {
       toast.error('Failed to delete team member.');
     }
   };
+  const validateData = (data) => {
+    const errors = {};
+  
+    const namePattern = /^[A-Za-z\s]+$/;
+    if (!data.name || data.name.trim().length < 2 || data.name.trim().length > 50 || !namePattern.test(data.name.trim())) {
+      errors.name = "Name must be between 2 and 50 characters long and contain only letters.";
+    }
+  
+    if (!data.position || data.position.trim().length < 2 || data.position.trim().length > 50) {
+      errors.position = "Position must be between 2 and 50 characters long.";
+    }
+  
+    if (!data.bio) {
+      errors.bio = "Bio is required.";
+    } else {
+      const plainTextBio = data.bio.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags
+      const wordCount = plainTextBio.split(/\s+/).length; // Count words
+  
+      if (wordCount < 100 || wordCount > 310) {
+        errors.bio = "Bio must be between 100 and 310 words.";
+      }
+    }
+  
+    const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}(\/\S*)?$/;
+    if (!data.linkedin || !urlPattern.test(data.linkedin)) {
+      errors.linkedin = "LinkedIn must be a valid URL.";
+    }
+  
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!data.email || !emailPattern.test(data.email)) {
+      errors.email = "Email must be a valid email address.";
+    }
+  
+    if (!data.order || isNaN(data.order)) {
+      errors.order = "Order must be a valid number.";
+    }
+  
+    if (typeof data.isActive !== "boolean") {
+      errors.isActive = "isActive must be a boolean value.";
+    }
+  
+    return errors;
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validateData(formData);
+    const newErrors = { ...validationErrors };
+  
+    // Image validation
+    if (!selectedFile) {
+      const imgPattern = /\.(jpeg|jpg|gif|png|svg)$/i;
+      if (!formData.img || !imgPattern.test(formData.img)) {
+        newErrors.img = "Image must be a valid URL and should be in JPG, JPEG, PNG, GIF, or SVG format.";
+      } else {
+        delete newErrors.img; // ✅ Remove error if the image is valid
+      }
+    }
+  
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+  
+    setErrors({}); // ✅ Clear all errors when validation passes
+  
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
       formDataToSend.append(key, formData[key]);
     });
+  
     if (selectedFile) {
-      formDataToSend.append('image', selectedFile);
+      formDataToSend.append("image", selectedFile);
     }
-
+  
     try {
       setIsLoading(true);
       if (isEditing) {
         await axiosInstance.put(`/team/update-team/${formData.id}`, formDataToSend);
-        toast.success('Team member updated successfully!');
+        toast.success("Team member updated successfully!");
       } else {
-        await axiosInstance.post('/team/add-team', formDataToSend);
-        toast.success('Team member added successfully!');
+        await axiosInstance.post("/team/add-team", formDataToSend);
+        toast.success("Team member added successfully!");
       }
       await fetchTeamMembers();
       setIsDrawerOpen(false);
-      setIsLoading(false);
     } catch (error) {
-      console.error('Error saving team member:', error);
+      console.error("Error saving team member:", error);
+      toast.error("Failed to save team member.");
+    } finally {
       setIsLoading(false);
-      toast.error('Failed to save team member.');
     }
+  };
+ 
+  
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setFormData({ ...formData, img: "" });
+  
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+  const openDetailModal = (member) => {
+    setSelectedMember(member);
+    setIsDetailModalOpen(true);
+  };
+
+  const truncateBio = (bio, maxLength = 80) => {
+    // Remove HTML tags for card display
+    const textOnly = bio?.replace(/<[^>]*>/g, '') || '';
+    if (textOnly.length <= maxLength) return textOnly;
+    return textOnly.substring(0, maxLength) + '...';
   };
 
   const TeamMemberCard = ({ member }) => (
@@ -118,13 +230,21 @@ const TeamManagement = () => {
             <p className="text-sm">{member.position}</p>
           </div>
         </div>
-        <p className="text-sm">{member.bio}</p>
+        <p className="text-sm line-clamp-2">{truncateBio(member.bio)}</p>
         <div className="flex justify-between items-center">
-          {member.linkedin && (
-            <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
-              <Linkedin className="h-5 w-5" />
-            </a>
-          )}
+          <div className="flex gap-2">
+            {member.linkedin && (
+              <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-circle">
+                <Linkedin className="h-4 w-4" />
+              </a>
+            )}
+            <button
+              className="btn btn-sm btn-circle btn-primary"
+              onClick={() => openDetailModal(member)}
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+          </div>
           <div className="flex gap-2">
             <button
               className="btn btn-sm"
@@ -147,6 +267,154 @@ const TeamManagement = () => {
     </div>
   );
 
+  const DetailModal = ({ member, isOpen, onClose }) => {
+    if (!isOpen || !member) return null;
+
+    // Prevent body scrolling when modal is open
+    useEffect(() => {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }, []);
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 md:p-6">
+        <div className="bg-base-200 rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+          {/* Header with close button */}
+          <div className="p-4 border-b border-base-300 flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Team Member Details</h2>
+            <button className="btn btn-sm btn-circle" onClick={onClose}>
+              ✕
+            </button>
+          </div>
+
+          {/* Scrollable content */}
+          <div className="overflow-y-auto flex-1 p-4">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Left column - Profile */}
+              <div className="lg:w-1/3 flex flex-col items-center">
+                <div className="bg-base-300 p-6 rounded-lg w-full">
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover mb-4"
+                    />
+                    <h3 className="text-xl md:text-2xl font-bold text-center">{member.name}</h3>
+                    <p className="text-md md:text-lg text-center">{member.position}</p>
+
+                    <div className="flex gap-3 mt-4">
+                      {member.linkedin && (
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-sm btn-circle"
+                        >
+                          <Linkedin className="h-4 w-4" />
+                        </a>
+                      )}
+                      {member.email && (
+                        <a
+                          href={`mailto:${member.email}`}
+                          className="btn btn-sm btn-circle"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Additional details table */}
+                  <div className="mt-6 bg-base-200 p-3 rounded">
+                    <h4 className="font-semibold mb-2 text-sm">Member Details</h4>
+                    <table className="w-full text-sm">
+                      <tbody>
+                        {member.email && (
+                          <tr>
+                            <td className="font-medium pr-2 py-1">Email</td>
+                            <td className="truncate">{member.email}</td>
+                          </tr>
+                        )}
+                        {member.order !== undefined && (
+                          <tr>
+                            <td className="font-medium pr-2 py-1">Display Order</td>
+                            <td>{member.order}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td className="font-medium pr-2 py-1">Status</td>
+                          <td>
+                            <span className={`px-2 py-1 rounded text-xs ${member.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {member.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column - Biography and other details */}
+              <div className="lg:w-2/3">
+                <div className="bg-base-300 p-6 rounded-lg h-full">
+                  <h3 className="text-lg font-semibold mb-3">Biography</h3>
+                  <div
+                    className="bg-base-200 p-4 rounded-lg mb-6 prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: member.bio }}
+                  />
+
+                  {/* Additional sections can go here */}
+                  {member.linkedin && (
+                    <div className="mt-4">
+                      <h3 className="text-lg font-semibold mb-3">Social Media</h3>
+                      <div className="bg-base-200 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">LinkedIn</h4>
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline break-all"
+                        >
+                          {member.linkedin}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer with action buttons */}
+          <div className="p-4 border-t border-base-300 flex justify-end gap-2">
+            <button
+              className="btn btn-primary btn-sm md:btn-md"
+              onClick={() => {
+                onClose();
+                handleEdit(member);
+              }}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Member
+            </button>
+            <button
+              className="btn btn-sm md:btn-md"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
@@ -157,77 +425,169 @@ const TeamManagement = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {teamMembers.length>0?(<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {teamMembers.map((member) => (
           <TeamMemberCard key={member.id} member={member} />
         ))}
-      </div>
+      </div>):( <div className="w-full h-96  flex justify-center items-center">
+            <p>No Team members available</p>
+          </div>)}
 
       {/* Add/Edit Form Drawer */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-base-200 p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {isEditing ? 'Edit Member' : 'Add Member'}
-            </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-base-200 p-6 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">
+                {isEditing ? 'Edit Member' : 'Add Member'}
+              </h2>
+              <button
+                className="btn btn-sm btn-circle"
+                onClick={() => setIsDrawerOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="input input-bordered w-full"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Position"
-                value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                className="input input-bordered w-full"
-                required
-              />
-              <textarea
-                placeholder="Bio"
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="textarea textarea-bordered w-full"
-                required
-              />
-              <input
-                type="text"
-                placeholder="LinkedIn URL"
-                value={formData.linkedin}
-                onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                className="input input-bordered w-full"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="input input-bordered w-full"
-              />
-              <input
-                type="number"
-                placeholder="Order"
-                value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: e.target.value })}
-                className="input input-bordered w-full"
-              />
-              <input
-                type="file"
-                onChange={(e) => setSelectedFile(e.target.files[0])}
-                className="file-input file-input-bordered w-full"
-                accept="image/*"
-                required={!isEditing}
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setIsDrawerOpen(false)}
-                >
+              <div>
+                <label className="block text-sm font-medium mb-1">Name  <span className="text-error">*</span> </label>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="input input-bordered w-full"
+
+                />
+                {errors.name && <p className="text-error">{errors.name}</p>}
+
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Position  <span className="text-error">*</span> </label>
+                <input
+                  type="text"
+                  placeholder="Position"
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  className="input input-bordered w-full"
+
+                />
+                {errors.position && <p className="text-error">{errors.position}</p>}
+              </div>
+
+              {/* ReactQuill Editor for Bio with contained styling */}
+              <div className="quill-container">
+                <label className="block text-sm font-medium mb-1">Bio  <span className="text-error">*</span></label>
+                <div className="rounded-md border border-gray-300">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.bio || ''}
+                    onChange={(content) => setFormData({ ...formData, bio: content })}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    placeholder="Enter team member biography..."
+                  />
+                </div>
+                <style jsx global>{`
+                  .quill-container .ql-container {
+                    min-height: 150px;
+                    max-height: 300px;
+                    overflow-y: auto;
+                  }
+                  .quill-container .ql-editor {
+                    min-height: 150px;
+                  }
+                  /* Fix responsive issues */
+                  .quill-container .ql-toolbar {
+                    flex-wrap: wrap;
+                  }
+                  /* Add margin to separate from next field */
+                  .quill-container {
+                    margin-bottom: 2rem;
+                  }
+                `}</style>
+           {errors.bio && <p className="text-error">{errors.bio}</p>}
+
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">LinkedIn URL  <span className="text-error">*</span></label>
+                <input
+                  type="text"
+                  placeholder="LinkedIn URL"
+                  value={formData.linkedin}
+                  onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                  className="input input-bordered w-full"
+                />
+                {errors.linkedin && <p className="text-error">{errors.linkedin}</p>}
+
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Email  <span className="text-error">*</span></label>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="input input-bordered w-full"
+                />
+                {errors.email && <p className="text-error">{errors.email}</p>}
+
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Display Order  <span className="text-error">*</span></label>
+                <input
+                  type="number"
+                  placeholder="Order"
+                  value={formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: e.target.value })}
+                  className="input input-bordered w-full"
+                />
+                {errors.order && <p className="text-error">{errors.order}</p>}
+
+              </div>
+
+              <div>
+  <label className="block text-sm font-medium mb-1">
+    Profile Image <span className="text-error">*</span>
+  </label>
+  <input
+    type="file"
+    ref={fileInputRef}
+    onChange={(e) => {
+      setSelectedFile(e.target.files[0]);
+      setFormData({ ...formData, img: URL.createObjectURL(e.target.files[0]) });
+    }}
+    className="file-input file-input-bordered w-full"
+    accept="image/*"
+  />
+  {errors.img && <p className="text-error">{errors.img}</p>}
+
+  {/* Image Preview */}
+  {selectedFile && (
+    <div className="mt-5 flex items-center justify-center gap-4">
+      <img
+        src={URL.createObjectURL(selectedFile)}
+        alt="Preview"
+        className="w-80 h-80 rounded-lg border object-contain"
+      />
+      <button
+        type="button"
+        className="btn btn-sm btn-error"
+        onClick={handleRemoveImage}
+      >
+        Remove
+      </button>
+    </div>
+  )}
+</div>
+
+
+              <div className="flex justify-end gap-2 pt-4">
+                <button type="button" className="btn" onClick={() => setIsDrawerOpen(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={isLoading}>
@@ -238,6 +598,13 @@ const TeamManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Detail View Modal */}
+      <DetailModal
+        member={selectedMember}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+      />
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal

@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Mail, Lock, XIcon, CheckCircleIcon } from 'lucide-react';
+import { Mail, Lock, XIcon, CheckCircleIcon, EyeOffIcon, EyeIcon } from 'lucide-react';
 import axiosInstance from '../../config/axios';
 import OTPInput from 'react-otp-input';
+import BackgroundImage from '../../assets/images/bg-img.jpg';
+import BubbleAnimation from '../../components/ui/Bubble';
 
 // Validation Schemas
 const emailSchema = yup.object({
@@ -13,13 +15,19 @@ const emailSchema = yup.object({
 });
 
 const otpSchema = yup.object({
-    otp: yup.string().length(6, 'OTP must be 6 digits').required('OTP is required'),
+    otp: yup
+        .string()
+        .matches(/^[0-9]+$/, 'OTP must contain only numbers')
+        .length(6, 'OTP must be 6 digits')
+        .required('OTP is required'),
 });
 
 const passwordSchema = yup.object({
     newPassword: yup
         .string()
-        .min(6, 'Password must be at least 6 characters long')
+        .min(8, 'New password must be at least 8 characters long')
+        .matches(/[A-Z]/, 'New password must contain at least one uppercase letter')
+        .matches(/[!@#$%^&*(),.?":{}|<>]/, 'New password must contain at least one special character')
         .required('New password is required'),
     confirmNewPassword: yup
         .string()
@@ -34,6 +42,8 @@ function ForgotPassword() {
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState(false);
 
     const {
         control,
@@ -112,11 +122,18 @@ function ForgotPassword() {
     };
 
     return (
-        <div className="min-h-screen w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+        <div
+            style={{ backgroundImage: `url(${BackgroundImage})` }}
+            className="relative min-h-screen bg-cover bg-center w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+        >
+            <BubbleAnimation/>
+            {/* Reduced blur and added slight opacity for better readability */}
+            <div className='inset-0 absolute bg-black/30 backdrop-blur-sm'></div>
+
+            <div className="max-w-md w-full space-y-8 bg-stone-100 bg-opacity-10 z-[10] p-8 rounded-xl shadow-lg relative">
                 <div className="text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900">Password Reset</h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <h2 className="text-3xl font-extrabold text-gray-200">Password Reset</h2>
+                    <p className="mt-2 text-sm text-gray-300">
                         {step === 1 && "Enter your email to reset password"}
                         {step === 2 && "Enter the OTP sent to your email"}
                         {step === 3 && "Create a new password"}
@@ -151,19 +168,26 @@ function ForgotPassword() {
                 {step === 1 && (
                     <form onSubmit={handleSubmit(handleEmailSubmit)} className="space-y-6">
                         <div className="relative">
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-                            <Controller
-                                name="email"
-                                control={control}
-                                render={({ field }) => (
-                                    <input
-                                        {...field}
-                                        type="email"
-                                        className={`appearance-none block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-                                        placeholder="Enter your email"
-                                    />
-                                )}
-                            />
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">Email address</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Mail className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <Controller
+                                    name="email"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <input
+                                            {...field}
+                                            type="email"
+                                            className={`appearance-none block w-full pl-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm 
+                                            text-slate-900 placeholder:text-slate-900
+                                            ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                                            placeholder="Enter your email"
+                                        />
+                                    )}
+                                />
+                            </div>
                             <div className='absolute'>
                                 {errors.email && (
                                     <p className="text-red-500 text-xs ml-3 mt-1">{errors.email.message}</p>
@@ -179,9 +203,9 @@ function ForgotPassword() {
                             {isLoading ? 'Sending...' : 'Request OTP'}
                         </button>
 
-                        <p className="mt-2 text-center text-sm text-gray-600">
-                            Don't have an account?{' '}
-                            <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">Sign up</Link>
+                        <p className="mt-2 text-center text-sm text-gray-300">
+                            Think you don’t need a reset? {' '}
+                            <Link to="/login" className="font-medium text-blue-300 hover:text-blue-500">Login</Link>
                         </p>
                     </form>
                 )}
@@ -189,40 +213,42 @@ function ForgotPassword() {
                 {/* OTP Step */}
                 {step === 2 && (
                     <form onSubmit={handleSubmit(handleOtpSubmit)} className="space-y-6">
-                        <div className="relative ">
-                            <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">Enter OTP</label>
+                        <div className="relative">
+                            <label htmlFor="otp" className="block text-sm font-medium text-gray-300 mb-1">Enter OTP</label>
                             <div className='flex justify-center'>
-                            <Controller
-                                name="otp"
-                                control={control}
-                                render={({ field }) => (
-                                    <OTPInput
-                                        {...field}
-                                        value={field.value || ''} // Default to empty string to avoid uncontrolled input error
-                                        onChange={(value) => field.onChange(value)} // Update form state on change
-                                        numInputs={6} 
-                                        renderInput={(props) => <input {...props} />}
-                                        separator={<span className="mx-1 text-gray-900">-</span>} // Add separator
-                                        inputStyle={{
-                                            width: '2.5rem',
-                                            height: '2.5rem',
-                                            margin: '0.5rem',
-                                            fontSize: '1rem',
-                                            borderRadius: '0.375rem',
-                                            border: '1px solid #d1d5db',
-                                            textAlign: 'center',
-                                        }}
-                                        focusStyle={{
-                                            borderColor: '#3b82f6',
-                                            outline: 'none',
-                                            boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.5)',
-                                        }}
-                                    />
-                                )}
-                            />
+                                <Controller
+                                    name="otp"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <OTPInput
+                                            {...field}
+                                            value={field.value || ''}
+                                            onChange={(value) => field.onChange(value)}
+                                            numInputs={6}
+                                            renderInput={(props) => <input {...props} />}
+                                            separator={<span className="mx-1 text-gray-300">-</span>}
+                                            inputStyle={{
+                                                width: '2.5rem',
+                                                height: '2.5rem',
+                                                margin: '0.5rem',
+                                                fontSize: '1rem',
+                                                borderRadius: '0.375rem',
+                                                border: '1px solid #d1d5db',
+                                                textAlign: 'center',
+                                                backgroundColor: 'white',
+                                                color: 'black'
+                                            }}
+                                            focusStyle={{
+                                                borderColor: '#3b82f6',
+                                                outline: 'none',
+                                                boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.5)',
+                                            }}
+                                        />
+                                    )}
+                                />
                             </div>
                             {errors.otp && (
-                                <p className="text-red-500 text-xs ml-3 mt-1">{errors.otp.message}</p>
+                                <p className="text-red-500 text-xs ml-3 mt-1 text-center">{errors.otp.message}</p>
                             )}
                         </div>
 
@@ -230,7 +256,7 @@ function ForgotPassword() {
                             <button
                                 type="button"
                                 onClick={() => setStep(1)}
-                                className="w-1/2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                className="w-1/2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-300 bg-black/30 hover:bg-black/50"
                             >
                                 Back
                             </button>
@@ -250,41 +276,86 @@ function ForgotPassword() {
                 {step === 3 && (
                     <form onSubmit={handleSubmit(handlePasswordReset)} className="space-y-6">
                         <div className="relative">
-                            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                            <Controller
-                                name="newPassword"
-                                control={control}
-                                render={({ field }) => (
-                                    <input
-                                        {...field}
-                                        type="password"
-                                        className={`appearance-none block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
-                                        placeholder="Enter your new password"
+                            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-300 mb-1">New Password</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <div className="relative">
+                                    <Controller
+                                        name="newPassword"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <input
+                                                {...field}
+                                                type={showPassword ? "text" : "password"}
+                                                className={`appearance-none block w-full pl-10 pr-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm 
+            text-slate-900 placeholder:text-slate-900
+            ${errors.newPassword ? "border-red-500" : "border-gray-300"}`}
+                                                placeholder="Enter your new password"
+                                            />
+                                        )}
                                     />
-                                )}
-                            />
+                                    <button
+                                        type="button"
+                                        className="absolute inset-y-0 right-3 flex items-center"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <EyeOffIcon className='text-base-300' size={20} /> : <EyeIcon className='text-base-300' size={20} />}
+                                    </button>
+                                </div>
+                            </div>
                             <div className='absolute'>
                                 {errors.newPassword && (
                                     <p className="text-red-500 text-xs ml-3 mt-1">{errors.newPassword.message}</p>
                                 )}
                             </div>
-
                         </div>
 
                         <div className="relative">
-                            <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                            <Controller
-                                name="confirmNewPassword"
-                                control={control}
-                                render={({ field }) => (
-                                    <input
-                                        {...field}
-                                        type="password"
-                                        className={`appearance-none block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
-                                        placeholder="Confirm your new password"
+                            <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                {/* <Controller
+                                    name="confirmNewPassword"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <input
+                                            {...field}
+                                            type="password"
+                                            className={`appearance-none block w-full pl-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm 
+                                            text-slate-900 placeholder:text-slate-900
+                                            ${errors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
+                                            placeholder="Confirm your new password"
+                                        />
+                                    )}
+                                /> */}
+                                <div className="relative">
+                                    <Controller
+                                        name="confirmNewPassword"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <input
+                                                {...field}
+                                                type={confirmPassword ? "text" : "password"}
+                                                className={`appearance-none block w-full pl-10 pr-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm 
+            text-slate-900 placeholder:text-slate-900
+            ${errors.confirmNewPassword ? "border-red-500" : "border-gray-300"}`}
+                                                placeholder="Confirm your new password"
+                                            />
+                                        )}
                                     />
-                                )}
-                            />
+                                    <button
+                                        type="button"
+                                        className="absolute inset-y-0 right-3 flex items-center"
+                                        onClick={() => setConfirmPassword(!confirmPassword)}
+                                    >
+                                        {confirmPassword ? <EyeOffIcon className='text-base-300' size={20} /> : <EyeIcon className='text-base-300' size={20} />}
+                                    </button>
+                                </div>
+                            </div>
                             <div className='absolute flex items-center'>
                                 {errors.confirmNewPassword && <p className="text-red-500 text-xs ml-3 mt-1">{errors.confirmNewPassword.message}</p>}
                             </div>
@@ -299,6 +370,16 @@ function ForgotPassword() {
                         </button>
                     </form>
                 )}
+            </div>
+            <div className="text-center mt-6 absolute z-[999] bottom-10 ">
+                <a
+                    href="https://www.tltechnologies.net/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 text-sm bg-black/70 p-3"
+                >
+                    © 2025 <span className="text-red-500 ">TL TECHNOLOGIES PRIVATE LIMITED</span> All rights reserved.
+                </a>
             </div>
         </div>
     );

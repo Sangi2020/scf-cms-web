@@ -1,3 +1,4 @@
+import { EyeIcon, EyeOffIcon } from "lucide-react"; 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -7,13 +8,24 @@ import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import axiosInstance from '../../config/axios';
 import DeleteConfirmModal from '../../components/ui/modal/DeleteConfirmModal';
 
-// Validation Schema using Yup
+// Enhanced Validation Schema using Yup
 const userSchema = yup.object().shape({
-  name: yup.string().required('Name is required'),
-  email: yup.string().email('Please enter a valid email').required('Email is required'),
+  name: yup.string()
+    .required('Name is required')
+    .min(2, 'Name must be at least 2 characters')
+    .max(50, 'Name must be at most 50 characters')
+    .matches(/^[a-zA-Z\s]+$/, 'Name can only contain letters'),
+  email: yup.string()
+    .required('Email is required')
+    .email('Please enter a valid email')
+    .max(100, 'Email must be at most 100 characters'),
   password: yup.string().when('isEditing', {
     is: false,
-    then: () => yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+    then: () => yup.string()
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
+      .required('Password is required'),
     otherwise: () => yup.string().nullable(),
   }),
   confirmPassword: yup.string().when('password', {
@@ -26,6 +38,8 @@ const userSchema = yup.object().shape({
   role: yup.string().required('Role is required'),
   isEditing: yup.boolean(),
 });
+
+
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -133,6 +147,50 @@ const UserList = () => {
     }
   };
 
+  // Reusable form field component
+  const FormField = ({ 
+    label, 
+    name, 
+    register, 
+    errors, 
+    type = "text", 
+    mandatory = false, 
+    ...props 
+  }) => {
+    const [showPassword, setShowPassword] = useState(false);
+  
+    return (
+      <div className="form-control mt-4 relative">
+        <label className="label">
+          <span className="label-text">
+            {label}
+            {mandatory && <span className="text-error ml-1">*</span>}
+          </span>
+        </label>
+        <div className="relative">
+          <input
+            type={type === "password" ? (showPassword ? "text" : "password") : type}
+            className={`input input-bordered w-full pr-10 ${errors[name] ? "input-error" : ""}`}
+            {...register(name)}
+            {...props}
+          />
+          {type === "password" && (
+            <button
+              type="button"
+              className="absolute inset-y-0 right-3 flex items-center"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
+          )}
+        </div>
+        {errors[name] && <span className="text-error text-sm mt-1">{errors[name].message}</span>}
+      </div>
+    );
+  };
+  
+    
+  
   return (
     <div className="p-6 bg-base-100 rounded-lg space-y-6">
       {/* Header */}
@@ -207,53 +265,60 @@ const UserList = () => {
             {selectedUser ? 'Edit User' : 'Add New User'}
           </h3>
           <form onSubmit={handleSubmit(handleSubmitUser)}>
-            <div className="form-control">
-              <label className="label">Name</label>
-              <input
-                type="text"
-                className={`input input-bordered ${errors.name ? 'input-error' : ''}`}
-                {...register('name')}
-              />
-              {errors.name && <span className="text-error text-sm mt-1">{errors.name.message}</span>}
-            </div>
+            <FormField 
+              label="Name" 
+              name="name" 
+              register={register} 
+              errors={errors}
+              mandatory={true}
+              placeholder="Enter full name"
+            />
 
-            <div className="form-control mt-4">
-              <label className="label">Email</label>
-              <input
-                type="email"
-                className={`input input-bordered ${errors.email ? 'input-error' : ''}`}
-                {...register('email')}
-              />
-              {errors.email && <span className="text-error text-sm mt-1">{errors.email.message}</span>}
-            </div>
+            <FormField 
+              label="Email" 
+              name="email" 
+              type="email"
+              register={register} 
+              errors={errors}
+              mandatory={true}
+              placeholder="Enter email address"
+            />
 
             {!selectedUser && (
               <>
-                <div className="form-control mt-4">
-                  <label className="label">Password</label>
-                  <input
-                    type="password"
-                    className={`input input-bordered ${errors.password ? 'input-error' : ''}`}
-                    {...register('password')}
-                  />
-                  {errors.password && <span className="text-error text-sm mt-1">{errors.password.message}</span>}
-                </div>
+                <FormField 
+                  label="Password" 
+                  name="password" 
+                  type="password"
+                  register={register} 
+                  errors={errors}
+                  mandatory={true}
+                  placeholder="Enter password"
+                />
 
-                <div className="form-control mt-4">
-                  <label className="label">Confirm Password</label>
-                  <input
-                    type="password"
-                    className={`input input-bordered ${errors.confirmPassword ? 'input-error' : ''}`}
-                    {...register('confirmPassword')}
-                  />
-                  {errors.confirmPassword && <span className="text-error text-sm mt-1">{errors.confirmPassword.message}</span>}
-                </div>
+                <FormField 
+                  label="Confirm Password" 
+                  name="confirmPassword" 
+                  type="password"
+                  register={register} 
+                  errors={errors}
+                  mandatory={true}
+                  placeholder="Confirm password"
+                />
               </>
             )}
 
             <div className="form-control mt-4">
-              <label className="label">Role</label>
-              <select className="select select-bordered" {...register('role')}>
+              <label className="label">
+                <span className="label-text">
+                  Role
+                  <span className="text-error ml-1">*</span>
+                </span>
+              </label>
+              <select 
+                className={`select select-bordered ${errors.role ? 'select-error' : ''}`} 
+                {...register('role')}
+              >
                 <option value="admin">Admin</option>
                 <option value="superadmin">Super Admin</option>
               </select>
