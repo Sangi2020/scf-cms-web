@@ -11,8 +11,9 @@ const DocumentEditor = () => {
 
   const quillRef = useRef(null);
 
+  // Send GET request to the backend to get the document
   const fetchContent = async (option) => {
-    try {
+    try {      
       const response = await axiosInstance.get(`/document/${selectedOption}`)
       if (response.status == 200) {
         setValue(response.data.document.content);
@@ -29,12 +30,28 @@ const DocumentEditor = () => {
         title: selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1),
         content: value,
         type: selectedOption,
-      };
-
+      };      
+      const plainTextContent = payload.content.replace(/<[^>]*>/g, "").trim();
+      const wordCount = plainTextContent.split(/\s+/).length;
+    
+      if (wordCount < 200) {
+        toast.error("Content must have at least 200 words.");
+        return
+      } else if (wordCount > 570 && selectedOption=="PRIVACY") {
+        toast.error("Content cannot exceed 570 words.");
+        return 
+      } 
+       else if (wordCount > 450 && selectedOption=="TERMS") {
+        toast.error("Content cannot exceed 450 words.");
+        return 
+      } 
+      else if(wordCount.length ==0){
+        toast.error("Details required")
+      }     
       // Send POST request to the backend to create or update the document
       const response = await axiosInstance.post('/document/create-document', payload);
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         toast.success(`${selectedOption} document has been saved successfully!`);
       }
     } catch (error) {
@@ -87,14 +104,8 @@ const DocumentEditor = () => {
           </div>
         </div>
         <div className="flex gap-2 ">
-          <button
-            className={`btn btn-outline hover:btn-success mr-10 text-slate-300`}
-            onClick={saveContent}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
-          {['PRIVACY', 'TERMS', 'DISCLAIMER'].map((option) => (
+         
+          {['PRIVACY', 'TERMS',].map((option) => (
             <button
               key={option}
               className={`btn ${selectedOption === option ? 'btn-primary' : 'btn-outline'
@@ -104,14 +115,21 @@ const DocumentEditor = () => {
               {option.charAt(0).toUpperCase() + option.slice(1)}
             </button>
           ))}
+           <button
+            className={`btn btn-outline hover:btn-success mr-10 text-slate-300`}
+            onClick={saveContent}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </button>
         </div>
       </div>
 
       <div
-        className="overflow-hidden"
-        style={{
-          height: 'calc(100vh - 200px)',
-        }}
+        className="overflow-y-scroll min-h-[100vh]"
+        // style={{
+        //   height: 'calc(100vh - 200px)',
+        // }}
       >
         <ReactQuill
           ref={quillRef}
@@ -121,7 +139,7 @@ const DocumentEditor = () => {
           modules={modules}
           formats={formats}
           style={{
-            height: '100%',
+            height: '100vh',
             maxHeight: '100%',
             borderRadius: '8px',
           }}
