@@ -51,13 +51,20 @@ const TeamManagement = () => {
     try {
       setIsLoading(true);
       const response = await axiosInstance.get('/team/all-team');
-      setTeamMembers(response.data.team);
+  
+      // Sorting team members alphabetically by name
+      const sortedTeam = response.data.team.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+  
+      setTeamMembers(sortedTeam);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching team members:', error);
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchTeamMembers();

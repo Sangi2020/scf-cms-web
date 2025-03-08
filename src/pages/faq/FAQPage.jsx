@@ -167,6 +167,7 @@ const FAQPage = () => {
               onFAQCreated={refreshFAQList}
               initialData={editFAQ}
               mode={mode}
+              faqs={faqs}
               setIsDrawerOpen={setIsDrawerOpen}
             />
           </div>
