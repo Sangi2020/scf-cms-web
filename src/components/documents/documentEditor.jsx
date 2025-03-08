@@ -54,7 +54,7 @@ const DocumentEditor = () => {
 
       if (response.status === 200) {
         playNotificationSound()
-        toast.success(`${selectedOption} document has been saved successfully!`);
+        toast.success(`${selectedOption} document has been saved successfully `);
       }
     } catch (error) {
       console.error('Error saving content:', error);
