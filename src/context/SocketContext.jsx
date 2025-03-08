@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
+import playNotificationSound from '../utils/playNotification';
 
 // Create contexts for socket and notification settings
 const SocketContext = createContext(null);
@@ -36,6 +37,9 @@ export const SocketProvider = ({ children }) => {
     setSoundEnabled((prev) => {
       const newValue = !prev;
       localStorage.setItem('notificationSoundEnabled', JSON.stringify(newValue));
+      if(newValue){
+        playNotificationSound()
+      }
       return newValue;
     });
   };
