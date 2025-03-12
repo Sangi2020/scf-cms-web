@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Crown } from "lucide-react";
 import React, { useState } from "react";
 import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
@@ -34,6 +34,14 @@ function BlogCard({ blog, onDelete, onEdit }) {
             alt={blog.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          
+          {/* Premium Badge */}
+          {blog.isPremium && (
+            <div className="absolute top-0 right-0 bg-amber-500 text-white px-3 py-1 rounded-bl-lg flex items-center gap-1 shadow-md">
+              <Crown className="w-4 h-4" />
+              <span className="text-xs font-bold">PREMIUM</span>
+            </div>
+          )}
         </figure>
 
         <div className="card-body p-4">
@@ -45,6 +53,14 @@ function BlogCard({ blog, onDelete, onEdit }) {
             <div className="flex items-center gap-1 text-neutral-content">
               <span className="text-sm">{format(new Date(blog.date), "dd MMM, yyyy")}</span>
             </div>
+            
+            {/* Alternative Premium indicator in the card body */}
+            {blog.isPremium && (
+              <div className="badge badge-warning gap-1">
+                <Crown className="w-3 h-3" />
+                Premium
+              </div>
+            )}
           </div>
         </div>
 
