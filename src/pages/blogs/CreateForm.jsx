@@ -2,16 +2,18 @@ import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axios";
 
-function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
+function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [date, setDate] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const inputRef = useRef(null);
-
+  
+  
   useEffect(() => {
     if (mode === "edit" && initialData) {
       // Populate fields with initial data when in edit mode
@@ -20,6 +22,7 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
       setDate(initialData.date || "");
       setExcerpt(initialData.excerpt || "");
       setContent(initialData.content || "");
+      setIsPremium(initialData.isPremium || false); // Add this line to set isPremium
       setImagePreview(initialData.image || null);
     } else if (mode === "add") {
       // Reset fields for add mode
@@ -28,10 +31,12 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
       setDate("");
       setExcerpt("");
       setContent("");
+      setIsPremium(false); // Reset isPremium
       setImageFile(null);
       setImagePreview(null);
     }
   }, [mode, initialData]);
+  console.log(isPremium, "premium");
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -55,7 +60,7 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
   
-    if (!title || !author || !date || !excerpt || !content) {
+    if (!title || !author || !date || !excerpt || !content ) {
       toast.error("Please fill in all fields.");
       return;
     }
@@ -66,6 +71,7 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
     formData.append("date", date);
     formData.append("excerpt", excerpt);
     formData.append("content", content);
+    formData.append("isPremium", isPremium);
   
     if (imageFile) {
       formData.append("image", imageFile);
@@ -82,6 +88,7 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
         });
         toast.success("Blog post created successfully!");
       } else if (mode === "edit" && initialData) {
+        console.log(initialData,"dattaa");
         response = await axiosInstance.put(
           `/blog/update-blog/${initialData.id}`,
           formData,
@@ -105,6 +112,7 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
       setDate("");
       setExcerpt("");
       setContent("");
+      setIsPremium(false);
       setImageFile(null);
       setImagePreview(null);
       setIsDrawerOpen(false);
@@ -155,6 +163,20 @@ function BlogPostForm({ onBlogCreated ,initialData ,mode ,setIsDrawerOpen }) {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
+      </div>
+      {/* Premium Status Dropdown */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Content Type</span>
+        </label>
+        <select
+          className="select select-bordered border-accent"
+          value={isPremium ? "true" : "false"}
+          onChange={(e) => setIsPremium(e.target.value === "true")}
+        >
+          <option value="false">Free Content</option>
+          <option value="true">Premium Content</option>
+        </select>
       </div>
 
       {/* Excerpt Input */}
