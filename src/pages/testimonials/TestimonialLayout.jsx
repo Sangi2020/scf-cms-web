@@ -62,7 +62,10 @@ const TestimonialLayout = () => {
         />
         <div className="drawer-content">
           <div className="flex justify-between items-center mb-8">
+            <div className='space-y-2'>
             <h1 className="text-3xl font-bold text-neutral-content">Testimonials</h1>
+            <p>Total Testimonials : {testimonials.length}</p>
+            </div>
             <button
               className="btn btn-primary gap-2"
               onClick={handleAddNew}

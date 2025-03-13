@@ -73,7 +73,10 @@ function ClientsLayout() {
         <div className="drawer-content">
           {/* Header Section */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-content">Clients</h1>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-neutral-content">Clients</h1>
+              <p>Total Clients: {clients.length}</p>
+            </div>
             <button
               className="btn btn-primary text-white gap-2"
               onClick={handleAddNewClient}

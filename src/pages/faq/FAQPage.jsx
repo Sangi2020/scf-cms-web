@@ -102,7 +102,10 @@ const FAQPage = () => {
         />
         <div className="drawer-content">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-content">FAQs</h1>
+            <div className='space-y-2'>
+              <h1 className="text-3xl font-bold text-neutral-content">FAQs</h1>
+              <p>Total Faqs :{faqs.length} </p>
+            </div>
             <button
               className="btn btn-primary gap-2"
               onClick={handleAddNewFAQ}
@@ -181,7 +184,7 @@ const FAQPage = () => {
           onConfirm={() => handleDeleteFAQ(faqToDelete)}
           title="Delete FAQ?"
           message="Are you sure you want to delete this FAQ? This action cannot be undone."
-          isLoading={isDeleting} 
+          isLoading={isDeleting}
         />
       )}
     </div>
