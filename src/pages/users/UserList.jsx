@@ -195,7 +195,10 @@ const UserList = () => {
     <div className="p-6 bg-base-100 rounded-lg space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
+        <div className="space-y-2">
         <h1 className="text-2xl font-bold text-neutral-content">User List</h1>
+<p>Total Users : {users.length}</p>
+        </div>
         <button className="btn btn-primary" onClick={() => openModal()}>
           Add User
         </button>

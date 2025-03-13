@@ -45,6 +45,8 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         comments: 0,
         notifications: 0,
         blogs: 0,
+        users: 0,
+        faqs: 0,
         testimonials: 0,
         newsletters: 0,
         clients: 0,
@@ -55,12 +57,13 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
         const fetchCounts = async () => {
             try {
                 const { data } = await axiosInstance.get('/stats/total-counts');
-
                 setCount({
                     enquiries: data.counts.enquiries.unread || 0,
                     comments: 0,
                     notifications: data.counts.notifications.unread || 0,
                     blogs: data.counts.blogs.total || 0,
+                    users: data.counts.users.total || 0,
+                    faqs: data.counts.faqs.total || 0,
                     testimonials: data.counts.testimonials.total || 0,
                     newsletters: data.counts.newsletter.subscribers || 0,
                     clients: data.counts.clients.total || 0,
@@ -99,14 +102,14 @@ function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
                 { name: 'Documents', path: '/documents', icon: FileText },
                 { name: 'SEO Editor', path: '/seo-editor', icon: Layers },
                 { name: 'Team Members', path: '/team', icon: Users, count: count.team },
-                { name: 'FAQs', path: '/faqs', icon: FileText, },
+                { name: 'FAQs', path: '/faqs', icon: FileText,count: count.faqs },
                 { name: 'Organization Details', path: '/organization-details', icon: Info, },
             ]
         },
         {
             section: "User Management",
             items: [
-                { name: 'Users', path: '/users', icon: Users, role: 'superadmin' },
+                { name: 'Users', path: '/users', icon: Users, role: 'superadmin',count: count.users },
                 // { name: 'Roles & Permissions', path: '/roles', icon: Lock },
             ]
         },

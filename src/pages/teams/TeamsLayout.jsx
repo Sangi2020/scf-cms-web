@@ -51,12 +51,12 @@ const TeamManagement = () => {
     try {
       setIsLoading(true);
       const response = await axiosInstance.get('/team/all-team');
-  
+
       // Sorting team members alphabetically by name
       const sortedTeam = response.data.team.sort((a, b) =>
         a.name.localeCompare(b.name)
       );
-  
+
       setTeamMembers(sortedTeam);
       setIsLoading(false);
     } catch (error) {
@@ -64,7 +64,7 @@ const TeamManagement = () => {
       setIsLoading(false);
     }
   };
-  
+
 
   useEffect(() => {
     fetchTeamMembers();
@@ -109,54 +109,54 @@ const TeamManagement = () => {
   };
   const validateData = (data) => {
     const errors = {};
-  
+
     const namePattern = /^[A-Za-z\s]+$/;
     if (!data.name || data.name.trim().length < 2 || data.name.trim().length > 50 || !namePattern.test(data.name.trim())) {
       errors.name = "Name must be between 2 and 50 characters long and contain only letters.";
     }
-  
+
     if (!data.position || data.position.trim().length < 2 || data.position.trim().length > 50) {
       errors.position = "Position must be between 2 and 50 characters long.";
     }
-  
+
     if (!data.bio) {
       errors.bio = "Bio is required.";
     } else {
       const plainTextBio = data.bio.replace(/<[^>]*>/g, '').trim(); // Remove HTML tags
       const wordCount = plainTextBio.split(/\s+/).length; // Count words
-  
+
       if (wordCount < 100 || wordCount > 310) {
         errors.bio = "Bio must be between 100 and 310 words.";
       }
     }
-  
+
     const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}(\/\S*)?$/;
     if (!data.linkedin || !urlPattern.test(data.linkedin)) {
       errors.linkedin = "LinkedIn must be a valid URL.";
     }
-  
+
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!data.email || !emailPattern.test(data.email)) {
       errors.email = "Email must be a valid email address.";
     }
-  
+
     if (!data.order || isNaN(data.order)) {
       errors.order = "Order must be a valid number.";
     }
-  
+
     if (typeof data.isActive !== "boolean") {
       errors.isActive = "isActive must be a boolean value.";
     }
-  
+
     return errors;
   };
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateData(formData);
     const newErrors = { ...validationErrors };
-  
+
     // Image validation
     if (!selectedFile) {
       const imgPattern = /\.(jpeg|jpg|gif|png|svg)$/i;
@@ -166,23 +166,23 @@ const TeamManagement = () => {
         delete newErrors.img; // ✅ Remove error if the image is valid
       }
     }
-  
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-  
+
     setErrors({}); // ✅ Clear all errors when validation passes
-  
+
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
       formDataToSend.append(key, formData[key]);
     });
-  
+
     if (selectedFile) {
       formDataToSend.append("image", selectedFile);
     }
-  
+
     try {
       setIsLoading(true);
       if (isEditing) {
@@ -201,12 +201,12 @@ const TeamManagement = () => {
       setIsLoading(false);
     }
   };
- 
-  
+
+
   const handleRemoveImage = () => {
     setSelectedFile(null);
     setFormData({ ...formData, img: "" });
-  
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -425,20 +425,23 @@ const TeamManagement = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Team Management</h1>
+        <div className='space-y-2'>
+          <h1 className="text-3xl font-bold">Team Management</h1>
+          <p>Total Team Members: {teamMembers.length}</p>
+        </div>
         <button className="btn btn-primary" onClick={handleAdd} disabled={isLoading}>
           <Plus className="h-5 w-5" />
           {isLoading ? 'Loading...' : 'Add Member'}
         </button>
       </div>
 
-      {teamMembers.length>0?(<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {teamMembers.length > 0 ? (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {teamMembers.map((member) => (
           <TeamMemberCard key={member.id} member={member} />
         ))}
-      </div>):( <div className="w-full h-96  flex justify-center items-center">
-            <p>No Team members available</p>
-          </div>)}
+      </div>) : (<div className="w-full h-96  flex justify-center items-center">
+        <p>No Team members available</p>
+      </div>)}
 
       {/* Add/Edit Form Drawer */}
       {isDrawerOpen && (
@@ -514,7 +517,7 @@ const TeamManagement = () => {
                     margin-bottom: 2rem;
                   }
                 `}</style>
-           {errors.bio && <p className="text-error">{errors.bio}</p>}
+                {errors.bio && <p className="text-error">{errors.bio}</p>}
 
               </div>
 
@@ -558,39 +561,39 @@ const TeamManagement = () => {
               </div>
 
               <div>
-  <label className="block text-sm font-medium mb-1">
-    Profile Image <span className="text-error">*</span>
-  </label>
-  <input
-    type="file"
-    ref={fileInputRef}
-    onChange={(e) => {
-      setSelectedFile(e.target.files[0]);
-      setFormData({ ...formData, img: URL.createObjectURL(e.target.files[0]) });
-    }}
-    className="file-input file-input-bordered w-full"
-    accept="image/*"
-  />
-  {errors.img && <p className="text-error">{errors.img}</p>}
+                <label className="block text-sm font-medium mb-1">
+                  Profile Image <span className="text-error">*</span>
+                </label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    setSelectedFile(e.target.files[0]);
+                    setFormData({ ...formData, img: URL.createObjectURL(e.target.files[0]) });
+                  }}
+                  className="file-input file-input-bordered w-full"
+                  accept="image/*"
+                />
+                {errors.img && <p className="text-error">{errors.img}</p>}
 
-  {/* Image Preview */}
-  {selectedFile && (
-    <div className="mt-5 flex items-center justify-center gap-4">
-      <img
-        src={URL.createObjectURL(selectedFile)}
-        alt="Preview"
-        className="w-80 h-80 rounded-lg border object-contain"
-      />
-      <button
-        type="button"
-        className="btn btn-sm btn-error"
-        onClick={handleRemoveImage}
-      >
-        Remove
-      </button>
-    </div>
-  )}
-</div>
+                {/* Image Preview */}
+                {selectedFile && (
+                  <div className="mt-5 flex items-center justify-center gap-4">
+                    <img
+                      src={URL.createObjectURL(selectedFile)}
+                      alt="Preview"
+                      className="w-80 h-80 rounded-lg border object-contain"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-error"
+                      onClick={handleRemoveImage}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
 
 
               <div className="flex justify-end gap-2 pt-4">
