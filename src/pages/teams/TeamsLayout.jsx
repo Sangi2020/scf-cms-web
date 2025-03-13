@@ -91,13 +91,13 @@ const TeamManagement = () => {
   const handleDelete = async () => {
     try {
       setIsLoading(true);
-      await axiosInstance.delete(/team/delete-team/${memberToDelete.id});
+      await axiosInstance.delete(`/team/delete-team/${memberToDelete.id}`);
       await fetchTeamMembers();
       setIsModalOpen(false);
       setMemberToDelete(null);
       setIsLoading(false);
       playNotificationSound()
-      toast.success(Deleted ${memberToDelete.name} successfully!);
+      toast.success(`Deleted ${memberToDelete.name} successfully!`);
     } catch (error) {
       console.error('Error deleting team member:', error);
       setIsLoading(false);
@@ -187,7 +187,7 @@ const TeamManagement = () => {
     try {
       setIsLoading(true);
       if (isEditing) {
-        await axiosInstance.put(/team/update-team/${formData.id}, formDataToSend);
+        await axiosInstance.put(`/team/update-team/${formData.id}`, formDataToSend);
         toast.success("Team member updated successfully!");
         setSelectedFile(null)
 
@@ -233,7 +233,7 @@ const TeamManagement = () => {
   
   const truncateBio = (bio, length = 100) => {
     const plainText = stripHtml(bio);
-    return plainText.length > length ? ${plainText.slice(0, length)}... : plainText;
+    return plainText.length > length ? `${plainText.slice(0, length)}...` : plainText;
   };
 
   const TeamMemberCard = ({ member }) => (
@@ -337,7 +337,7 @@ const TeamManagement = () => {
                       )}
                       {member.email && (
                         <a
-                          href={mailto:${member.email}}
+                          href={`mailto:${member.email}`}
                           className="btn btn-sm btn-circle"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -369,7 +369,7 @@ const TeamManagement = () => {
                         <tr>
                           <td className="font-medium pr-2 py-1">Status</td>
                           <td>
-                            <span className={px-2 py-1 rounded text-xs ${member.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}}>
+                            <span className={`px-2 py-1 rounded text-xs ${member.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                               {member.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </td>
@@ -513,7 +513,7 @@ const TeamManagement = () => {
               {/* ReactQuill Editor for Bio with contained styling */}
               <div className="quill-container">
                 <label className="block text-sm font-medium mb-1">Bio  <span className="text-error">*</span></label>
-                <div className={quill-container ${theme === "dark" ? "dark-mode" : "light-mode"}}>
+                <div className={`quill-container ${theme === "dark" ? "dark-mode" : "light-mode"}`}>
                   <ReactQuill
                     theme="snow"
                     value={formData.bio || ''}
@@ -692,8 +692,8 @@ const TeamManagement = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleDelete}
-        title={Delete ${memberToDelete?.name}?}
-        message={Are you sure you want to delete ${memberToDelete?.name}? This action cannot be undone.}
+        title={`Delete ${memberToDelete?.name}?`}
+        message={`Are you sure you want to delete ${memberToDelete?.name}? This action cannot be undone.`}
         isLoading={isLoading}
       />
     </div>

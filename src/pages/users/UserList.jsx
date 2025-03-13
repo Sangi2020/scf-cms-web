@@ -505,18 +505,11 @@ const UserList = () => {
   return (
     <div className="p-6 bg-base-100 rounded-lg space-y-6">
       {/* Header */}
-<<<<<<< HEAD
       <div className="md:flex space-y-2 md:space-y-0 block justify-between items-center">
         {/* <h1 className="text-2xl font-bold text-neutral-content">User List</h1> */}
         <div className=' space-y-2'>
        <h1 className="text-3xl font-bold text-neutral-content">User List </h1>
        <p >Total Users : {users.length}</p>
-=======
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-neutral-content">User List</h1>
-<p>Total Users : {users.length}</p>
->>>>>>> 592df574dd9a0d8b28b953ef4d43ec55d1331c47
         </div>
         <button className="btn btn-primary" onClick={() => openModal()}>
           Add User
