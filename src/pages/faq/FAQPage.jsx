@@ -19,7 +19,7 @@ const FAQPage = () => {
       const response = await axiosInstance.get('/qna/get-faqs');
       const result = response.data;
       if (result.success) {
-        setFaqs(result.data);
+         setFaqs(result.data);
       }
     } catch (err) {
       console.error('Error fetching FAQs:', err);
@@ -101,8 +101,12 @@ const FAQPage = () => {
           onChange={() => setIsDrawerOpen(!isDrawerOpen)}
         />
         <div className="drawer-content">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-content">FAQs</h1>
+          <div className="md:flex space-y-2 md:space-y-0 block justify-between items-center mb-8">
+            {/* <h1 className="text-3xl font-bold text-neutral-content">FAQs</h1> */}
+            <div className=' space-y-2'>
+       <h1 className="text-3xl font-bold text-neutral-content">FAQ's </h1>
+       <p >Total Faq's : {faqs.length}</p>
+        </div>
             <button
               className="btn btn-primary gap-2"
               onClick={handleAddNewFAQ}
@@ -112,7 +116,7 @@ const FAQPage = () => {
             </button>
           </div>
 
-          <DragDropContext onDragEnd={handleDragEnd}>
+          {faqs.length>0?(<DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="faq-list">
               {(provided) => (
                 <div
@@ -156,7 +160,11 @@ const FAQPage = () => {
                 </div>
               )}
             </Droppable>
-          </DragDropContext>
+          </DragDropContext>):(
+            <div className="w-full h-96  flex justify-center items-center">
+            <p>No FAQs available</p>
+          </div>)
+            }
         </div>
 
         <div className="drawer-side">
@@ -177,6 +185,7 @@ const FAQPage = () => {
       {faqToDelete && (
         <DeleteConfirmModal
           isOpen={faqToDelete !== null}
+          faqs={faqs}
           onClose={() => setFaqToDelete(null)}
           onConfirm={() => handleDeleteFAQ(faqToDelete)}
           title="Delete FAQ?"

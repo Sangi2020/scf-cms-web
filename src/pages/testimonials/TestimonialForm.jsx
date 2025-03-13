@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
+import playNotificationSound from '../../utils/playNotification';
 
 function TestimonialForm({ onTestimonialCreated, initialData, mode, setIsDrawerOpen }) {
   const [testimonial, setTestimonial] = useState({
@@ -37,9 +38,9 @@ function TestimonialForm({ onTestimonialCreated, initialData, mode, setIsDrawerO
   const validateField = (name, value) => {
     switch (name) {
       case 'author':
-        return value.trim().length >= 2
+        return /^[a-zA-Z\s]+$/.test(value) && value.trim().length >= 2
           ? null
-          : "Author name must be at least 2 characters long";
+          : "Author name must be at least 2 characters long and contain only letters ";      
       case 'position':
         return value.trim().length >= 2
           ? null
@@ -94,6 +95,7 @@ function TestimonialForm({ onTestimonialCreated, initialData, mode, setIsDrawerO
       let response;
       if (mode === "add") {
         response = await axiosInstance.post("/contents/testimonial", testimonial);
+        playNotificationSound()
         toast.success("Testimonial created successfully!");
       } else if (mode === "edit" && initialData) {
         response = await axiosInstance.put(`/contents/testimonial/${initialData.id}`, testimonial);
