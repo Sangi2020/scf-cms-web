@@ -3,7 +3,7 @@ import {
   Instagram, 
   Facebook, 
   Share2, 
-  Twitter, 
+  Youtube,
   Linkedin,
   Link as LinkIcon,
   CheckCircle,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
+import playNotificationSound from '../../utils/playNotification';
 
 const SocialMediaLayout = () => {
   // State for managing social links
@@ -29,7 +30,7 @@ const SocialMediaLayout = () => {
     instagram: <Instagram className="w-6 h-6 text-pink-500" />,
     facebook: <Facebook className="w-6 h-6 text-blue-600" />,
     whatsapp: <Share2 className="w-6 h-6 text-green-500" />,
-    twitter: <Twitter className="w-6 h-6 text-blue-400" />,
+    youtube: <Youtube className="w-6 h-6 text-red-400" />,
     linkedin: <Linkedin className="w-6 h-6 text-blue-700" />
   };
 
@@ -39,8 +40,7 @@ const SocialMediaLayout = () => {
       try {
         setLoading(true);
         const response = await axiosInstance.get("/social/get-social");
-        console.log(response.data.data);
-        // Transform API data into the required format
+
         const links = response.data.data.reduce((acc, link) => {
           const platform = link.platform.toLowerCase();
           acc[platform] = {
@@ -103,6 +103,7 @@ const SocialMediaLayout = () => {
           }
         }));
         setEditing(null);
+        playNotificationSound()
         toast.success("Social media link updated successfully!");
       } else {
         throw new Error(response.data.message || "Failed to update");
