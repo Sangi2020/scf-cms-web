@@ -154,7 +154,7 @@ function Header({ onToggleSidebar, isCollapsed }) {
         </div>
 
         {/* Breadcrumb and Navigation */}
-        <div className="hidden lg:flex items-center space-x-4 flex-1 justify-center">
+        {/* <div className="hidden lg:flex items-center space-x-4 flex-1 justify-center">
           <button
             onClick={handleBack}
             disabled={historyStack.length <= 1}
@@ -176,7 +176,7 @@ function Header({ onToggleSidebar, isCollapsed }) {
             <span className="mr-1">Forward</span>
             <BsChevronDoubleRight className="w-5 h-5" />
           </button>
-        </div>
+        </div> */}
 
         {/* Mobile Title */}
         <div className="lg:hidden flex-1 text-center">

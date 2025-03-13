@@ -5,17 +5,20 @@ import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import * as yup from "yup";
 
-
 const blogSchema = yup.object().shape({
   title: yup
     .string()
     .required("Title is required")
     .max(100, "Title cannot exceed 100 characters"),
 
-  author: yup
+    author: yup
     .string()
     .required("Author name is required")
-    .min(2, "Author name must be at least 2 characters"),
+    .min(2, "Author name must be at least 2 characters")
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Author name can only contain letters and spaces"
+    ),
 
   date: yup
     .date()
@@ -39,12 +42,22 @@ const blogSchema = yup.object().shape({
 
   image: yup
     .mixed()
-    .nullable()
+    .required("Image is required")
+    .test(
+      "required-or-existing",
+      "Image is required",
+      (value, context) => {
+        // Check if we're in edit mode with an existing image
+        const hasExistingImage = context.options.context?.imagePreview;
+        // Image is valid if it's a new file or if there's an existing image in edit mode
+        return value || hasExistingImage;
+      }
+    )
     .test(
       "fileFormat",
-      "Only JPG, PNG, GIF and WEBP images are allowed",
-      value => {
-        if (!value) return true; // Image is optional
+      "Only JPG, PNG, GIF, and WEBP images are allowed",
+      (value) => {
+        if (!value) return true; // Skip validation if no new file
         const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
         return allowedTypes.includes(value.type);
       }
@@ -52,11 +65,11 @@ const blogSchema = yup.object().shape({
     .test(
       "fileSize",
       "Image size cannot exceed 2MB",
-      value => {
-        if (!value) return true; // Image is optional
+      (value) => {
+        if (!value) return true; // Skip validation if no new file
         return value.size <= 2 * 1024 * 1024;
       }
-    )
+    ),
 });
 
 function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
@@ -73,6 +86,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isPremium, setIsPremium] = useState(false);
+
   useEffect(() => {
     if (mode === "edit" && initialData) {
       setTitle(initialData.title || "");
@@ -118,7 +132,9 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
             field === "date" ? date :
               field === "author" ? author : title;
 
-      await fieldSchema.validate(value);
+      // Add context for image validation
+      const options = field === "image" ? { context: { imagePreview } } : {};
+      await fieldSchema.validate(value, options);
 
       // Clear error if validation passes
       setErrors(prev => ({ ...prev, [field]: "" }));
@@ -142,7 +158,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     setTouched(allTouched);
 
     try {
-      // Validate all fields at once
+      // Validate all fields at once with context for image
       await blogSchema.validate(
         {
           title,
@@ -152,7 +168,10 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
           content,
           image: imageFile
         },
-        { abortEarly: false }
+        { 
+          abortEarly: false,
+          context: { imagePreview }
+        }
       );
 
       setErrors({});
@@ -171,21 +190,22 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    setImageFile(file);
+    setTouched(prev => ({ ...prev, image: true }));
+  
     if (file) {
-      setImageFile(file);
-      setTouched(prev => ({ ...prev, image: true }));
-
-      // Create image preview
+      // Validate image immediately
+      validateField("image");
+  
+      // Generate preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
-
-      validateField("image");
     }
   };
-
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -324,7 +344,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
           )}
         </label>
         <textarea
-          className={`textarea textarea-bordered ${errors.excerpt && touched.excerpt ? "textarea-error" : ""}`}
+          className={`textarea textarea-bordered ${errors.excerpt && touched.excerpt ? "textarea-error" : "border-accent"}`}
           value={excerpt}
           onChange={(e) => {
             setExcerpt(e.target.value);
@@ -343,7 +363,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       <div className="form-control mb-4">
         <label className="label"><span className="label-text">Image</span></label>
         <div
-          className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer bg-base-100 ${errors.image && touched.image ? "border-error" : ""}`}
+          className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer bg-base-100 ${errors.image && touched.image ? "border-error" : "border-accent"}`}
           onClick={() => inputRef.current?.click()}
         >
           {!imagePreview ? (
@@ -365,6 +385,8 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
                   setImageFile(null);
                   setImagePreview(null);
                   setErrors(prev => ({ ...prev, image: "" }));
+                  setTouched(prev => ({ ...prev, image: true }));
+                  validateField("image");
                 }}
               >
                 Remove
