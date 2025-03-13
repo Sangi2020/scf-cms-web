@@ -502,7 +502,7 @@ setEnquiries(formattedEnquiries);
             <Inbox className="w-6 h-6 text-primary" />
             <div className="space-y-[0.5px]">
               <h1 className="text-2xl font-bold text-neutral-content">Enquiries</h1>
-              <p >Total Enquiries : {enquiries.length}</p>
+              <p>Total Enquiries : {enquiries.length}</p>
               <p className="text-sm text-gray-500 mt-1">Manage and respond to your enquiries</p>
             </div>
           </div>

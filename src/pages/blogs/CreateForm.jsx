@@ -11,37 +11,37 @@ const blogSchema = yup.object().shape({
     .string()
     .required("Title is required")
     .max(100, "Title cannot exceed 100 characters"),
-  
+
   author: yup
     .string()
     .required("Author name is required")
     .min(2, "Author name must be at least 2 characters"),
-  
+
   date: yup
     .date()
     .required("Date is required")
     .max(new Date(), "Future dates are not allowed"),
-  
+
   excerpt: yup
     .string()
     .required("Excerpt is required")
     .min(10, "Excerpt must be at least 10 characters")
     .max(500, "Excerpt cannot exceed 500 characters"),
-  
+
   content: yup
     .string()
     .required("Content is required")
     .test(
-      "min-content-length", 
-      "Content must be at least 50 characters", 
+      "min-content-length",
+      "Content must be at least 50 characters",
       value => value && value.replace(/<[^>]*>/g, "").trim().length >= 50
     ),
-  
+
   image: yup
     .mixed()
     .nullable()
     .test(
-      "fileFormat", 
+      "fileFormat",
       "Only JPG, PNG, GIF and WEBP images are allowed",
       value => {
         if (!value) return true; // Image is optional
@@ -50,8 +50,8 @@ const blogSchema = yup.object().shape({
       }
     )
     .test(
-      "fileSize", 
-      "Image size cannot exceed 2MB", 
+      "fileSize",
+      "Image size cannot exceed 2MB",
       value => {
         if (!value) return true; // Image is optional
         return value.size <= 2 * 1024 * 1024;
@@ -68,11 +68,11 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const inputRef = useRef(null);
-  
+
   // Add validation states
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-
+  const [isPremium, setIsPremium] = useState(false);
   useEffect(() => {
     if (mode === "edit" && initialData) {
       setTitle(initialData.title || "");
@@ -80,12 +80,13 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       setDate(initialData.date || "");
       setExcerpt(initialData.excerpt || "");
       setContent(initialData.content || "");
+      setIsPremium(initialData.isPremium || false);
       setImagePreview(initialData.image || null);
     } else if (mode === "add") {
       resetForm();
     }
   }, [mode, initialData]);
-  
+
   const resetForm = () => {
     setTitle("");
     setAuthor("");
@@ -93,6 +94,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     setExcerpt("");
     setContent("");
     setImageFile(null);
+    setIsPremium(false)
     setImagePreview(null);
     setErrors({});
     setTouched({});
@@ -103,21 +105,21 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     setTouched(prev => ({ ...prev, [field]: true }));
     validateField(field);
   };
-  
+
   // Validate a specific field using Yup
   const validateField = async (field) => {
     try {
       const fieldSchema = yup.reach(blogSchema, field);
-      
+
       // Get the field's current value
-      const value = field === "image" ? imageFile : 
-                    field === "content" ? content :
-                    field === "excerpt" ? excerpt :
-                    field === "date" ? date :
-                    field === "author" ? author : title;
-                    
+      const value = field === "image" ? imageFile :
+        field === "content" ? content :
+          field === "excerpt" ? excerpt :
+            field === "date" ? date :
+              field === "author" ? author : title;
+
       await fieldSchema.validate(value);
-      
+
       // Clear error if validation passes
       setErrors(prev => ({ ...prev, [field]: "" }));
       return true;
@@ -127,7 +129,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       return false;
     }
   };
-  
+
   // Validate all fields
   const validateForm = async () => {
     // Mark all fields as touched
@@ -136,23 +138,23 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       acc[field] = true;
       return acc;
     }, {});
-    
+
     setTouched(allTouched);
-    
+
     try {
       // Validate all fields at once
       await blogSchema.validate(
-        { 
-          title, 
-          author, 
-          date, 
-          excerpt, 
-          content, 
-          image: imageFile 
-        }, 
+        {
+          title,
+          author,
+          date,
+          excerpt,
+          content,
+          image: imageFile
+        },
         { abortEarly: false }
       );
-      
+
       setErrors({});
       return true;
     } catch (validationError) {
@@ -161,7 +163,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       validationError.inner.forEach(error => {
         newErrors[error.path] = error.message;
       });
-      
+
       setErrors(newErrors);
       return false;
     }
@@ -172,21 +174,21 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     if (file) {
       setImageFile(file);
       setTouched(prev => ({ ...prev, image: true }));
-      
+
       // Create image preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
-      
+
       validateField("image");
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     // Validate all fields before submission
     const isValid = await validateForm();
     if (!isValid) {
@@ -200,6 +202,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     formData.append("date", date);
     formData.append("excerpt", excerpt);
     formData.append("content", content);
+    formData.append("isPremium", isPremium);
 
     if (imageFile) {
       formData.append("image", imageFile);
@@ -227,6 +230,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       }
 
       resetForm();
+      
       setIsDrawerOpen(false);
     } catch (error) {
       console.error("Error handling blog post:", error);
@@ -239,14 +243,14 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       {/* Title */}
       <div className="form-control mb-4">
         <label className="label"><span className="label-text">Title</span></label>
-        <input 
-          type="text" 
+        <input
+          type="text"
           className={`input input-bordered ${errors.title && touched.title ? "input-error" : "border-accent"}`}
-          value={title} 
+          value={title}
           onChange={(e) => {
             setTitle(e.target.value);
             if (touched.title) validateField("title");
-          }} 
+          }}
           onBlur={() => handleBlur("title")}
         />
         {errors.title && touched.title && (
@@ -259,14 +263,14 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       {/* Author */}
       <div className="form-control mb-4">
         <label className="label"><span className="label-text">Author</span></label>
-        <input 
-          type="text" 
+        <input
+          type="text"
           className={`input input-bordered ${errors.author && touched.author ? "input-error" : "border-accent"}`}
-          value={author} 
+          value={author}
           onChange={(e) => {
             setAuthor(e.target.value);
             if (touched.author) validateField("author");
-          }} 
+          }}
           onBlur={() => handleBlur("author")}
         />
         {errors.author && touched.author && (
@@ -279,14 +283,14 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       {/* Date */}
       <div className="form-control mb-4">
         <label className="label"><span className="label-text">Date</span></label>
-        <input 
-          type="date" 
-          className={`input input-bordered ${errors.date && touched.date ? "input-error" : "border-accent"}`} 
-          value={date} 
+        <input
+          type="date"
+          className={`input input-bordered ${errors.date && touched.date ? "input-error" : "border-accent"}`}
+          value={date}
           onChange={(e) => {
             setDate(e.target.value);
             if (touched.date) validateField("date");
-          }} 
+          }}
           onBlur={() => handleBlur("date")}
         />
         {errors.date && touched.date && (
@@ -294,6 +298,21 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
             <span className="label-text-alt text-error">{errors.date}</span>
           </label>
         )}
+      </div>
+
+      {/* Premium Status Dropdown */}
+      <div className="form-control mb-4">
+        <label className="label">
+          <span className="label-text">Content Type</span>
+        </label>
+        <select
+          className="select select-bordered border-accent"
+          value={isPremium ? "true" : "false"}
+          onChange={(e) => setIsPremium(e.target.value === "true")}
+        >
+          <option value="false">Free Content</option>
+          <option value="true">Premium Content</option>
+        </select>
       </div>
 
       {/* Excerpt */}
@@ -304,9 +323,9 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
             <span className="label-text-alt">{excerpt.length}/500 characters</span>
           )}
         </label>
-        <textarea 
-          className={`textarea textarea-bordered ${errors.excerpt && touched.excerpt ? "textarea-error" : ""}`} 
-          value={excerpt} 
+        <textarea
+          className={`textarea textarea-bordered ${errors.excerpt && touched.excerpt ? "textarea-error" : ""}`}
+          value={excerpt}
           onChange={(e) => {
             setExcerpt(e.target.value);
             if (touched.excerpt) validateField("excerpt");
@@ -323,8 +342,8 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       {/* Image Upload */}
       <div className="form-control mb-4">
         <label className="label"><span className="label-text">Image</span></label>
-        <div 
-          className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer bg-base-100 ${errors.image && touched.image ? "border-error" : ""}`} 
+        <div
+          className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer bg-base-100 ${errors.image && touched.image ? "border-error" : ""}`}
           onClick={() => inputRef.current?.click()}
         >
           {!imagePreview ? (
@@ -338,8 +357,8 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
           ) : (
             <div className="relative">
               <img src={imagePreview} alt="Preview" className="w-full h-auto rounded-lg shadow-lg" />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="absolute top-2 right-2 btn btn-xs btn-error"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -352,12 +371,12 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
               </button>
             </div>
           )}
-          <input 
-            type="file" 
-            accept="image/jpeg, image/png, image/gif, image/webp" 
-            className="hidden" 
-            ref={inputRef} 
-            onChange={handleImageChange} 
+          <input
+            type="file"
+            accept="image/jpeg, image/png, image/gif, image/webp"
+            className="hidden"
+            ref={inputRef}
+            onChange={handleImageChange}
           />
         </div>
         {errors.image && touched.image && (
@@ -371,9 +390,9 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       <div className="form-control mb-4">
         <label className="label"><span className="label-text">Content</span></label>
         <div className={errors.content && touched.content ? "border border-error rounded" : ""}>
-          <ReactQuill 
-            theme="snow" 
-            value={content} 
+          <ReactQuill
+            theme="snow"
+            value={content}
             onChange={(value) => {
               setContent(value);
               if (touched.content) validateField("content");

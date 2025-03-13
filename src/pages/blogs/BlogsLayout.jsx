@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import BlogPostForm from "./CreateForm";
 import BlogCard from "./BlogCard";
 import axiosInstance from "../../config/axios";
@@ -12,6 +12,7 @@ function BlogsLayout() {
   const [editBlog, setEditBlog] = useState(null);
   const [mode, setMode] = useState("add");
   const [searchQuery, setSearchQuery] = useState("");
+  const [contentFilter, setContentFilter] = useState("all"); // "all", "free", or "premium"
 
   const refreshBlogList = useCallback(async () => {
     try {
@@ -59,10 +60,22 @@ function BlogsLayout() {
     setIsDrawerOpen(true);
   };
 
-  const filteredBlogs = blogs.filter((blog) =>
-    blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    blog.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Apply both search and content type filters
+  const filteredBlogs = blogs.filter((blog) => {
+    // First apply search filter
+    const matchesSearch = 
+      blog.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      blog.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Then apply content type filter
+    if (contentFilter === "all") {
+      return matchesSearch;
+    } else if (contentFilter === "premium") {
+      return matchesSearch && blog.isPremium === true;
+    } else { // "free"
+      return matchesSearch && (blog.isPremium === false || blog.isPremium === undefined);
+    }
+  });
 
   return (
     <div className="min-h-screen relative">
@@ -99,11 +112,31 @@ function BlogsLayout() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            {/* <select className="select select-bordered focus:outline-none bg-base-100 text-neutral-content">
-              <option>Latest</option>
-              <option>Most Viewed</option>
-              <option>Most Shared</option>
-            </select> */}
+            
+            {/* Content Type Filter Dropdown */}
+            <div className="relative">
+              <div className="flex items-center">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <select
+                  className="select select-bordered pl-10 pr-8 focus:outline-none bg-base-100 text-neutral-content appearance-none"
+                  value={contentFilter}
+                  onChange={(e) => setContentFilter(e.target.value)}
+                >
+                  <option value="all">All Content</option>
+                  <option value="free">Free Only</option>
+                  <option value="premium">Premium Only</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Blog Count Display */}
+          <div className="mb-4 text-neutral-content">
+            <p>
+              Showing {filteredBlogs.length} {contentFilter !== "all" ? 
+                `${contentFilter} ${filteredBlogs.length === 1 ? 'blog' : 'blogs'}` : 
+                (filteredBlogs.length === 1 ? 'blog' : 'blogs')}
+            </p>
           </div>
 
           {/* Blog Grid */}
@@ -135,6 +168,15 @@ function BlogsLayout() {
             </div>
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
+          ) : filteredBlogs.length === 0 ? (
+            <div className="text-center p-8 bg-base-200 rounded-lg">
+              <h3 className="text-xl font-semibold mb-2">No blogs found</h3>
+              <p className="text-neutral-content">
+                {searchQuery ? 
+                  `No blogs matching "${searchQuery}" in ${contentFilter} content` : 
+                  `No ${contentFilter} blogs available`}
+              </p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBlogs.map((blog) => (
