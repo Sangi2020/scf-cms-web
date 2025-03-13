@@ -71,7 +71,7 @@ function LoginPage() {
         <div style={{ backgroundImage: `url(${BackgroundImage})` }} className=" relative min-h-screen bg-cover bg-center w-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
            <BubbleAnimation/>
             <div className='inset-0 absolute  bg-black/10 backdrop-blur-sm'></div>
-            <div className="max-w-md w-full space-y-8 bg-stone-100 bg-opacity-20 z-[999] p-8 rounded-xl shadow-lg">
+            <div className="max-w-md w-full space-y-8 bg-stone-800  z-[999] p-8 rounded-xl shadow-lg">
                 <div className="flex justify-between flex-wrap"><div className="text-center">
                     <h2 className="text-3xl font-extrabold text-gray-200">Welcome back</h2>
                     <p className="mt-2 text-sm text-gray-200">Sign in to your account</p>

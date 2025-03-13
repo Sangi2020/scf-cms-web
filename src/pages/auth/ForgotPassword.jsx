@@ -128,9 +128,8 @@ function ForgotPassword() {
         >
             <BubbleAnimation/>
             {/* Reduced blur and added slight opacity for better readability */}
-            <div className='inset-0 absolute bg-black/30 backdrop-blur-sm'></div>
-
-            <div className="max-w-md w-full space-y-8 bg-stone-100 bg-opacity-10 z-[10] p-8 rounded-xl shadow-lg relative">
+            <div className='inset-0 absolute  bg-black/10 backdrop-blur-sm'></div>
+            <div className="max-w-md w-full space-y-8 bg-stone-800  z-[999] p-8 rounded-xl shadow-lg">
                 <div className="text-center">
                     <h2 className="text-3xl font-extrabold text-gray-200">Password Reset</h2>
                     <p className="mt-2 text-sm text-gray-300">

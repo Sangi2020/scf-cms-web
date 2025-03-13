@@ -38,12 +38,12 @@ const DocumentEditor = () => {
       if (wordCount < 200) {
         toast.error("Content must have at least 200 words.");
         return
-      } else if (wordCount > 570 && selectedOption=="PRIVACY") {
-        toast.error("Content cannot exceed 570 words.");
+      } else if (wordCount > 550 && selectedOption=="PRIVACY") {
+        toast.error("Content cannot exceed 550 words.");
         return 
       } 
-       else if (wordCount > 450 && selectedOption=="TERMS") {
-        toast.error("Content cannot exceed 450 words.");
+       else if (wordCount > 420 && selectedOption=="TERMS") {
+        toast.error("Content cannot exceed 420 words.");
         return 
       } 
       else if(wordCount.length ==0){
@@ -52,9 +52,9 @@ const DocumentEditor = () => {
       // Send POST request to the backend to create or update the document
       const response = await axiosInstance.post('/document/create-document', payload);
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         playNotificationSound()
-        toast.success(`${selectedOption} document has been saved successfully `);
+        toast.success(`${selectedOption} document has been saved successfully!`);
       }
     } catch (error) {
       console.error('Error saving content:', error);
@@ -107,7 +107,7 @@ const DocumentEditor = () => {
         </div>
         <div className="flex gap-2 ">
          
-          {['PRIVACY', 'TERMS',].map((option) => (
+          {['PRIVACY', 'TERMS','DISCLAIMER'].map((option) => (
             <button
               key={option}
               className={`btn ${selectedOption === option ? 'btn-primary' : 'btn-outline'
@@ -118,7 +118,7 @@ const DocumentEditor = () => {
             </button>
           ))}
            <button
-            className={`btn btn-outline hover:btn-success mr-10 text-slate-300`}
+            className={`btn btn-outline hover:btn-success mr-10`}
             onClick={saveContent}
             disabled={isSaving}
           >
