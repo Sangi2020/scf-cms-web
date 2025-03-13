@@ -26,11 +26,15 @@ const Settings = () => {
     toggleNotifications,
   } = useNotification();
 
+  
+
   const [storageUsage, setStorageUsage] = useState({
     totalSpace: 0,
     usedSpace: 0,
     freeSpace: 0,
   });
+
+
 
   // Fetch storage usage using axios
   const fetchStorageUsage = async () => {
@@ -47,11 +51,17 @@ const Settings = () => {
     }
   };
 
+  
+
   useEffect(() => {
     fetchStorageUsage();
   }, []);
 
+
+
   const { theme, toggleTheme, selectedFont, setSelectedFont } = useTheme();
+
+
 
   const getTimeZoneOffset = () => {
     const offset = new Date().getTimezoneOffset();

@@ -3,6 +3,7 @@ import axiosInstance from "../../config/axios";
 import SubscriberTable from "../../components/newsletter/SubscriberTable";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
+import playNotificationSound from "../../utils/playNotification";
 
 const Newsletter = () => {
     const [subscribers, setSubscribers] = useState([]);
@@ -101,6 +102,7 @@ const Newsletter = () => {
                 subject: emailSubject,
                 content: emailMessage,
             });
+            // playNotificationSound()
             toast.success("Bulk mail sent successfully");
         } catch (error) {
             console.error("Error sending bulk email:", error);

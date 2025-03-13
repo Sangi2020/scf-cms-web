@@ -19,7 +19,7 @@ const FAQPage = () => {
       const response = await axiosInstance.get('/qna/get-faqs');
       const result = response.data;
       if (result.success) {
-        setFaqs(result.data);
+         setFaqs(result.data);
       }
     } catch (err) {
       console.error('Error fetching FAQs:', err);
@@ -115,7 +115,7 @@ const FAQPage = () => {
             </button>
           </div>
 
-          <DragDropContext onDragEnd={handleDragEnd}>
+          {faqs.length>0?(<DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="faq-list">
               {(provided) => (
                 <div
@@ -159,7 +159,11 @@ const FAQPage = () => {
                 </div>
               )}
             </Droppable>
-          </DragDropContext>
+          </DragDropContext>):(
+            <div className="w-full h-96  flex justify-center items-center">
+            <p>No FAQs available</p>
+          </div>)
+            }
         </div>
 
         <div className="drawer-side">
@@ -180,6 +184,7 @@ const FAQPage = () => {
       {faqToDelete && (
         <DeleteConfirmModal
           isOpen={faqToDelete !== null}
+          faqs={faqs}
           onClose={() => setFaqToDelete(null)}
           onConfirm={() => handleDeleteFAQ(faqToDelete)}
           title="Delete FAQ?"

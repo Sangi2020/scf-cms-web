@@ -18,6 +18,7 @@ import {
   Trash2,
   AlertTriangle
 } from "lucide-react";
+import playNotificationSound from "../../utils/playNotification";
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemName }) => {
   if (!isOpen) return null;
@@ -77,6 +78,7 @@ const EnquiryItem = ({ enquiry, onStatusChange, onDelete }) => {
     try {
       await axiosInstance.delete(`/enquiries/delete-enquiry/${enquiry.id}`);
       onDelete(enquiry.id);
+      playNotificationSound()
       toast.success("Enquiry deleted successfully!");
     } catch (error) {
       console.error("Error deleting Enquiry:", error);
@@ -112,7 +114,7 @@ const EnquiryItem = ({ enquiry, onStatusChange, onDelete }) => {
                   </span>
                   <span className="flex items-center gap-1">
                     <Phone className="w-4 h-4" />
-                    {enquiry.phoneNumber}
+                    +{enquiry.phoneNumber}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
@@ -168,6 +170,8 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, filters, isVisible
     filters.endDate ? parseISO(filters.endDate) : null
   );
   const [status, setStatus] = useState(filters.status || "");
+  const [error, setError] = useState("");
+  const infoMessage = "Example: If you select March 3, the end date will be automatically set to March 4.";
 
   useEffect(() => {
     // Update local state when filters prop changes
@@ -185,6 +189,7 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, filters, isVisible
   };
 
   const handleEndDateChange = (date) => {
+    
     setLocalEndDate(date);
     // Only trigger date range change if the date is valid
     if (isValid(date)) {
@@ -199,18 +204,28 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, filters, isVisible
 
   const handleApplyFilter = () => {
     // Ensure both dates are valid before applying
+    if (!localStartDate || !localEndDate) {
+      setError("Please select both start and end dates.");
+      return;
+    }    
+    if (new Date(localStartDate).getTime() === new Date(localEndDate).getTime()) {
+      setError("Start date and end date cannot be the same.");
+      return;
+    }
+    
     const startDateFormatted = localStartDate && isValid(localStartDate)
       ? format(localStartDate, "yyyy-MM-dd")
       : "";
     const endDateFormatted = localEndDate && isValid(localEndDate)
       ? format(localEndDate, "yyyy-MM-dd")
       : "";
-
+setError("")
     onDateRangeChange("startDate", startDateFormatted);
     onDateRangeChange("endDate", endDateFormatted);
   };
 
   const handleClearFilter = () => {
+    
     setLocalStartDate(null);
     setLocalEndDate(null);
     setStatus("");
@@ -277,6 +292,11 @@ const EnquiriesFilter = ({ onFilterChange, onDateRangeChange, filters, isVisible
               </button>
             </div>
           </div>
+          <p className="text-gray-500 text-sm mt-2">
+  Note: To get data for a day, set the start date to that day and the end date to the next day.
+</p>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
         </div>
       </div>
     </div>
@@ -379,7 +399,14 @@ const EnquiriesView = () => {
       queryParams.append('limit', filters.limit.toString());
 
       const response = await axiosInstance.get(`/enquiries/get-all-enquiries?${queryParams}`);
-      setEnquiries(response.data.enquiries);
+const formattedEnquiries = response.data.enquiries.map((enquiry) => ({
+  ...enquiry,
+  phoneNumber: enquiry.phoneNumber.length > 2 
+    ? enquiry.phoneNumber.slice(0, 2) + " " + enquiry.phoneNumber.slice(2) 
+    : enquiry.phoneNumber,
+}));
+
+setEnquiries(formattedEnquiries);   
       setPagination(response.data.pagination);
     } catch (error) {
       console.error("Failed to fetch enquiries", error);
@@ -471,7 +498,7 @@ const EnquiriesView = () => {
     <div className="py-8 min-h-screen">
       <div className="bg-base-100 p-6 rounded-lg shadow-lg">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3">
             <Inbox className="w-6 h-6 text-primary" />
             <div className="space-y-[0.5px]">
               <h1 className="text-2xl font-bold text-neutral-content">Enquiries</h1>
