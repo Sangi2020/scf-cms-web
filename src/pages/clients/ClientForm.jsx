@@ -50,6 +50,7 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isLoading,setIsLoading]=useState(false)
   const inputRef = useRef(null);
   
   // Add validation states
@@ -65,6 +66,7 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
       
       // For edit mode, if there's an existing logo but no file,
       // we need to handle validation differently
+      setErrors({})
       if (initialData.logo && !imageFile) {
         setErrors(prev => ({ ...prev, image: "" }));
       }
@@ -212,16 +214,13 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
     formData.append("website", website);
     formData.append("description", content);
     
-    // For edit mode, only append the logo if a new file was selected
     if (imageFile) {
       formData.append("logo", imageFile);
-    } else if (mode === "edit" && initialData?.logo) {
-      // For edit mode, if no new image but has existing logo, we might need
-      // to indicate that the existing logo should be kept (depends on your API)
-      // formData.append("keepExistingLogo", "true"); // Uncomment if your API needs this
     }
 
     try {
+      setIsLoading(true); // Set loading to true at the start of submission
+      
       if (mode === "add") {
         await axiosInstance.post("/client/create-client", formData, {
           headers: {
@@ -251,6 +250,8 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
     } catch (error) {
       console.error("Error handling client:", error);
       toast.error("Failed to save client. Please try again.");
+    } finally {
+      setIsLoading(false); // Reset loading state regardless of success or failure
     }
   };
 
@@ -383,10 +384,25 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
 
       {/* Submit Button */}
       <div className="form-control mt-6">
-        <button type="submit" className="btn btn-primary">
-          {mode === "add" ? "Create" : "Update"}
+        <button 
+          type="submit" 
+          className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <span className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Loading...
+            </span>
+          ) : (
+            mode === "add" ? "Publish" : "Update"
+          )}
         </button>
       </div>
+      
     </form>
   );
 }
