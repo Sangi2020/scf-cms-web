@@ -52,7 +52,7 @@ const DocumentEditor = () => {
       // Send POST request to the backend to create or update the document
       const response = await axiosInstance.post('/document/create-document', payload);
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         playNotificationSound()
         toast.success(`${selectedOption} document has been saved successfully!`);
       }
@@ -99,13 +99,12 @@ const DocumentEditor = () => {
   return (
     <div className="min-h-screen bg-base-100 p-6 rounded-lg shadow-lg">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between w-full gap-3">
           <div>
             <h1 className="text-2xl font-bold text-neutral-content">Documents</h1>
             <p className="text-sm text-gray-500 mt-1">Manage your documents</p>
           </div>
-        </div>
-        <div className="flex gap-2 ">
+          <div className="flex gap-2  ">
          
           {['PRIVACY', 'TERMS','DISCLAIMER'].map((option) => (
             <button
@@ -117,7 +116,9 @@ const DocumentEditor = () => {
               {option.charAt(0).toUpperCase() + option.slice(1)}
             </button>
           ))}
-           <button
+           
+        </div>
+        <button
             className={`btn btn-outline hover:btn-success mr-10`}
             onClick={saveContent}
             disabled={isSaving}
@@ -125,6 +126,7 @@ const DocumentEditor = () => {
             {isSaving ? 'Saving...' : 'Save'}
           </button>
         </div>
+        
       </div>
 
       <div
