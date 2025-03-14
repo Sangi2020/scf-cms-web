@@ -4,73 +4,77 @@ import axiosInstance from "../../config/axios";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import * as yup from "yup";
-
-const blogSchema = yup.object().shape({
-  title: yup
-    .string()
-    .required("Title is required")
-    .max(100, "Title cannot exceed 100 characters"),
+const createBlogSchema = (isEditMode = false, hasExistingImage = false) => {
+  return yup.object().shape({
+    title: yup
+      .string()
+      .required("Title is required")
+      .max(100, "Title cannot exceed 100 characters"),
 
     author: yup
-    .string()
-    .required("Author name is required")
-    .min(2, "Author name must be at least 2 characters")
-    .matches(
-      /^[a-zA-Z\s]+$/,
-      "Author name can only contain letters and spaces"
-    ),
+      .string()
+      .required("Author name is required")
+      .min(2, "Author name must be at least 2 characters")
+      .matches(/^[a-zA-Z\s]+$/, "Author name can only contain letters and spaces"),
 
-  date: yup
-    .date()
-    .required("Date is required")
-    .max(new Date(), "Future dates are not allowed"),
+    date: yup
+      .string()
+      .required("Date is required")
+      .test("is-valid-date", "Invalid date format", (value) => {
+        return value && !isNaN(new Date(value).getTime());
+      })
+      .test("max-date", "Future dates are not allowed", (value) => {
+        return new Date(value) <= new Date();
+      }),
 
-  excerpt: yup
-    .string()
-    .required("Excerpt is required")
-    .min(10, "Excerpt must be at least 10 characters")
-    .max(500, "Excerpt cannot exceed 500 characters"),
+    excerpt: yup
+      .string()
+      .required("Excerpt is required")
+      .min(10, "Excerpt must be at least 10 characters")
+      .max(500, "Excerpt cannot exceed 500 characters"),
 
-  content: yup
-    .string()
-    .required("Content is required")
-    .test(
-      "min-content-length",
-      "Content must be at least 50 characters",
-      value => value && value.replace(/<[^>]*>/g, "").trim().length >= 50
-    ),
+    content: yup
+      .string()
+      .required("Content is required")
+      .test(
+        "min-content-length",
+        "Content must be at least 50 characters",
+        (value) => {
+          if (!value) return false;
+          const plainText = value.replace(/<[^>]*>/g, "").trim();
+          return plainText.length >= 50;
+        }
+      ),
 
-  image: yup
-    .mixed()
-    .required("Image is required")
-    .test(
-      "required-or-existing",
-      "Image is required",
-      (value, context) => {
-        // Check if we're in edit mode with an existing image
-        const hasExistingImage = context.options.context?.imagePreview;
-        // Image is valid if it's a new file or if there's an existing image in edit mode
-        return value || hasExistingImage;
-      }
-    )
-    .test(
-      "fileFormat",
-      "Only JPG, PNG, GIF, and WEBP images are allowed",
-      (value) => {
-        if (!value) return true; // Skip validation if no new file
-        const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-        return allowedTypes.includes(value.type);
-      }
-    )
-    .test(
-      "fileSize",
-      "Image size cannot exceed 2MB",
-      (value) => {
-        if (!value) return true; // Skip validation if no new file
-        return value.size <= 2 * 1024 * 1024;
-      }
-    ),
-});
+    image: isEditMode
+      ? yup.mixed().nullable().test(
+          "file-check",
+          "Invalid image file",
+          (value) => {
+            // If there's an existing image and no new file, skip validation
+            if (hasExistingImage && !value) return true;
+            // If there's a new file, validate it
+            if (value && value instanceof File) {
+              const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+              return allowedTypes.includes(value.type) && value.size <= 2 * 1024 * 1024;
+            }
+            return true; // Allow null/undefined in edit mode
+          }
+        )
+      : yup
+          .mixed()
+          .required("Image is required")
+          .test("fileFormat", "Only JPG, PNG, GIF, and WEBP images are allowed", (value) => {
+            if (!value || !(value instanceof File)) return false;
+            const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+            return allowedTypes.includes(value.type);
+          })
+          .test("fileSize", "Image size cannot exceed 2MB", (value) => {
+            if (!value || !(value instanceof File)) return false;
+            return value.size <= 2 * 1024 * 1024;
+          }),
+  });
+};
 
 function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
   const [title, setTitle] = useState("");
@@ -80,24 +84,30 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const inputRef = useRef(null);
-
-  // Add validation states
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isPremium, setIsPremium] = useState(false);
+  const [isLoading,setIsLoading]=useState(false)
+  const inputRef = useRef(null);
+
+  const isEditMode = mode === "edit";
+  const hasExistingImage = isEditMode && !!initialData?.image;
 
   useEffect(() => {
-    if (mode === "edit" && initialData) {
+    if (isEditMode && initialData) {
       setTitle(initialData.title || "");
       setAuthor(initialData.author || "");
-      setDate(initialData.date || "");
+      setDate(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : "");
       setExcerpt(initialData.excerpt || "");
       setContent(initialData.content || "");
       setIsPremium(initialData.isPremium || false);
       setImagePreview(initialData.image || null);
-    } else if (mode === "add") {
+      // Reset imageFile to null in edit mode since we're not uploading a new image initially
+      setImageFile(null);
+      setErrors({})
+    } else {
       resetForm();
+      
     }
   }, [mode, initialData]);
 
@@ -108,81 +118,62 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     setExcerpt("");
     setContent("");
     setImageFile(null);
-    setIsPremium(false)
     setImagePreview(null);
+    setIsPremium(false);
     setErrors({});
     setTouched({});
   };
 
-  // Mark field as touched when user interacts with it
   const handleBlur = (field) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
     validateField(field);
   };
 
-  // Validate a specific field using Yup
   const validateField = async (field) => {
     try {
-      const fieldSchema = yup.reach(blogSchema, field);
+      const schema = createBlogSchema(isEditMode, hasExistingImage);
+      const fieldSchema = yup.reach(schema, field);
+      const value = {
+        title,
+        author,
+        date,
+        excerpt,
+        content,
+        image: imageFile,
+      }[field];
 
-      // Get the field's current value
-      const value = field === "image" ? imageFile :
-        field === "content" ? content :
-          field === "excerpt" ? excerpt :
-            field === "date" ? date :
-              field === "author" ? author : title;
-
-      // Add context for image validation
-      const options = field === "image" ? { context: { imagePreview } } : {};
-      await fieldSchema.validate(value, options);
-
-      // Clear error if validation passes
-      setErrors(prev => ({ ...prev, [field]: "" }));
+      await fieldSchema.validate(value);
+      setErrors((prev) => ({ ...prev, [field]: "" }));
       return true;
     } catch (error) {
-      // Set error message
-      setErrors(prev => ({ ...prev, [field]: error.message }));
+      setErrors((prev) => ({ ...prev, [field]: error.message }));
       return false;
     }
   };
 
-  // Validate all fields
   const validateForm = async () => {
-    // Mark all fields as touched
-    const allFields = ["title", "author", "date", "excerpt", "content", "image"];
-    const allTouched = allFields.reduce((acc, field) => {
-      acc[field] = true;
-      return acc;
-    }, {});
-
-    setTouched(allTouched);
+    setTouched({
+      title: true,
+      author: true,
+      date: true,
+      excerpt: true,
+      content: true,
+      image: true,
+    });
 
     try {
-      // Validate all fields at once with context for image
-      await blogSchema.validate(
-        {
-          title,
-          author,
-          date,
-          excerpt,
-          content,
-          image: imageFile
-        },
-        { 
-          abortEarly: false,
-          context: { imagePreview }
-        }
+      const schema = createBlogSchema(isEditMode, hasExistingImage);
+      await schema.validate(
+        { title, author, date, excerpt, content, image: imageFile },
+        { abortEarly: false }
       );
-
       setErrors({});
       return true;
     } catch (validationError) {
-      // Process all validation errors
       const newErrors = {};
-      validationError.inner.forEach(error => {
+      validationError.inner.forEach((error) => {
         newErrors[error.path] = error.message;
       });
-
       setErrors(newErrors);
       return false;
     }
@@ -190,26 +181,20 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImageFile(file);
-    setTouched(prev => ({ ...prev, image: true }));
-  
     if (file) {
-      // Validate image immediately
+      setImageFile(file);
+      setTouched((prev) => ({ ...prev, image: true }));
       validateField("image");
-  
-      // Generate preview
+
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validate all fields before submission
     const isValid = await validateForm();
     if (!isValid) {
       toast.error("Please fix the errors in the form.");
@@ -222,39 +207,38 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     formData.append("date", date);
     formData.append("excerpt", excerpt);
     formData.append("content", content);
-    formData.append("isPremium", isPremium);
+    formData.append("isPremium", isPremium.toString());
 
-    if (imageFile) {
+    // Only append image if a new file was selected
+    if (imageFile instanceof File) {
       formData.append("image", imageFile);
     }
 
     try {
       let response;
       if (mode === "add") {
+        setIsLoading(true)
+
         response = await axiosInstance.post("/blog/create-blog", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Blog post created successfully!");
-      } else if (mode === "edit" && initialData) {
+      } else if (isEditMode && initialData?.id) {
         response = await axiosInstance.put(
           `/blog/update-blog/${initialData.id}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-        setIsDrawerOpen(false);
+        setIsLoading(false)
         toast.success("Blog post updated successfully!");
       }
 
-      if (onBlogCreated) {
-        onBlogCreated();
-      }
-
+      onBlogCreated?.();
       resetForm();
-      
       setIsDrawerOpen(false);
     } catch (error) {
-      console.error("Error handling blog post:", error);
-      toast.error("Failed to save blog post. Please try again.");
+      console.error("Error handling blog post:", error.response?.data || error);
+      toast.error(error.response?.data?.message || "Failed to save blog post. Please try again.");
     }
   };
 
@@ -262,7 +246,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
     <form onSubmit={handleSubmit} noValidate>
       {/* Title */}
       <div className="form-control mb-4">
-        <label className="label"><span className="label-text">Title</span></label>
+        <label className="label"><span className="label-text">Title  <span className="text-error pl-1">*</span></span></label>
         <input
           type="text"
           className={`input input-bordered ${errors.title && touched.title ? "input-error" : "border-accent"}`}
@@ -282,7 +266,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
 
       {/* Author */}
       <div className="form-control mb-4">
-        <label className="label"><span className="label-text">Author</span></label>
+        <label className="label"><span className="label-text">Author  <span className="text-error pl-1">*</span></span></label>
         <input
           type="text"
           className={`input input-bordered ${errors.author && touched.author ? "input-error" : "border-accent"}`}
@@ -302,7 +286,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
 
       {/* Date */}
       <div className="form-control mb-4">
-        <label className="label"><span className="label-text">Date</span></label>
+        <label className="label"><span className="label-text">Date  <span className="text-error pl-1">*</span></span></label>
         <input
           type="date"
           className={`input input-bordered ${errors.date && touched.date ? "input-error" : "border-accent"}`}
@@ -323,7 +307,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       {/* Premium Status Dropdown */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Content Type</span>
+          <span className="label-text">Content Type  <span className="text-error pl-1">*</span></span>
         </label>
         <select
           className="select select-bordered border-accent"
@@ -338,7 +322,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
       {/* Excerpt */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Excerpt</span>
+          <span className="label-text">Excerpt  <span className="text-error pl-1">*</span></span>
           {touched.excerpt && (
             <span className="label-text-alt">{excerpt.length}/500 characters</span>
           )}
@@ -361,7 +345,10 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
 
       {/* Image Upload */}
       <div className="form-control mb-4">
-        <label className="label"><span className="label-text">Image</span></label>
+        <label className="label">
+          <span className="label-text">Image {!isEditMode && <span className="text-error pl-1">*</span>}</span>
+          {isEditMode && <span className="text-xs text-neutral-content">(Only required for new posts)</span>}
+        </label>
         <div
           className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer bg-base-100 ${errors.image && touched.image ? "border-error" : "border-accent"}`}
           onClick={() => inputRef.current?.click()}
@@ -383,13 +370,13 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
                 onClick={(e) => {
                   e.stopPropagation();
                   setImageFile(null);
-                  setImagePreview(null);
+                  setImagePreview(isEditMode && initialData?.image ? initialData.image : null);
                   setErrors(prev => ({ ...prev, image: "" }));
                   setTouched(prev => ({ ...prev, image: true }));
                   validateField("image");
                 }}
               >
-                Remove
+                {isEditMode && initialData?.image && imagePreview === initialData.image ? "Reset" : "Remove"}
               </button>
             </div>
           )}
@@ -402,6 +389,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
           />
         </div>
         {errors.image && touched.image && (
+        
           <label className="label">
             <span className="label-text-alt text-error">{errors.image}</span>
           </label>
@@ -410,7 +398,7 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
 
       {/* Content (ReactQuill) */}
       <div className="form-control mb-4">
-        <label className="label"><span className="label-text">Content</span></label>
+        <label className="label"><span className="label-text">Content  <span className="text-error pl-1">*</span></span></label>
         <div className={errors.content && touched.content ? "border border-error rounded" : ""}>
           <ReactQuill
             theme="snow"
@@ -424,15 +412,32 @@ function BlogPostForm({ onBlogCreated, initialData, mode, setIsDrawerOpen }) {
         </div>
         {errors.content && touched.content && (
           <label className="label">
-            <span className="label-text-alt text-error">{errors.content}</span>
+          {mode === "add" ?<span className="label-text-alt text-error">{errors.content}</span>:<span className="label-text-alt text-error"></span> }
+            
           </label>
         )}
       </div>
 
       {/* Submit Button */}
       <div className="form-control mt-6">
-        <button type="submit" className="btn btn-primary">{mode === "add" ? "Publish" : "Update"}</button>
-      </div>
+  <button 
+    type="submit" 
+    className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+    disabled={isLoading}
+  >
+    {isLoading ? (
+      <span className="flex items-center">
+        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Loading...
+      </span>
+    ) : (
+      mode === "add" ? "Publish" : "Update"
+    )}
+  </button>
+</div>
     </form>
   );
 }
