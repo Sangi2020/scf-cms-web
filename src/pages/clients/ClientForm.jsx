@@ -24,12 +24,12 @@ const clientSchema = yup.object().shape({
   
   image: yup
     .mixed()
-    .nullable()
+    .required("Logo image is required") // Changed to required
     .test(
       "fileFormat", 
       "Only JPG, PNG, GIF and WEBP images are allowed",
       value => {
-        if (!value) return true; // Image is optional
+        if (!value) return false; // Will fail if no image
         const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
         return allowedTypes.includes(value.type);
       }
@@ -38,7 +38,7 @@ const clientSchema = yup.object().shape({
       "fileSize", 
       "Image size cannot exceed 2MB", 
       value => {
-        if (!value) return true; // Image is optional
+        if (!value) return false; // Will fail if no image
         return value.size <= 2 * 1024 * 1024;
       }
     )
@@ -62,6 +62,12 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
       setWebsite(initialData.website || "");
       setContent(initialData.description || "");
       setImagePreview(initialData.logo || null);
+      
+      // For edit mode, if there's an existing logo but no file,
+      // we need to handle validation differently
+      if (initialData.logo && !imageFile) {
+        setErrors(prev => ({ ...prev, image: "" }));
+      }
     } else if (mode === "add") {
       resetForm();
     }
@@ -82,7 +88,8 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
-    setErrors(prev => ({ ...prev, image: "" }));
+    setTouched(prev => ({ ...prev, image: true })); // Mark as touched when removed
+    setErrors(prev => ({ ...prev, image: "Logo image is required" })); // Set error when removed
     if (inputRef.current) {
       inputRef.current.value = "";
     }
@@ -96,6 +103,9 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
     setImagePreview(null);
     setErrors({});
     setTouched({});
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
   };
 
   // Mark field as touched when user interacts with it
@@ -107,13 +117,20 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
   // Validate a specific field using Yup
   const validateField = async (field, value = null) => {
     try {
+      // Special case for edit mode with existing image
+      if (field === "image" && mode === "edit" && initialData?.logo && !value && !imageFile) {
+        setErrors(prev => ({ ...prev, [field]: "" }));
+        return true;
+      }
+
       const fieldSchema = yup.reach(clientSchema, field);
       
       // Get the field's current value if not provided
       const fieldValue = value !== null ? value : 
-                        field === "image" ? imageFile : 
+                        field === "title" ? title :
+                        field === "website" ? website :
                         field === "content" ? content :
-                        field === "website" ? website : title;
+                        field === "image" ? imageFile : null;
                     
       await fieldSchema.validate(fieldValue);
       
@@ -139,18 +156,34 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
     setTouched(allTouched);
     
     try {
-      // Validate all fields at once
-      await clientSchema.validate(
-        { 
-          title, 
-          website, 
-          content, 
-          image: imageFile 
-        }, 
-        { abortEarly: false }
-      );
-      
-      setErrors({});
+      // Special case for edit mode with existing image but no new file
+      if (mode === "edit" && initialData?.logo && !imageFile) {
+        // Validate only the other fields
+        await yup.object({
+          title: clientSchema.fields.title,
+          website: clientSchema.fields.website,
+          content: clientSchema.fields.content
+        }).validate({ title, website, content }, { abortEarly: false });
+        
+        // Clear any image errors
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.image;
+          return newErrors;
+        });
+      } else {
+        // Normal validation for all fields
+        await clientSchema.validate(
+          { 
+            title, 
+            website, 
+            content, 
+            image: imageFile 
+          }, 
+          { abortEarly: false }
+        );
+        setErrors({});
+      }
       return true;
     } catch (validationError) {
       // Process all validation errors
@@ -178,8 +211,14 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
     formData.append("name", title);
     formData.append("website", website);
     formData.append("description", content);
+    
+    // For edit mode, only append the logo if a new file was selected
     if (imageFile) {
       formData.append("logo", imageFile);
+    } else if (mode === "edit" && initialData?.logo) {
+      // For edit mode, if no new image but has existing logo, we might need
+      // to indicate that the existing logo should be kept (depends on your API)
+      // formData.append("keepExistingLogo", "true"); // Uncomment if your API needs this
     }
 
     try {
@@ -220,16 +259,16 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
       {/* Title Input */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Title</span>
+          <span className="label-text">Title *</span>
         </label>
         <input
           type="text"
           placeholder="Client name"
-          className={`input input-bordered ${errors.title && touched.title ? "input-error" : "border-accent"}`}
+          className={`input input-bordered ${errors.title && touched.title ? "input-error" : ""}`}
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
-            if (touched.title) validateField("title");
+            if (touched.title) validateField("title", e.target.value);
           }}
           onBlur={() => handleBlur("title")}
         />
@@ -243,16 +282,16 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
       {/* Website Input */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Website</span>
+          <span className="label-text">Website *</span>
         </label>
         <input
           type="url"
           placeholder="Enter website URL"
-          className={`input input-bordered ${errors.website && touched.website ? "input-error" : "border-accent"}`}
+          className={`input input-bordered ${errors.website && touched.website ? "input-error" : ""}`}
           value={website}
           onChange={(e) => {
             setWebsite(e.target.value);
-            if (touched.website) validateField("website");
+            if (touched.website) validateField("website", e.target.value);
           }}
           onBlur={() => handleBlur("website")}
         />
@@ -266,10 +305,8 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
       {/* Content Input */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Description</span>
-          {touched.content && (
-            <span className="label-text-alt">{content.length}/1000 characters</span>
-          )}
+          <span className="label-text">Description *</span>
+          <span className="label-text-alt">{content.length}/1000 characters</span>
         </label>
         <textarea
           className={`textarea textarea-bordered ${errors.content && touched.content ? "textarea-error" : ""}`}
@@ -277,7 +314,7 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
           value={content}
           onChange={(e) => {
             setContent(e.target.value);
-            if (touched.content) validateField("content");
+            if (touched.content) validateField("content", e.target.value);
           }}
           onBlur={() => handleBlur("content")}
         ></textarea>
@@ -291,7 +328,7 @@ function ClientForm({ onClientCreated, refreshClientList, initialData, mode, set
       {/* Image Upload */}
       <div className="form-control mb-4">
         <label className="label">
-          <span className="label-text">Logo</span>
+          <span className="label-text">Logo *</span>
         </label>
         <div
           className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer bg-base-100 ${errors.image && touched.image ? "border-error" : ""}`}
